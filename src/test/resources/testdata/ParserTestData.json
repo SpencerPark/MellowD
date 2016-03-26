@@ -1,0 +1,13 @@
+//Parser Test Data
+//================
+
+//This file contains the test parameters for the Parser Test. It is a JSON array
+//of JSON arrays of strings. Each nested array describes 2 parameters to test. The
+//first string is the path to the input file. The second is the name of the rule
+//to start parsing on.
+[
+  [ "varDeclaration.mlod", "varDeclaration"],
+  [ "simpleBlock.mlod", "song"],
+  [ "chordNames.mlod", "song"],
+  [ "VivaLaVida.mlod", "song"]
+]

@@ -1,0 +1,89 @@
+group 'cas.cs4tb3'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'antlr'
+
+//Use java 7 source and class files
+compileJava {
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+}
+
+//All required libs are on the maven central repo
+repositories {
+    mavenCentral()
+}
+
+//Define a shade configuration. Dependencies in this configuration
+//are available at compile time and are shaded into the jar.
+configurations {
+    shade
+    shade.transitive = false
+    compile.extendsFrom(shade)
+}
+
+//The compiler needs junit and gson to run the tests, antlr to generate
+//the parser and argparse4j to parse the command line arguments.
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'com.google.code.gson', name: 'gson', version: '2.6.2'
+    antlr group: 'org.antlr', name: 'antlr4', version: '4.5.2-1'
+    shade group: 'net.sourceforge.argparse4j', name: 'argparse4j', version: '0.7.0'
+}
+
+//Add a manifest attribute, the shaded dependencies and antlr to the built jar.
+//The manifest attribute makes the jar executable.
+jar {
+    manifest {
+        attributes 'Main-Class': 'cas.cs4tb3.mellowd.compiler.Compiler'
+    }
+    //Include all shaded dependencies in the jar
+    from configurations.shade.plus(configurations.antlr)
+            .collect { it.isDirectory() ? it : zipTree(it) }
+
+}
+
+def doccoMode = 'linear' /* linear, parallel, classic */
+def pathToLanguages = 'C:\\dev\\literate\\docco\\languages.json'
+
+def toRelFile(File file) {
+    String relPath = file.absolutePath.replace(projectDir.absolutePath, '');
+    if (relPath.startsWith('\\')) {
+        relPath = relPath.substring(1);
+    }
+    return relPath;
+}
+
+task docco << {
+    exec {
+        String outDir = toRelFile(file("${project.docsDir}\\docco"));
+        executable = 'docco.cmd'
+        args += ['-o', "$outDir"]
+        //Always compile md files as linear because they look out of place
+        //when squeezed on the side with a blank window beside it
+        args += ['-l', doccoMode]
+        if (pathToLanguages) args += ['-L', pathToLanguages]
+        args += ['-t', 'site\\docco.jst']
+        args += ['-c', 'site\\docco.css']
+        sourceSets.main.allSource.plus(sourceSets.test.allSource)
+        //Exclude generated source files as they are not documented
+                .grep { !(it.path ==~ /.*generated-src.*/) }
+                .each { srcFile ->
+                    args += toRelFile(file(srcFile))
+        }
+        args += toRelFile(file('index.md'))
+    }
+    copy {
+        from 'site\\public'
+        into toRelFile(file("${project.docsDir}\\docco\\public"))
+    }
+}
+
+test {
+    reports.html.destination = file("${project.docsDir}\\docco\\tests")
+}
+
+generateGrammarSource {
+    arguments += ['-package', 'cas.cs4tb3.mellowd.parser']
+}
