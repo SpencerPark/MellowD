@@ -36,5 +36,5 @@ public interface MidiNoteMessageSource {
 
     //Pitch evaluation needs to be delayed until an octave is know and the note source
     //must support shifting to the desired octave.
-    MidiNoteMessageSource inOctave(int octave);
+    MidiNoteMessageSource shiftOctave(int octave);
 }

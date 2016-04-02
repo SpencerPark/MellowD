@@ -52,7 +52,7 @@ B : 'b';
 C : 'c';
 D : 'd';
 E : 'e';
-//`F : 'f';` is already defined above with the dynamics
+/*F : 'f'; is already defined above with the dynamics*/
 G : 'g';
 H : 'h';
 Q : 'q';

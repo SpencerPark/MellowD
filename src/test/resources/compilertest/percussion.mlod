@@ -1,0 +1,59 @@
+percussionVar ->* [clap, clap]
+percussionChord ->* (snare, bass)
+percussionPhrase ->* [clap, percussionChord]*<e>
+
+percussionBlock[percussion] {
+    [bassDrum2, bass2, *]*<e>
+    [bassDrum1, bass, bass1, *]*<e>
+    [rimshot, sideStick, rim, *]*<e>
+    [snareDrum1, snare, snare1, *]*<e>
+    [handClap, clap, *]*<e>
+    [snareDrum2, snare2, *]*<e>
+    [lowTom2, ltom2, *]*<e>
+    [closedHiHat, cHat, closedHat, *]*<e>
+    [lowTom1, ltom, ltom1, *]*<e>
+    [pedalHiHat, pHat, pedalHat, *]*<e>
+    [midTom2, mtom2, *]*<e>
+    [openHiHat, oHat, openHat, *]*<e>
+    [midTom1, mtom, mtom1, *]*<e>
+    [highTom2, htom2, *]*<e>
+    [crashCymbal1, crash, crash1, *]*<e>
+    [highTom1, htom, htom1, *]*<e>
+    [rideCymbal1, ride, ride1, *]*<e>
+    [chineseCymbal, trash, *]*<e>
+    [rideBell, *]*<e>
+    [tambourine, *]*<e>
+    [splashCymbal, *]*<e>
+    [cowbell, *]*<e>
+    [crashCymbal2, crash2, *]*<e>
+    [vibraSlap, vibra, *]*<e>
+    [rideCymbal2, ride2, *]*<e>
+    [highBongo, hbongo, *]*<e>
+    [lowBongo, lbongo, *]*<e>
+    [muteHighConga, mhconga, mutehconga, *]*<e>
+    [openHighConga, hconga, openhconga, *]*<e>
+    [lowConga, lconga, *]*<e>
+    [highTimbale, htim, *]*<e>
+    [lowTimbale, ltim, *]*<e>
+    [highAgogo, hAgogo, *]*<e>
+    [lowAgogo, lAgogo, *]*<e>
+    [cabasa, *]*<e>
+    [maracas, *]*<e>
+    [shortWhistle, sWhistle, *]*<e>
+    [longWhistle, lWhistle, *]*<e>
+    [shortGuiro, sGuiro, *]*<e>
+    [longGuiro, lGuiro, *]*<e>
+    [claves, sticks, *]*<e>
+    [highWoodBlock, hWoodBlock, hBlock, *]*<e>
+    [lowWoodBlock, lWoodBlock, lBlock, *]*<e>
+    [muteCuica, mCucia, *]*<e>
+    [openCuica, oCucia, *]*<e>
+    [muteTriangle, mTriangle, mTri, *]*<e>
+    [openTriangle, oTriangle, oTri, triangle, tri, *]*<e>
+}
+
+percussionBlock {
+    (claves, sWhistle)*<e>
+    percussionPhrase
+    [percussionChord:0, percussionChord:1, percussionChord]*<e, e, q>
+}

@@ -1,0 +1,4 @@
+phrase -> [a, b, c]*<q, q, q>
+rhythm -> <w, h, q, e, s>
+chord -> (a$-1, b#+1, c)
+melody -> [a, b, c, d, e, f, g]

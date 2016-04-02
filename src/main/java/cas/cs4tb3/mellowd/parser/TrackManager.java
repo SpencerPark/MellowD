@@ -1,7 +1,7 @@
 package cas.cs4tb3.mellowd.parser;
 
-import cas.cs4tb3.mellowd.TimingEnvironment;
 import cas.cs4tb3.mellowd.Dynamic;
+import cas.cs4tb3.mellowd.TimingEnvironment;
 import org.antlr.v4.runtime.Token;
 
 import javax.sound.midi.InvalidMidiDataException;
@@ -76,6 +76,12 @@ public class TrackManager {
         return this.blocks.get(blockName);
     }
 
+    public void finish() {
+        for (Block block : this.blocks.values()) {
+            block.finish();
+        }
+    }
+
     public void requestChannel(Block block) {
         List<Channel> empties = new LinkedList<>();
         if (block.getOptions().isPercussion()) {
@@ -122,7 +128,7 @@ public class TrackManager {
                 //We really can't just put 2 random regular blocks together because at the very
                 //least we may have an instrument mismatch. This is a problem we unfortunately cannot
                 //fix.
-                throw new IllegalStateException("Ran out of channels. Mellow D source is overloaded and cannot fit the channels.");
+                throw new IllegalStateException("Ran out of channels. Mellow D source is overloaded and cannot fit in the MIDI channels.");
             } else {
                 //Take the first empty channel.
                 switchChannels(empties.get(0), block);
@@ -194,6 +200,10 @@ public class TrackManager {
     }
 
     public Channel getChannel(Block block) {
+        Channel channel = this.channelMap.get(block.getName());
+        if (channel != null)
+            return channel;
+        this.requestChannel(block);
         return this.channelMap.get(block.getName());
     }
 }

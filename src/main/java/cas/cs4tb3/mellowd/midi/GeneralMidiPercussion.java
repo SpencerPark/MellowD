@@ -13,22 +13,22 @@ import java.util.Map;
 //instrument mapping.
 public enum GeneralMidiPercussion {
     BASS_DRUM_2(35, "bass2"),
-    BASS_DRUM_1(36, "bass1"),
+    BASS_DRUM_1(36, "bass", "bass1"),
     RIMSHOT(37, "sideStick", "rim"),
     SNARE_DRUM_1(38, "snare", "snare1"),
     HAND_CLAP(39, "clap"),
     SNARE_DRUM_2(40, "snare2"),
     LOW_TOM_2(41, "ltom2"),
     CLOSED_HI_HAT(42, "cHat", "closedHat", "clHat"),
-    LOW_TOM_1(43, "ltom1"),
+    LOW_TOM_1(43, "ltom", "ltom1"),
     PEDAL_HI_HAT(44, "pHat", "pedalHat"),
     MID_TOM_2(45, "mtom2"),
     OPEN_HI_HAT(46, "oHat", "openHat"),
-    MID_TOM_1(47, "mtom1"),
+    MID_TOM_1(47, "mtom", "mtom1"),
     HIGH_TOM_2(48, "htom2"),
-    CRASH_CYMBAL_1(49, "crash1"),
-    HIGH_TOM_1(50, "htom1"),
-    RIDE_CYMBAL_1(51, "ride1"),
+    CRASH_CYMBAL_1(49, "crash", "crash1"),
+    HIGH_TOM_1(50, "htom", "htom1"),
+    RIDE_CYMBAL_1(51, "ride", "ride1"),
     CHINESE_CYMBAL(52, "trash"),
     RIDE_BELL(53),
     TAMBOURINE(54),
@@ -57,7 +57,7 @@ public enum GeneralMidiPercussion {
     LOW_WOOD_BLOCK(77, "lWoodBlock", "lBlock"),
     MUTE_CUICA(78, "mCucia"),
     OPEN_CUICA(79, "oCucia"),
-    MUTE_TRAINGLE(80, "mTriangle", "mTri"),
+    MUTE_TRIANGLE(80, "mTriangle", "mTri"),
     OPEN_TRIANGLE(81, "oTriangle", "oTri", "triangle", "tri");
 
     //The only data that the percussion instrument needs is it's midi number. The other

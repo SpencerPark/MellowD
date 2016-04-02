@@ -9,7 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 //A symbol table holds references. It is simply a Map at its core but it provides type
-//and exception handling functionality.
+//and exception handling functionality. The `@SuppressWarnings("unchecked")` stops the compiler
+//from incorrectly warning about unchecked casts as the check is done via reflection and the
+//compiler isn't convinced that it has been checked.
+@SuppressWarnings("unchecked")
 public class SymbolTable {
     //The `declarations` are the actually `name -> value` mappings.
     private Map<String, Object> declarations;

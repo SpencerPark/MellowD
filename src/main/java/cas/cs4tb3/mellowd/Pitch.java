@@ -82,6 +82,7 @@ public final class Pitch implements MidiNoteMessageSource {
     }
 
     //The plain shift octave uses the sign of the `amt` to determine the direction for the shift.
+    @Override
     public Pitch shiftOctave(int amt) {
         return getPitch(midiNum + (12 * amt));
     }
@@ -95,7 +96,6 @@ public final class Pitch implements MidiNoteMessageSource {
     //In order to get the note value we can take the remainder of the MIDI note number when divided
     //by 12 (`midiNum % 12`). This gives the note number in octave 0. The we can just preform an
     //octave shift up to the desired octave (`octave * 12`).
-    @Override
     public Pitch inOctave(int octave) {
         return getPitch((octave * 12) + (midiNum % 12));
     }

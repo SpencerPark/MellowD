@@ -66,7 +66,7 @@ task docco << {
         if (pathToLanguages) args += ['-L', pathToLanguages]
         args += ['-t', 'site\\docco.jst']
         args += ['-c', 'site\\docco.css']
-        sourceSets.main.allSource.plus(sourceSets.test.allSource)
+        sourceSets.main.allSource.plus(sourceSets.test.allSource).plus(sourceSets.test.resources)
         //Exclude generated source files as they are not documented
                 .grep { !(it.path ==~ /.*generated-src.*/) }
                 .each { srcFile ->

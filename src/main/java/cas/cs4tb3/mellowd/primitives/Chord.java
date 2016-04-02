@@ -3,8 +3,8 @@
 
 package cas.cs4tb3.mellowd.primitives;
 
-import cas.cs4tb3.mellowd.midi.MidiNoteMessageSource;
 import cas.cs4tb3.mellowd.Pitch;
+import cas.cs4tb3.mellowd.midi.MidiNoteMessageSource;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.ShortMessage;
@@ -24,10 +24,10 @@ public class Chord implements MidiNoteMessageSource {
     //a chord identifier is expected the compiler will try to match it to this pattern before throwing
     //an undefined reference exception.
 
-    //The pattern is `[A-G] ( '#' | '$' )? ( '+' | '-' [0-9]+ )? ( [a-z0-9]+ )?`
+    //The pattern is `[A-G] ( 's' | 'b' )? ( 'u' | 'd' [0-9]+ )? ( [a-z0-9]+ )?`
     //with named capturing groups to pull the data from the matcher.
     private static final Pattern CHORD_NAME_PATTERN = Pattern.compile(
-            "^(?<note>[A-G])((?<sharp>#)|(?<flat>\\$))?(?<octaveShift>(\\+|\\-)[0-9]+)?(?<name>[a-z0-9]+)?$"
+            "^(?<note>[A-G])((?<sharp>s)|(?<flat>b))?(?<octaveShift>((?<shiftUp>u)|(?<shiftDown>d))(?<shiftAmt>[0-9]+))?(?<name>[a-z0-9]+)?$"
     );
 
     //At its core, a chord is simply a collection of pitches. These are those pitches.
@@ -67,10 +67,10 @@ public class Chord implements MidiNoteMessageSource {
     //Chords defined as variables need to be reevaluated in the current octave
     //for them to have any use.
     @Override
-    public Chord inOctave(int octave) {
+    public Chord shiftOctave(int octaveShift) {
         Pitch[] pitches = new Pitch[this.pitches.length];
         for (int i = 0; i < this.pitches.length; i++) {
-            pitches[i] = this.pitches[i].inOctave(octave);
+            pitches[i] = this.pitches[i].shiftOctave(octaveShift);
         }
         return new Chord(pitches);
     }
@@ -126,8 +126,13 @@ public class Chord implements MidiNoteMessageSource {
             pitch = pitch.sharp();
         if (m.group("flat") != null)
             pitch = pitch.flat();
-        if (m.group("octaveShift") != null)
-            pitch = pitch.shiftOctave(Integer.parseInt(m.group("octaveShift")));
+        if (m.group("octaveShift") != null) {
+            if (m.group("shiftUp") != null) {
+                pitch = pitch.shiftOctaveUp(Integer.parseInt(m.group("shiftAmt")));
+            } else {
+                pitch = pitch.shiftOctaveDown(Integer.parseInt(m.group("shiftAmt")));
+            }
+        }
 
         //Then resolve the chord name and invoke the appropriate builder
         if (m.group("name") == null)

@@ -4,6 +4,7 @@
 package cas.cs4tb3.mellowd;
 
 import cas.cs4tb3.mellowd.midi.MidiNoteMessageSource;
+import cas.cs4tb3.mellowd.primitives.Chord;
 
 //A `PlayableSound` contains all of the information needed to preform a sound. It knows
 //the pitches to play and how to play them from the [articulated sound](ArticulatedSound.html).
@@ -53,8 +54,12 @@ public class PlayableSound {
         return this.sound.getSound();
     }
 
-    public PlayableSound inOctave(int octave) {
-        return new PlayableSound(new ArticulatedSound(this.getSound().inOctave(octave), this.getArticulation()),
+    public boolean isChord() {
+        return this.sound.getSound() instanceof Chord;
+    }
+
+    public PlayableSound shiftOctave(int octaveShift) {
+        return new PlayableSound(new ArticulatedSound(this.getSound().shiftOctave(octaveShift), this.getArticulation()),
                 this.duration,
                 this.slurred,
                 this.velocity);

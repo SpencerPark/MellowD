@@ -22,11 +22,10 @@ public class Phrase {
         return sounds;
     }
 
-    public Phrase inOctave(int octave) {
+    public Phrase shiftOctave(int octaveShift) {
         PlayableSound[] sounds = new PlayableSound[this.sounds.length];
         for (int i = 0; i < this.sounds.length; i++) {
-            sounds[i] = this.sounds[i].inOctave(octave);
-
+            sounds[i] = this.sounds[i].shiftOctave(octaveShift);
         }
         return new Phrase(sounds);
     }

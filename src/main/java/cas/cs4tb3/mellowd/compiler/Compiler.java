@@ -4,11 +4,11 @@
 package cas.cs4tb3.mellowd.compiler;
 
 import cas.cs4tb3.mellowd.TimingEnvironment;
-import cas.cs4tb3.mellowd.parser.TrackManager;
 import cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
 import cas.cs4tb3.mellowd.parser.MellowDLexer;
 import cas.cs4tb3.mellowd.parser.MellowDParser;
 import cas.cs4tb3.mellowd.parser.ParseException;
+import cas.cs4tb3.mellowd.parser.TrackManager;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -17,10 +17,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Sequence;
+import javax.sound.midi.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,6 +28,23 @@ import java.util.concurrent.TimeUnit;
 //The `Compiler` class is the main entry point for the program.
 public class Compiler {
 
+    //Empty sequences will have this event appended to create a playable empty sequence.
+    private static final class ImmutableEndOfTrack extends MetaMessage {
+        private static final byte EOT_EVENT_CODE = 0x2F;
+
+        private ImmutableEndOfTrack() {
+            super(new byte[3]);
+            data[0] = (byte) META;
+            data[1] = EOT_EVENT_CODE;
+            data[2] = 0;
+        }
+
+        public void setMessage(int type, byte[] data, int length) throws InvalidMidiDataException {
+            throw new InvalidMidiDataException("cannot modify end of track message");
+        }
+    }
+
+    public static final MidiMessage EOT_MESSAGE = new ImmutableEndOfTrack();
     public static final String FILE_EXTENSION = ".mlod";
 
     public static void main(String[] args) {
@@ -110,7 +124,8 @@ public class Compiler {
             compilationResult = compile(toCompile,
                     tempo.get(0).byteValue(),
                     tempo.get(1).byteValue(),
-                    arguments.getInt("tempo"));
+                    arguments.getInt("tempo"),
+                    true);
 
             //Calculate the compilation time and display it in seconds to 6 decimal places.
             long compileTime = System.nanoTime() - startTime;
@@ -171,11 +186,10 @@ public class Compiler {
                     //Create the output file if it doesn't exist.
                     if (!outFile.exists()) outFile.createNewFile();
 
-                    //If the compilation result is empty then stop the write as the Midi File Writer
-                    //cannot write an empty sequence to the file.
+                    //If the compilation result is empty then add the EOT event to
+                    //make the output file playable.
                     if (compilationResult.getTickLength() == 0) {
-                        System.out.println("Cannot write empty MIDI sequence to file.");
-                        System.exit(1);
+                        compilationResult.getTracks()[0].add(new MidiEvent(EOT_MESSAGE, 1));
                     }
 
                     //Write the result to the out file. The type 1 midi format is the standard
@@ -264,12 +278,14 @@ public class Compiler {
     }
 
     //`compile` is the method that actually runs the compiler.
-    private static Sequence compile(File src, byte numerator, byte denominator, int tempo) throws IOException {
+    public static Sequence compile(File src, byte numerator, byte denominator, int tempo, boolean verbose) throws IOException {
         //First we will display the inputs being used so they can double check everything
         //is as expected.
-        System.out.printf("Time Signature: %d / %d\n", numerator, denominator);
-        System.out.printf("Tempo: %d bpm\n", tempo);
-        System.out.printf("Compiling file: %s\n", src.getPath());
+        if (verbose) {
+            System.out.printf("Time Signature: %d / %d\n", numerator, denominator);
+            System.out.printf("Tempo: %d bpm\n", tempo);
+            System.out.printf("Compiling file: %s\n", src.getPath());
+        }
 
         //Now we can build a lexer with the `src` as the input.
         ANTLRFileStream inStream = new ANTLRFileStream(src.getAbsolutePath());
@@ -288,7 +304,7 @@ public class Compiler {
         //Parse the input!
         parser.song();
 
-        //Return the sequence generated while parseing.
+        //Return the sequence generated while parsing.
         return parser.getSequence();
     }
 }

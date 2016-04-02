@@ -1,0 +1,40 @@
+rhythmVar -> <w, h, q, e, s>
+otherRhythmVar -> <w., h.., q..., w...., s.....>
+
+rhythmTest {
+    [a]*rhythmVar
+    [b]*<q, (q, q)>
+    [c]*<q, 3(q)>
+    [d]*<q, 3q>
+    [e]*<q, 5:4(e)>
+    [f]*<e, rhythmVar, e>
+}
+
+//Get a good feel for the tuplet sounds with the use of a percussion block
+rhythmTestMetronome[percussion] {
+    //Sleep until the first block fragment is executed
+    [*]*<
+        rhythmVar,
+        q, (q, q),
+        q, 3(q),
+        q, 3q,
+        q, 5:4(e),
+        e, rhythmVar, e
+    >
+}
+
+rhythmTestMetronome[repeat -> 7] {
+    //Then play a control beat to hear the tuplet variation
+    [lBongo]*<q, q, q> [hBongo]*<q>
+}
+
+rhythmTest[percussion] {
+    [cHat]*<3q, 3q>
+    [*]*<w>
+    [cHat]*<3(q), 3(q)>
+    [*]*<w>
+    [cHat]*<3(q), 9(s)>
+    [*]*<w>
+    [cHat]*<7:4q>
+    [*]*<w>
+}

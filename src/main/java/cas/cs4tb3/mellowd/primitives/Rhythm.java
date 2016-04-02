@@ -5,8 +5,8 @@ package cas.cs4tb3.mellowd.primitives;
 
 import cas.cs4tb3.mellowd.ArticulatedSound;
 import cas.cs4tb3.mellowd.Beat;
-import cas.cs4tb3.mellowd.TimingEnvironment;
 import cas.cs4tb3.mellowd.PlayableSound;
+import cas.cs4tb3.mellowd.TimingEnvironment;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +20,7 @@ import java.util.List;
 public class Rhythm {
     //These two lists are maintained by the rhythm class making sure that both remain the same
     //length. Each beat has a slurred value associated with it, true marking the beat as slurred
-    //and false being the default, unslurred, state.
+    //and false being the default, un-slurred, state.
     private List<Beat> beats;
     private List<Boolean> slurred;
 

@@ -2,12 +2,11 @@
 //================
 
 //This file contains the test parameters for the Parser Test. It is a JSON array
-//of JSON arrays of strings. Each nested array describes 2 parameters to test. The
+//of JSON arrays of strings. Each nested array describes 3 parameters to test. The
 //first string is the path to the input file. The second is the name of the rule
-//to start parsing on.
+//to start parsing on. The third is the number of times to try and match the rule.
 [
-  [ "varDeclaration.mlod", "varDeclaration"],
-  [ "simpleBlock.mlod", "song"],
-  [ "chordNames.mlod", "song"],
-  [ "VivaLaVida.mlod", "song"]
+  [ "varDeclaration.mlod", "varDeclaration", "4"],
+  [ "simpleBlock.mlod", "song", "1"],
+  [ "chordNames.mlod", "block", "1"]
 ]

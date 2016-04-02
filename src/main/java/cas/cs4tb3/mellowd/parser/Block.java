@@ -5,13 +5,17 @@ package cas.cs4tb3.mellowd.parser;
 
 import cas.cs4tb3.mellowd.Articulation;
 import cas.cs4tb3.mellowd.Dynamic;
+import cas.cs4tb3.mellowd.PlayableSound;
 import cas.cs4tb3.mellowd.TimingEnvironment;
 import cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
+import cas.cs4tb3.mellowd.primitives.Chord;
 import cas.cs4tb3.mellowd.primitives.Phrase;
-import cas.cs4tb3.mellowd.PlayableSound;
 import org.antlr.v4.runtime.Token;
 
-import javax.sound.midi.*;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiEvent;
+import javax.sound.midi.ShortMessage;
+import javax.sound.midi.Track;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -189,6 +193,8 @@ public class Block {
             tickDuration += tickDuration/8;
         int velocity = sound.getVelocity();
         int offVelocity = sound.isSlurred() ? 1 : 96;
+        boolean roll = false;
+        long offsetStep = 0;
 
         //Apply the articulation effects
         switch (sound.getArticulation()) {
@@ -237,26 +243,44 @@ public class Block {
             //as to not interfere with the next note. Additionally a reset message will be queued for the
             //next note to take.
             case GLISCANDO:
-                int bendAmt = GeneralMidiConstants.NO_PITCH_BEND;
-                int bendTickOffset;
-                for (bendTickOffset = 0; bendTickOffset < tickDuration; bendTickOffset += tickDuration/16) {
-                    bendAmt += BEND_AMT;
-                    ShortMessage message = new ShortMessage(ShortMessage.PITCH_BEND, channel.midiChannelNum, 0x7F & bendAmt, 0x7F & (bendAmt >> 7));
-                    addEventToTrack(new MidiEvent(message, time + bendTickOffset));
+                //If the sound is a chord a gliscando should be preformed as a roll.
+                if (sound.isChord()) {
+                    roll = true;
+                    //The roll will play the first note in the chord right on the down beat. Each
+                    //consecutive note in the chord will be delayed by the `offsetStep`.
+                    offsetStep = tickDuration / (((Chord) sound.getSound()).size() * 2);
+                //otherwise preform the gliscando as a pitch bend.
+                } else {
+                    int bendAmt = GeneralMidiConstants.NO_PITCH_BEND;
+                    int bendTickOffset;
+                    for (bendTickOffset = 0; bendTickOffset < tickDuration; bendTickOffset += tickDuration / 16) {
+                        bendAmt += BEND_AMT;
+                        ShortMessage message = new ShortMessage(ShortMessage.PITCH_BEND, channel.midiChannelNum, 0x7F & bendAmt, 0x7F & (bendAmt >> 7));
+                        addEventToTrack(new MidiEvent(message, time + bendTickOffset));
+                    }
+                    this.queuedPitchReset = new ShortMessage(ShortMessage.PITCH_BEND, channel.midiChannelNum, 0x7F & GeneralMidiConstants.NO_PITCH_BEND, 0x7F & (GeneralMidiConstants.NO_PITCH_BEND >> 7));
                 }
-                this.queuedPitchReset = new ShortMessage(ShortMessage.PITCH_BEND, channel.midiChannelNum, 0x7F & GeneralMidiConstants.NO_PITCH_BEND, 0x7F & (GeneralMidiConstants.NO_PITCH_BEND >> 7));
                 break;
         }
+
+        //Initialize the offset to 0. If `!roll` then this offset will remain at 0. If
+        //the `roll` is set to true each time a note is added to the track the next is offset
+        //`offsetStep`.
+        long offset = 0L;
 
         //Now that all of the performance data is set we can create the events and add them to the
         //track.
         for (ShortMessage message : sound.getSound().noteOn(channel.midiChannelNum, velocity)) {
-            addEventToTrack(new MidiEvent(message, this.time));
+            addEventToTrack(new MidiEvent(message, this.time + offset));
+            if (roll) offset += offsetStep;
         }
+
+        offset = 0;
 
         //The off events will occur after the note completion hence the `this.time + tickDuration`
         for (ShortMessage message : sound.getSound().noteOff(channel.midiChannelNum, offVelocity)) {
-            addEventToTrack(new MidiEvent(message, this.time + tickDuration));
+            addEventToTrack(new MidiEvent(message, this.time + tickDuration + offset));
+            if (roll) offset += offsetStep;
         }
 
         //Lastly we need to increase the state time as we just played some music!
@@ -290,13 +314,19 @@ public class Block {
     //This method should be invoked to notify the block that the options have changed. Some changes require
     //additional events to be added to the track or other various state changes.
     protected void updateBlockOptions(Token blockNameToken, BlockOptions options, boolean force) throws InvalidMidiDataException {
+        //Save the old options for comparing but use the new options when invoking trackmanager methods
+        BlockOptions oldOptions = this.options;
+        this.options = options;
+
         //If a channel is selected and different from the current channel we will make a request for the
         //track manager to change to it.
-        if (options.isChannelSelected() && options.getSelectedChannel() != this.options.getSelectedChannel()) {
-            String reasonForDenial = this.trackManager.requestChannel(this, options.getSelectedChannel());
+        if (oldOptions.isChannelSelected() && oldOptions.getSelectedChannel() != this.options.getSelectedChannel()) {
+            String reasonForDenial = this.trackManager.requestChannel(this, oldOptions.getSelectedChannel());
             if (reasonForDenial != null) {
-                throw new ParseException(blockNameToken, "Cannot select midi channel "+options.getSelectedChannel()+". Reason: "+reasonForDenial);
+                throw new ParseException(blockNameToken, "Cannot select midi channel "+oldOptions.getSelectedChannel()+". Reason: "+reasonForDenial);
             }
+        } else {
+            this.trackManager.requestChannel(this);
         }
 
         //Ask the track manager for the channel it is on
@@ -304,20 +334,17 @@ public class Block {
 
         //If the update is forced or the instrument has changed since the last update then
         //some MIDI program change events need to be added.
-        if (force || options.getInstrument() != this.options.getInstrument()
-                || options.getSoundbank() != this.options.getSoundbank()) {
+        if (force || oldOptions.getInstrument() != this.options.getInstrument()
+                || oldOptions.getSoundbank() != this.options.getSoundbank()) {
             //If a soundbank was specified preform the soundbank change sequence described in the
             //[General MIDI Constants](../midi/GeneralMidiConstants.html).
-            if (options.getSoundbank() != 0) {
+            if (oldOptions.getSoundbank() != 0) {
                 this.track.add(new MidiEvent(new ShortMessage(ShortMessage.CONTROL_CHANGE, channel.midiChannelNum, GeneralMidiConstants.BANK_SELECT_CC_1, GeneralMidiConstants.BANK_SELECT_CC_1_VAL), time));
-                this.track.add(new MidiEvent(new ShortMessage(ShortMessage.CONTROL_CHANGE, channel.midiChannelNum, GeneralMidiConstants.BANK_SELECT_CC_2, options.getSoundbank()), time));
+                this.track.add(new MidiEvent(new ShortMessage(ShortMessage.CONTROL_CHANGE, channel.midiChannelNum, GeneralMidiConstants.BANK_SELECT_CC_2, oldOptions.getSoundbank()), time));
             }
             //Add the program change message
-            this.track.add(new MidiEvent(new ShortMessage(ShortMessage.PROGRAM_CHANGE, channel.midiChannelNum, options.getInstrument(), 0), time));
+            this.track.add(new MidiEvent(new ShortMessage(ShortMessage.PROGRAM_CHANGE, channel.midiChannelNum, oldOptions.getInstrument(), 0), time));
         }
-
-        //Save the new options
-        this.options = options;
     }
 
     //This method is invoked by the compiler when this block in entered.
@@ -342,5 +369,13 @@ public class Block {
 
         MidiEvent endOfTrackEvent = track.get(track.size()-1);
         endOfTrackEvent.setTick(endOfTrackEvent.getTick() + timingEnv.getPPQ());
+    }
+
+    //When the song is finished we may need to report some "unclosed" operations like a
+    //crescendo.
+    protected void finish() {
+        if (!this.dynBuffer.isEmpty())
+            throw new ParseException(this.cresToken, "Gradual change specified but found EOF before the target" +
+                    " dynamic is specified.");
     }
 }

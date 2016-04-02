@@ -43,10 +43,10 @@ public class Melody {
 
     //Melodies defined as variables need to be reevaluated in the current octave
     //for them to have any use.
-    public Melody inOctave(int octave) {
+    public Melody shiftOctave(int octaveShift) {
         List<ArticulatedSound> sounds = new ArrayList<>(notes.size());
         for (ArticulatedSound sound : this.notes) {
-            sounds.add(new ArticulatedSound(sound.getSound().inOctave(octave), sound.getArticulation()));
+            sounds.add(new ArticulatedSound(sound.getSound().shiftOctave(octaveShift), sound.getArticulation()));
         }
         return new Melody(sounds);
     }

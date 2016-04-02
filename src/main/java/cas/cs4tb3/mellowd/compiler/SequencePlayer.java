@@ -4,7 +4,9 @@
 package cas.cs4tb3.mellowd.compiler;
 
 import javax.sound.midi.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 //This class is a simple playback manager that provides some concurrency features

@@ -21,10 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,12 +61,13 @@ public class ParserTest {
     private TestErrorListener errorListener;
     private String inputFileName;
     private String ruleName;
+    private int amt;
     private InputStream inputStream;
 
-    public ParserTest(String inputFile, String ruleName) throws IOException {
+    public ParserTest(String inputFile, String ruleName, String amt) throws IOException {
         //Get the test resource and save a reference to it so it may be closed
         //upon completion of the test.
-        this.inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(inputFile);
+        this.inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("parsertest" + File.separator + inputFile);
 
         //Instantiate the lexer and parser. The parser's default error listener
         //needs to be overridden with a custom one to store all error messages.
@@ -83,6 +81,7 @@ public class ParserTest {
         this.parser.addErrorListener(this.errorListener);
         this.inputFileName = inputFile;
         this.ruleName = ruleName;
+        this.amt = Integer.parseInt(amt);
     }
 
     //Test Case
@@ -92,30 +91,33 @@ public class ParserTest {
     public void parseTest() throws Exception {
         try {
             Method ruleMethod = parser.getClass().getMethod(ruleName);
-            ParserRuleContext context = (ParserRuleContext) ruleMethod.invoke(parser);
             //Print out some information about the test. This includes a marker ID which is simply
             //a number that uniquely identifies a test from this set. It also displays the target
             //starting rule and the name of the input file used.
             System.out.println("Parser Test " + TEST_NUM.getAndIncrement() + ": Rule=" + this.ruleName
                     + " InFile=" + this.inputFileName);
-            System.out.print("-----------------------------------------------------------------------------------\n\t");
+            System.out.print("-----------------------------------------------------------------------------------\n");
+            for (int runNum = 0; runNum < this.amt; runNum++) {
+                System.out.printf("Run: %d\n\t", runNum);
+                ParserRuleContext context = (ParserRuleContext) ruleMethod.invoke(parser);
 
-            //Check for a failed parse.
-            if (this.errorListener.encounteredError()) {
-                //Print out more detailed information about the failure.
-                System.out.println("FAILED: Errors encountered while parsing.");
-                for (String error : this.errorListener.getErrors()) {
-                    System.out.print("\t\t");
-                    System.out.println(error);
+                //Check for a failed parse.
+                if (this.errorListener.encounteredError()) {
+                    //Print out more detailed information about the failure.
+                    System.out.println("FAILED: Errors encountered while parsing.");
+                    for (String error : this.errorListener.getErrors()) {
+                        System.out.print("\t\t");
+                        System.out.println(error);
+                    }
+                    fail("Exceptions thrown while parsing. See standard output for more detail.");
                 }
-                fail("Exceptions thrown while parsing. See standard output for more detail.");
-            }
 
-            //If we reach this part in the test code the test has passed so we will
-            //print out some information about the data parsed. This includes the matched rule,
-            //the starting token, the final token and the parse tree.
-            System.out.println(context.toInfoString(this.parser));
-            System.out.println();
+                //If we reach this part in the test code the test has passed so we will
+                //print out some information about the data parsed. This includes the matched rule,
+                //the starting token, the final token and the parse tree.
+                System.out.println(context.toInfoString(this.parser));
+                System.out.println();
+            }
             //No matter how the test goes we must close the input stream.
         } finally {
             this.inputStream.close();
