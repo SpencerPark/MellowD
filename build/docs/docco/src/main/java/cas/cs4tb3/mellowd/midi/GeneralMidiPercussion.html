@@ -214,6 +214,12 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\CompilerTest.html">
+                                    CompilerTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\ParserTest.html">
                                     ParserTest.java
                                 </a>
@@ -222,6 +228,87 @@
                             <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\TestErrorListener.html">
                                     TestErrorListener.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\compilertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\articulation.html">
+                                    articulation.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\percussion.html">
+                                    percussion.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeChords.html">
+                                    strangeChords.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeMelodies.html">
+                                    strangeMelodies.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeRhythms.html">
+                                    strangeRhythms.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\varDeclarations.html">
+                                    varDeclarations.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\parsertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\chordNames.html">
+                                    chordNames.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\simpleBlock.html">
+                                    simpleBlock.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\varDeclaration.html">
+                                    varDeclaration.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\testdata</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\testdata\CompilerTestData.html">
+                                    CompilerTestData.json
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\testdata\ParserTestData.html">
+                                    ParserTestData.json
                                 </a>
                             </li>
                         
@@ -256,22 +343,22 @@ instrument mapping.</p>
         
           <div class='highlight'><pre><span class="hljs-keyword">public</span> <span class="hljs-keyword">enum</span> GeneralMidiPercussion {
     BASS_DRUM_2(<span class="hljs-number">35</span>, <span class="hljs-string">"bass2"</span>),
-    BASS_DRUM_1(<span class="hljs-number">36</span>, <span class="hljs-string">"bass1"</span>),
+    BASS_DRUM_1(<span class="hljs-number">36</span>, <span class="hljs-string">"bass"</span>, <span class="hljs-string">"bass1"</span>),
     RIMSHOT(<span class="hljs-number">37</span>, <span class="hljs-string">"sideStick"</span>, <span class="hljs-string">"rim"</span>),
     SNARE_DRUM_1(<span class="hljs-number">38</span>, <span class="hljs-string">"snare"</span>, <span class="hljs-string">"snare1"</span>),
     HAND_CLAP(<span class="hljs-number">39</span>, <span class="hljs-string">"clap"</span>),
     SNARE_DRUM_2(<span class="hljs-number">40</span>, <span class="hljs-string">"snare2"</span>),
     LOW_TOM_2(<span class="hljs-number">41</span>, <span class="hljs-string">"ltom2"</span>),
     CLOSED_HI_HAT(<span class="hljs-number">42</span>, <span class="hljs-string">"cHat"</span>, <span class="hljs-string">"closedHat"</span>, <span class="hljs-string">"clHat"</span>),
-    LOW_TOM_1(<span class="hljs-number">43</span>, <span class="hljs-string">"ltom1"</span>),
+    LOW_TOM_1(<span class="hljs-number">43</span>, <span class="hljs-string">"ltom"</span>, <span class="hljs-string">"ltom1"</span>),
     PEDAL_HI_HAT(<span class="hljs-number">44</span>, <span class="hljs-string">"pHat"</span>, <span class="hljs-string">"pedalHat"</span>),
     MID_TOM_2(<span class="hljs-number">45</span>, <span class="hljs-string">"mtom2"</span>),
     OPEN_HI_HAT(<span class="hljs-number">46</span>, <span class="hljs-string">"oHat"</span>, <span class="hljs-string">"openHat"</span>),
-    MID_TOM_1(<span class="hljs-number">47</span>, <span class="hljs-string">"mtom1"</span>),
+    MID_TOM_1(<span class="hljs-number">47</span>, <span class="hljs-string">"mtom"</span>, <span class="hljs-string">"mtom1"</span>),
     HIGH_TOM_2(<span class="hljs-number">48</span>, <span class="hljs-string">"htom2"</span>),
-    CRASH_CYMBAL_1(<span class="hljs-number">49</span>, <span class="hljs-string">"crash1"</span>),
-    HIGH_TOM_1(<span class="hljs-number">50</span>, <span class="hljs-string">"htom1"</span>),
-    RIDE_CYMBAL_1(<span class="hljs-number">51</span>, <span class="hljs-string">"ride1"</span>),
+    CRASH_CYMBAL_1(<span class="hljs-number">49</span>, <span class="hljs-string">"crash"</span>, <span class="hljs-string">"crash1"</span>),
+    HIGH_TOM_1(<span class="hljs-number">50</span>, <span class="hljs-string">"htom"</span>, <span class="hljs-string">"htom1"</span>),
+    RIDE_CYMBAL_1(<span class="hljs-number">51</span>, <span class="hljs-string">"ride"</span>, <span class="hljs-string">"ride1"</span>),
     CHINESE_CYMBAL(<span class="hljs-number">52</span>, <span class="hljs-string">"trash"</span>),
     RIDE_BELL(<span class="hljs-number">53</span>),
     TAMBOURINE(<span class="hljs-number">54</span>),
@@ -300,7 +387,7 @@ instrument mapping.</p>
     LOW_WOOD_BLOCK(<span class="hljs-number">77</span>, <span class="hljs-string">"lWoodBlock"</span>, <span class="hljs-string">"lBlock"</span>),
     MUTE_CUICA(<span class="hljs-number">78</span>, <span class="hljs-string">"mCucia"</span>),
     OPEN_CUICA(<span class="hljs-number">79</span>, <span class="hljs-string">"oCucia"</span>),
-    MUTE_TRAINGLE(<span class="hljs-number">80</span>, <span class="hljs-string">"mTriangle"</span>, <span class="hljs-string">"mTri"</span>),
+    MUTE_TRIANGLE(<span class="hljs-number">80</span>, <span class="hljs-string">"mTriangle"</span>, <span class="hljs-string">"mTri"</span>),
     OPEN_TRIANGLE(<span class="hljs-number">81</span>, <span class="hljs-string">"oTriangle"</span>, <span class="hljs-string">"oTri"</span>, <span class="hljs-string">"triangle"</span>, <span class="hljs-string">"tri"</span>);</pre></div>
         
       

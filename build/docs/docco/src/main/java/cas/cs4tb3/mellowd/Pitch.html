@@ -214,6 +214,12 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\java\cas\cs4tb3\mellowd\CompilerTest.html">
+                                    CompilerTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\test\java\cas\cs4tb3\mellowd\ParserTest.html">
                                     ParserTest.java
                                 </a>
@@ -222,6 +228,87 @@
                             <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\test\java\cas\cs4tb3\mellowd\TestErrorListener.html">
                                     TestErrorListener.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\compilertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\compilertest\articulation.html">
+                                    articulation.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\compilertest\percussion.html">
+                                    percussion.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\compilertest\strangeChords.html">
+                                    strangeChords.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\compilertest\strangeMelodies.html">
+                                    strangeMelodies.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\compilertest\strangeRhythms.html">
+                                    strangeRhythms.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\compilertest\varDeclarations.html">
+                                    varDeclarations.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\parsertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\parsertest\chordNames.html">
+                                    chordNames.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\parsertest\simpleBlock.html">
+                                    simpleBlock.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\parsertest\varDeclaration.html">
+                                    varDeclaration.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\testdata</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\testdata\CompilerTestData.html">
+                                    CompilerTestData.json
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\testdata\ParserTestData.html">
+                                    ParserTestData.json
                                 </a>
                             </li>
                         
@@ -365,7 +452,8 @@ the sign of the <code>amt</code>.</p>
         <p>The plain shift octave uses the sign of the <code>amt</code> to determine the direction for the shift.</p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> Pitch <span class="hljs-title">shiftOctave</span><span class="hljs-params">(<span class="hljs-keyword">int</span> amt)</span> </span>{
+          <div class='highlight'><pre>    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Pitch <span class="hljs-title">shiftOctave</span><span class="hljs-params">(<span class="hljs-keyword">int</span> amt)</span> </span>{
         <span class="hljs-keyword">return</span> getPitch(midiNum + (<span class="hljs-number">12</span> * amt));
     }</pre></div>
         
@@ -386,8 +474,7 @@ by 12 (<code>midiNum % 12</code>). This gives the note number in octave 0. The w
 octave shift up to the desired octave (<code>octave * 12</code>).</p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-meta">@Override</span>
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Pitch <span class="hljs-title">inOctave</span><span class="hljs-params">(<span class="hljs-keyword">int</span> octave)</span> </span>{
+          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> Pitch <span class="hljs-title">inOctave</span><span class="hljs-params">(<span class="hljs-keyword">int</span> octave)</span> </span>{
         <span class="hljs-keyword">return</span> getPitch((octave * <span class="hljs-number">12</span>) + (midiNum % <span class="hljs-number">12</span>));
     }</pre></div>
         

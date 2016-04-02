@@ -214,6 +214,12 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\CompilerTest.html">
+                                    CompilerTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\ParserTest.html">
                                     ParserTest.java
                                 </a>
@@ -222,6 +228,87 @@
                             <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\TestErrorListener.html">
                                     TestErrorListener.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\compilertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\articulation.html">
+                                    articulation.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\percussion.html">
+                                    percussion.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeChords.html">
+                                    strangeChords.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeMelodies.html">
+                                    strangeMelodies.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeRhythms.html">
+                                    strangeRhythms.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\varDeclarations.html">
+                                    varDeclarations.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\parsertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\chordNames.html">
+                                    chordNames.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\simpleBlock.html">
+                                    simpleBlock.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\varDeclaration.html">
+                                    varDeclaration.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\testdata</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\testdata\CompilerTestData.html">
+                                    CompilerTestData.json
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\testdata\ParserTestData.html">
+                                    ParserTestData.json
                                 </a>
                             </li>
                         
@@ -241,13 +328,17 @@
 
 <span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.Articulation;
 <span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.Dynamic;
+<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.PlayableSound;
 <span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.TimingEnvironment;
 <span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
+<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.primitives.Chord;
 <span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.primitives.Phrase;
-<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.PlayableSound;
 <span class="hljs-keyword">import</span> org.antlr.v4.runtime.Token;
 
-<span class="hljs-keyword">import</span> javax.sound.midi.*;
+<span class="hljs-keyword">import</span> javax.sound.midi.InvalidMidiDataException;
+<span class="hljs-keyword">import</span> javax.sound.midi.MidiEvent;
+<span class="hljs-keyword">import</span> javax.sound.midi.ShortMessage;
+<span class="hljs-keyword">import</span> javax.sound.midi.Track;
 <span class="hljs-keyword">import</span> java.util.Collections;
 <span class="hljs-keyword">import</span> java.util.LinkedList;
 <span class="hljs-keyword">import</span> java.util.List;</pre></div>
@@ -539,7 +630,9 @@ custom sound.</p>
         <span class="hljs-keyword">if</span> (sound.isSlurred() || sound.getArticulation().equals(Articulation.TENUTO))
             tickDuration += tickDuration/<span class="hljs-number">8</span>;
         <span class="hljs-keyword">int</span> velocity = sound.getVelocity();
-        <span class="hljs-keyword">int</span> offVelocity = sound.isSlurred() ? <span class="hljs-number">1</span> : <span class="hljs-number">96</span>;</pre></div>
+        <span class="hljs-keyword">int</span> offVelocity = sound.isSlurred() ? <span class="hljs-number">1</span> : <span class="hljs-number">96</span>;
+        <span class="hljs-keyword">boolean</span> roll = <span class="hljs-keyword">false</span>;
+        <span class="hljs-keyword">long</span> offsetStep = <span class="hljs-number">0</span>;</pre></div>
         
       
         
@@ -621,17 +714,50 @@ as to not interfere with the next note. Additionally a reset message will be que
 next note to take.</p>
 
         
-          <div class='highlight'><pre>            <span class="hljs-keyword">case</span> GLISCANDO:
-                <span class="hljs-keyword">int</span> bendAmt = GeneralMidiConstants.NO_PITCH_BEND;
-                <span class="hljs-keyword">int</span> bendTickOffset;
-                <span class="hljs-keyword">for</span> (bendTickOffset = <span class="hljs-number">0</span>; bendTickOffset &lt; tickDuration; bendTickOffset += tickDuration/<span class="hljs-number">16</span>) {
-                    bendAmt += BEND_AMT;
-                    ShortMessage message = <span class="hljs-keyword">new</span> ShortMessage(ShortMessage.PITCH_BEND, channel.midiChannelNum, <span class="hljs-number">0x7F</span> &amp; bendAmt, <span class="hljs-number">0x7F</span> &amp; (bendAmt &gt;&gt; <span class="hljs-number">7</span>));
-                    addEventToTrack(<span class="hljs-keyword">new</span> MidiEvent(message, time + bendTickOffset));
+          <div class='highlight'><pre>            <span class="hljs-keyword">case</span> GLISCANDO:</pre></div>
+        
+      
+        
+        <p>If the sound is a chord a gliscando should be preformed as a roll.</p>
+
+        
+          <div class='highlight'><pre>                <span class="hljs-keyword">if</span> (sound.isChord()) {
+                    roll = <span class="hljs-keyword">true</span>;</pre></div>
+        
+      
+        
+        <p>The roll will play the first note in the chord right on the down beat. Each
+consecutive note in the chord will be delayed by the <code>offsetStep</code>.</p>
+
+        
+          <div class='highlight'><pre>                    offsetStep = tickDuration / (((Chord) sound.getSound()).size() * <span class="hljs-number">2</span>);</pre></div>
+        
+      
+        
+        <p>otherwise preform the gliscando as a pitch bend.</p>
+
+        
+          <div class='highlight'><pre>                } <span class="hljs-keyword">else</span> {
+                    <span class="hljs-keyword">int</span> bendAmt = GeneralMidiConstants.NO_PITCH_BEND;
+                    <span class="hljs-keyword">int</span> bendTickOffset;
+                    <span class="hljs-keyword">for</span> (bendTickOffset = <span class="hljs-number">0</span>; bendTickOffset &lt; tickDuration; bendTickOffset += tickDuration / <span class="hljs-number">16</span>) {
+                        bendAmt += BEND_AMT;
+                        ShortMessage message = <span class="hljs-keyword">new</span> ShortMessage(ShortMessage.PITCH_BEND, channel.midiChannelNum, <span class="hljs-number">0x7F</span> &amp; bendAmt, <span class="hljs-number">0x7F</span> &amp; (bendAmt &gt;&gt; <span class="hljs-number">7</span>));
+                        addEventToTrack(<span class="hljs-keyword">new</span> MidiEvent(message, time + bendTickOffset));
+                    }
+                    <span class="hljs-keyword">this</span>.queuedPitchReset = <span class="hljs-keyword">new</span> ShortMessage(ShortMessage.PITCH_BEND, channel.midiChannelNum, <span class="hljs-number">0x7F</span> &amp; GeneralMidiConstants.NO_PITCH_BEND, <span class="hljs-number">0x7F</span> &amp; (GeneralMidiConstants.NO_PITCH_BEND &gt;&gt; <span class="hljs-number">7</span>));
                 }
-                <span class="hljs-keyword">this</span>.queuedPitchReset = <span class="hljs-keyword">new</span> ShortMessage(ShortMessage.PITCH_BEND, channel.midiChannelNum, <span class="hljs-number">0x7F</span> &amp; GeneralMidiConstants.NO_PITCH_BEND, <span class="hljs-number">0x7F</span> &amp; (GeneralMidiConstants.NO_PITCH_BEND &gt;&gt; <span class="hljs-number">7</span>));
                 <span class="hljs-keyword">break</span>;
         }</pre></div>
+        
+      
+        
+        <p>Initialize the offset to 0. If <code>!roll</code> then this offset will remain at 0. If
+the <code>roll</code> is set to true each time a note is added to the track the next is offset
+<code>offsetStep</code>.</p>
+
+        
+          <div class='highlight'><pre>        <span class="hljs-keyword">long</span> offset = <span class="hljs-number">0L</span>;</pre></div>
         
       
         
@@ -640,8 +766,11 @@ track.</p>
 
         
           <div class='highlight'><pre>        <span class="hljs-keyword">for</span> (ShortMessage message : sound.getSound().noteOn(channel.midiChannelNum, velocity)) {
-            addEventToTrack(<span class="hljs-keyword">new</span> MidiEvent(message, <span class="hljs-keyword">this</span>.time));
-        }</pre></div>
+            addEventToTrack(<span class="hljs-keyword">new</span> MidiEvent(message, <span class="hljs-keyword">this</span>.time + offset));
+            <span class="hljs-keyword">if</span> (roll) offset += offsetStep;
+        }
+
+        offset = <span class="hljs-number">0</span>;</pre></div>
         
       
         
@@ -649,7 +778,8 @@ track.</p>
 
         
           <div class='highlight'><pre>        <span class="hljs-keyword">for</span> (ShortMessage message : sound.getSound().noteOff(channel.midiChannelNum, offVelocity)) {
-            addEventToTrack(<span class="hljs-keyword">new</span> MidiEvent(message, <span class="hljs-keyword">this</span>.time + tickDuration));
+            addEventToTrack(<span class="hljs-keyword">new</span> MidiEvent(message, <span class="hljs-keyword">this</span>.time + tickDuration + offset));
+            <span class="hljs-keyword">if</span> (roll) offset += offsetStep;
         }</pre></div>
         
       
@@ -721,15 +851,25 @@ additional events to be added to the track or other various state changes.</p>
         
       
         
+        <p>Save the old options for comparing but use the new options when invoking trackmanager methods</p>
+
+        
+          <div class='highlight'><pre>        BlockOptions oldOptions = <span class="hljs-keyword">this</span>.options;
+        <span class="hljs-keyword">this</span>.options = options;</pre></div>
+        
+      
+        
         <p>If a channel is selected and different from the current channel we will make a request for the
 track manager to change to it.</p>
 
         
-          <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (options.isChannelSelected() &amp;&amp; options.getSelectedChannel() != <span class="hljs-keyword">this</span>.options.getSelectedChannel()) {
-            String reasonForDenial = <span class="hljs-keyword">this</span>.trackManager.requestChannel(<span class="hljs-keyword">this</span>, options.getSelectedChannel());
+          <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (oldOptions.isChannelSelected() &amp;&amp; oldOptions.getSelectedChannel() != <span class="hljs-keyword">this</span>.options.getSelectedChannel()) {
+            String reasonForDenial = <span class="hljs-keyword">this</span>.trackManager.requestChannel(<span class="hljs-keyword">this</span>, oldOptions.getSelectedChannel());
             <span class="hljs-keyword">if</span> (reasonForDenial != <span class="hljs-keyword">null</span>) {
-                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ParseException(blockNameToken, <span class="hljs-string">"Cannot select midi channel "</span>+options.getSelectedChannel()+<span class="hljs-string">". Reason: "</span>+reasonForDenial);
+                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ParseException(blockNameToken, <span class="hljs-string">"Cannot select midi channel "</span>+oldOptions.getSelectedChannel()+<span class="hljs-string">". Reason: "</span>+reasonForDenial);
             }
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">this</span>.trackManager.requestChannel(<span class="hljs-keyword">this</span>);
         }</pre></div>
         
       
@@ -745,8 +885,8 @@ track manager to change to it.</p>
 some MIDI program change events need to be added.</p>
 
         
-          <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (force || options.getInstrument() != <span class="hljs-keyword">this</span>.options.getInstrument()
-                || options.getSoundbank() != <span class="hljs-keyword">this</span>.options.getSoundbank()) {</pre></div>
+          <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (force || oldOptions.getInstrument() != <span class="hljs-keyword">this</span>.options.getInstrument()
+                || oldOptions.getSoundbank() != <span class="hljs-keyword">this</span>.options.getSoundbank()) {</pre></div>
         
       
         
@@ -754,9 +894,9 @@ some MIDI program change events need to be added.</p>
 <a href="../midi/GeneralMidiConstants.html">General MIDI Constants</a>.</p>
 
         
-          <div class='highlight'><pre>            <span class="hljs-keyword">if</span> (options.getSoundbank() != <span class="hljs-number">0</span>) {
+          <div class='highlight'><pre>            <span class="hljs-keyword">if</span> (oldOptions.getSoundbank() != <span class="hljs-number">0</span>) {
                 <span class="hljs-keyword">this</span>.track.add(<span class="hljs-keyword">new</span> MidiEvent(<span class="hljs-keyword">new</span> ShortMessage(ShortMessage.CONTROL_CHANGE, channel.midiChannelNum, GeneralMidiConstants.BANK_SELECT_CC_1, GeneralMidiConstants.BANK_SELECT_CC_1_VAL), time));
-                <span class="hljs-keyword">this</span>.track.add(<span class="hljs-keyword">new</span> MidiEvent(<span class="hljs-keyword">new</span> ShortMessage(ShortMessage.CONTROL_CHANGE, channel.midiChannelNum, GeneralMidiConstants.BANK_SELECT_CC_2, options.getSoundbank()), time));
+                <span class="hljs-keyword">this</span>.track.add(<span class="hljs-keyword">new</span> MidiEvent(<span class="hljs-keyword">new</span> ShortMessage(ShortMessage.CONTROL_CHANGE, channel.midiChannelNum, GeneralMidiConstants.BANK_SELECT_CC_2, oldOptions.getSoundbank()), time));
             }</pre></div>
         
       
@@ -764,15 +904,8 @@ some MIDI program change events need to be added.</p>
         <p>Add the program change message</p>
 
         
-          <div class='highlight'><pre>            <span class="hljs-keyword">this</span>.track.add(<span class="hljs-keyword">new</span> MidiEvent(<span class="hljs-keyword">new</span> ShortMessage(ShortMessage.PROGRAM_CHANGE, channel.midiChannelNum, options.getInstrument(), <span class="hljs-number">0</span>), time));
-        }</pre></div>
-        
-      
-        
-        <p>Save the new options</p>
-
-        
-          <div class='highlight'><pre>        <span class="hljs-keyword">this</span>.options = options;
+          <div class='highlight'><pre>            <span class="hljs-keyword">this</span>.track.add(<span class="hljs-keyword">new</span> MidiEvent(<span class="hljs-keyword">new</span> ShortMessage(ShortMessage.PROGRAM_CHANGE, channel.midiChannelNum, oldOptions.getInstrument(), <span class="hljs-number">0</span>), time));
+        }
     }</pre></div>
         
       
@@ -820,6 +953,18 @@ added events.</p>
 
         MidiEvent endOfTrackEvent = track.get(track.size()-<span class="hljs-number">1</span>);
         endOfTrackEvent.setTick(endOfTrackEvent.getTick() + timingEnv.getPPQ());
+    }</pre></div>
+        
+      
+        
+        <p>When the song is finished we may need to report some “unclosed” operations like a
+crescendo.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">finish</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">this</span>.dynBuffer.isEmpty())
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ParseException(<span class="hljs-keyword">this</span>.cresToken, <span class="hljs-string">"Gradual change specified but found EOF before the target"</span> +
+                    <span class="hljs-string">" dynamic is specified."</span>);
     }
 }</pre></div>
         

@@ -214,6 +214,12 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\CompilerTest.html">
+                                    CompilerTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\ParserTest.html">
                                     ParserTest.java
                                 </a>
@@ -222,6 +228,87 @@
                             <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\TestErrorListener.html">
                                     TestErrorListener.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\compilertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\articulation.html">
+                                    articulation.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\percussion.html">
+                                    percussion.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeChords.html">
+                                    strangeChords.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeMelodies.html">
+                                    strangeMelodies.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeRhythms.html">
+                                    strangeRhythms.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\varDeclarations.html">
+                                    varDeclarations.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\parsertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\chordNames.html">
+                                    chordNames.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\simpleBlock.html">
+                                    simpleBlock.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\varDeclaration.html">
+                                    varDeclaration.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\testdata</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\testdata\CompilerTestData.html">
+                                    CompilerTestData.json
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\testdata\ParserTestData.html">
+                                    ParserTestData.json
                                 </a>
                             </li>
                         
@@ -250,10 +337,13 @@
       
         
         <p>A symbol table holds references. It is simply a Map at its core but it provides type
-and exception handling functionality.</p>
+and exception handling functionality. The <code>@SuppressWarnings(&quot;unchecked&quot;)</code> stops the compiler
+from incorrectly warning about unchecked casts as the check is done via reflection and the
+compiler isn’t convinced that it has been checked.</p>
 
         
-          <div class='highlight'><pre><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SymbolTable</span> </span>{</pre></div>
+          <div class='highlight'><pre><span class="hljs-meta">@SuppressWarnings</span>(<span class="hljs-string">"unchecked"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SymbolTable</span> </span>{</pre></div>
         
       
         

@@ -214,6 +214,12 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="CompilerTest.html">
+                                    CompilerTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="ParserTest.html">
                                     ParserTest.java
                                 </a>
@@ -222,6 +228,87 @@
                             <li class="tocelem">
                                 <a class="source" href="TestErrorListener.html">
                                     TestErrorListener.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\compilertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\compilertest\articulation.html">
+                                    articulation.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\compilertest\percussion.html">
+                                    percussion.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\compilertest\strangeChords.html">
+                                    strangeChords.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\compilertest\strangeMelodies.html">
+                                    strangeMelodies.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\compilertest\strangeRhythms.html">
+                                    strangeRhythms.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\compilertest\varDeclarations.html">
+                                    varDeclarations.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\parsertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\parsertest\chordNames.html">
+                                    chordNames.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\parsertest\simpleBlock.html">
+                                    simpleBlock.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\parsertest\varDeclaration.html">
+                                    varDeclaration.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\testdata</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\testdata\CompilerTestData.html">
+                                    CompilerTestData.json
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\testdata\ParserTestData.html">
+                                    ParserTestData.json
                                 </a>
                             </li>
                         
@@ -242,7 +329,6 @@
         
           <div class='highlight'><pre><span class="hljs-keyword">package</span> cas.cs4tb3.mellowd;
 
-<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.Pitch;
 <span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.primitives.Chord;
 <span class="hljs-keyword">import</span> org.junit.Test;
 <span class="hljs-keyword">import</span> org.junit.runner.RunWith;
@@ -266,7 +352,9 @@
                 {<span class="hljs-string">"Cmaj7"</span>, Chord.majorSeventh(Pitch.C)}, {<span class="hljs-string">"Cmin7"</span>, Chord.minorSeventh(Pitch.C)},
                 {<span class="hljs-string">"Caug7"</span>, Chord.augmentedSeventh(Pitch.C)}, {<span class="hljs-string">"Cdim7"</span>, Chord.diminished7th(Pitch.C)},
                 {<span class="hljs-string">"Cmaj7b5"</span>, Chord.majorSeventhFlatFive(Pitch.C)}, {<span class="hljs-string">"Cminmaj7"</span>, Chord.minorMajorSeventh(Pitch.C)},
-                {<span class="hljs-string">"Cdom7"</span>, Chord.dominantSeventh(Pitch.C)}, {<span class="hljs-string">"Cmaj7s5"</span>, Chord.majorSeventhSharpFive(Pitch.C)}
+                {<span class="hljs-string">"Cdom7"</span>, Chord.dominantSeventh(Pitch.C)}, {<span class="hljs-string">"Cmaj7s5"</span>, Chord.majorSeventhSharpFive(Pitch.C)},
+                {<span class="hljs-string">"As"</span>, Chord.major(Pitch.A.sharp())}, {<span class="hljs-string">"Bb"</span>, Chord.major(Pitch.B.flat())},
+                {<span class="hljs-string">"Du1"</span>, Chord.major(Pitch.D.shiftOctaveUp(<span class="hljs-number">1</span>))}, {<span class="hljs-string">"Ed1"</span>, Chord.major(Pitch.E.shiftOctaveDown(<span class="hljs-number">1</span>))}
         });
     }
 

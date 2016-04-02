@@ -3,17 +3,17 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <meta http-equiv="x-ua-compatible" content="IE=edge"/>
-<title>Test results - Class cas.cs4tb3.mellowd.ParserTest</title>
+<title>Test results - Class cas.cs4tb3.mellowd.CompilerTest</title>
 <link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
 <link href="../css/style.css" rel="stylesheet" type="text/css"/>
 <script src="../js/report.js" type="text/javascript"></script>
 </head>
 <body>
 <div id="content">
-<h1>Class cas.cs4tb3.mellowd.ParserTest</h1>
+<h1>Class cas.cs4tb3.mellowd.CompilerTest</h1>
 <div class="breadcrumbs">
 <a href="../index.html">all</a> &gt; 
-<a href="../packages/cas.cs4tb3.mellowd.html">cas.cs4tb3.mellowd</a> &gt; ParserTest</div>
+<a href="../packages/cas.cs4tb3.mellowd.html">cas.cs4tb3.mellowd</a> &gt; CompilerTest</div>
 <div id="summary">
 <table>
 <tr>
@@ -23,7 +23,7 @@
 <tr>
 <td>
 <div class="infoBox" id="tests">
-<div class="counter">3</div>
+<div class="counter">6</div>
 <p>tests</p>
 </div>
 </td>
@@ -41,7 +41,7 @@
 </td>
 <td>
 <div class="infoBox" id="duration">
-<div class="counter">0.005s</div>
+<div class="counter">0.565s</div>
 <p>duration</p>
 </div>
 </td>
@@ -78,18 +78,33 @@
 </tr>
 </thead>
 <tr>
-<td class="success">parseTest[0: varDeclaration]</td>
-<td>0.003s</td>
+<td class="success">compileTest[0: varDeclarations.mlod]</td>
+<td>0.463s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
-<td class="success">parseTest[1: song]</td>
-<td>0.001s</td>
+<td class="success">compileTest[1: strangeRhythms.mlod]</td>
+<td>0.053s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
-<td class="success">parseTest[2: block]</td>
-<td>0.001s</td>
+<td class="success">compileTest[2: strangeChords.mlod]</td>
+<td>0.010s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">compileTest[3: strangeMelodies.mlod]</td>
+<td>0.010s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">compileTest[4: percussion.mlod]</td>
+<td>0.020s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">compileTest[5: articulation.mlod]</td>
+<td>0.009s</td>
 <td class="success">passed</td>
 </tr>
 </table>
@@ -97,29 +112,29 @@
 <div id="tab1" class="tab">
 <h2>Standard output</h2>
 <span class="code">
-<pre>Parser Test 0: Rule=varDeclaration InFile=varDeclaration.mlod
+<pre>Compiler Test 0: InFile=varDeclarations.mlod  OutFile=varDeclarations.mid  Tempo=120 TimSig=4/4
 -----------------------------------------------------------------------------------
-Run: 0
-	ParserRuleContext[varDeclaration]{start=[@0,0:5='phrase',&lt;31&gt;,1:0], stop=[@16,28:28='&gt;',&lt;45&gt;,1:28]}
+Compilation successful.
 
-Run: 1
-	ParserRuleContext[varDeclaration]{start=[@17,31:36='rhythm',&lt;31&gt;,2:0], stop=[@29,55:55='&gt;',&lt;45&gt;,2:24]}
-
-Run: 2
-	ParserRuleContext[varDeclaration]{start=[@30,58:62='chord',&lt;31&gt;,3:0], stop=[@44,81:81=')',&lt;43&gt;,3:23]}
-
-Run: 3
-	ParserRuleContext[varDeclaration]{start=[@45,84:89='melody',&lt;31&gt;,4:0], stop=[@61,114:114=']',&lt;41&gt;,4:30]}
-
-Parser Test 1: Rule=song InFile=simpleBlock.mlod
+Compiler Test 1: InFile=strangeRhythms.mlod  OutFile=strangeRhythms.mid  Tempo=120 TimSig=4/4
 -----------------------------------------------------------------------------------
-Run: 0
-	ParserRuleContext[song]{start=[@0,0:5='sample',&lt;31&gt;,1:0], stop=[@42,99:98='&lt;EOF&gt;',&lt;-1&gt;,3:1]}
+Compilation successful.
 
-Parser Test 2: Rule=block InFile=chordNames.mlod
+Compiler Test 2: InFile=strangeChords.mlod  OutFile=strangeChords.mid  Tempo=120 TimSig=4/4
 -----------------------------------------------------------------------------------
-Run: 0
-	ParserRuleContext[block]{start=[@0,0:8='chordTest',&lt;31&gt;,1:0], stop=[@60,150:150='}',&lt;47&gt;,4:0]}
+Compilation successful.
+
+Compiler Test 3: InFile=strangeMelodies.mlod  OutFile=strangeMelodies.mid  Tempo=120 TimSig=4/4
+-----------------------------------------------------------------------------------
+Compilation successful.
+
+Compiler Test 4: InFile=percussion.mlod  OutFile=percussion.mid  Tempo=120 TimSig=4/4
+-----------------------------------------------------------------------------------
+Compilation successful.
+
+Compiler Test 5: InFile=articulation.mlod  OutFile=articulation.mid  Tempo=120 TimSig=4/4
+-----------------------------------------------------------------------------------
+Compilation successful.
 
 </pre>
 </span>

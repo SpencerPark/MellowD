@@ -214,6 +214,12 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="CompilerTest.html">
+                                    CompilerTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="ParserTest.html">
                                     ParserTest.java
                                 </a>
@@ -222,6 +228,87 @@
                             <li class="tocelem">
                                 <a class="source" href="TestErrorListener.html">
                                     TestErrorListener.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\compilertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\compilertest\articulation.html">
+                                    articulation.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\compilertest\percussion.html">
+                                    percussion.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\compilertest\strangeChords.html">
+                                    strangeChords.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\compilertest\strangeMelodies.html">
+                                    strangeMelodies.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\compilertest\strangeRhythms.html">
+                                    strangeRhythms.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\compilertest\varDeclarations.html">
+                                    varDeclarations.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\parsertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\parsertest\chordNames.html">
+                                    chordNames.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\parsertest\simpleBlock.html">
+                                    simpleBlock.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\parsertest\varDeclaration.html">
+                                    varDeclaration.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\testdata</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\testdata\CompilerTestData.html">
+                                    CompilerTestData.json
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\testdata\ParserTestData.html">
+                                    ParserTestData.json
                                 </a>
                             </li>
                         
@@ -264,10 +351,7 @@ via junit.</p>
 <span class="hljs-keyword">import</span> org.junit.runner.RunWith;
 <span class="hljs-keyword">import</span> org.junit.runners.Parameterized;
 
-<span class="hljs-keyword">import</span> java.io.BufferedReader;
-<span class="hljs-keyword">import</span> java.io.IOException;
-<span class="hljs-keyword">import</span> java.io.InputStream;
-<span class="hljs-keyword">import</span> java.io.InputStreamReader;
+<span class="hljs-keyword">import</span> java.io.*;
 <span class="hljs-keyword">import</span> java.lang.reflect.Method;
 <span class="hljs-keyword">import</span> java.util.Arrays;
 <span class="hljs-keyword">import</span> java.util.Collection;
@@ -323,9 +407,10 @@ information about what is going on during the test.</p>
     <span class="hljs-keyword">private</span> TestErrorListener errorListener;
     <span class="hljs-keyword">private</span> String inputFileName;
     <span class="hljs-keyword">private</span> String ruleName;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> amt;
     <span class="hljs-keyword">private</span> InputStream inputStream;
 
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ParserTest</span><span class="hljs-params">(String inputFile, String ruleName)</span> <span class="hljs-keyword">throws</span> IOException </span>{</pre></div>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ParserTest</span><span class="hljs-params">(String inputFile, String ruleName, String amt)</span> <span class="hljs-keyword">throws</span> IOException </span>{</pre></div>
         
       
         
@@ -333,7 +418,7 @@ information about what is going on during the test.</p>
 upon completion of the test.</p>
 
         
-          <div class='highlight'><pre>        <span class="hljs-keyword">this</span>.inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(inputFile);</pre></div>
+          <div class='highlight'><pre>        <span class="hljs-keyword">this</span>.inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(<span class="hljs-string">"parsertest"</span> + File.separator + inputFile);</pre></div>
         
       
         
@@ -351,6 +436,7 @@ needs to be overridden with a custom one to store all error messages.</p>
         <span class="hljs-keyword">this</span>.parser.addErrorListener(<span class="hljs-keyword">this</span>.errorListener);
         <span class="hljs-keyword">this</span>.inputFileName = inputFile;
         <span class="hljs-keyword">this</span>.ruleName = ruleName;
+        <span class="hljs-keyword">this</span>.amt = Integer.parseInt(amt);
     }</pre></div>
         
       
@@ -362,8 +448,7 @@ needs to be overridden with a custom one to store all error messages.</p>
           <div class='highlight'><pre>    <span class="hljs-meta">@Test</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">parseTest</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> Exception </span>{
         <span class="hljs-keyword">try</span> {
-            Method ruleMethod = parser.getClass().getMethod(ruleName);
-            ParserRuleContext context = (ParserRuleContext) ruleMethod.invoke(parser);</pre></div>
+            Method ruleMethod = parser.getClass().getMethod(ruleName);</pre></div>
         
       
         
@@ -374,27 +459,30 @@ starting rule and the name of the input file used.</p>
         
           <div class='highlight'><pre>            System.out.println(<span class="hljs-string">"Parser Test "</span> + TEST_NUM.getAndIncrement() + <span class="hljs-string">": Rule="</span> + <span class="hljs-keyword">this</span>.ruleName
                     + <span class="hljs-string">" InFile="</span> + <span class="hljs-keyword">this</span>.inputFileName);
-            System.out.print(<span class="hljs-string">"-----------------------------------------------------------------------------------\n\t"</span>);</pre></div>
+            System.out.print(<span class="hljs-string">"-----------------------------------------------------------------------------------\n"</span>);
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> runNum = <span class="hljs-number">0</span>; runNum &lt; <span class="hljs-keyword">this</span>.amt; runNum++) {
+                System.out.printf(<span class="hljs-string">"Run: %d\n\t"</span>, runNum);
+                ParserRuleContext context = (ParserRuleContext) ruleMethod.invoke(parser);</pre></div>
         
       
         
         <p>Check for a failed parse.</p>
 
         
-          <div class='highlight'><pre>            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.errorListener.encounteredError()) {</pre></div>
+          <div class='highlight'><pre>                <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.errorListener.encounteredError()) {</pre></div>
         
       
         
         <p>Print out more detailed information about the failure.</p>
 
         
-          <div class='highlight'><pre>                System.out.println(<span class="hljs-string">"FAILED: Errors encountered while parsing."</span>);
-                <span class="hljs-keyword">for</span> (String error : <span class="hljs-keyword">this</span>.errorListener.getErrors()) {
-                    System.out.print(<span class="hljs-string">"\t\t"</span>);
-                    System.out.println(error);
-                }
-                fail(<span class="hljs-string">"Exceptions thrown while parsing. See standard output for more detail."</span>);
-            }</pre></div>
+          <div class='highlight'><pre>                    System.out.println(<span class="hljs-string">"FAILED: Errors encountered while parsing."</span>);
+                    <span class="hljs-keyword">for</span> (String error : <span class="hljs-keyword">this</span>.errorListener.getErrors()) {
+                        System.out.print(<span class="hljs-string">"\t\t"</span>);
+                        System.out.println(error);
+                    }
+                    fail(<span class="hljs-string">"Exceptions thrown while parsing. See standard output for more detail."</span>);
+                }</pre></div>
         
       
         
@@ -403,8 +491,9 @@ print out some information about the data parsed. This includes the matched rule
 the starting token, the final token and the parse tree.</p>
 
         
-          <div class='highlight'><pre>            System.out.println(context.toInfoString(<span class="hljs-keyword">this</span>.parser));
-            System.out.println();</pre></div>
+          <div class='highlight'><pre>                System.out.println(context.toInfoString(<span class="hljs-keyword">this</span>.parser));
+                System.out.println();
+            }</pre></div>
         
       
         

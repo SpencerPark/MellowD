@@ -214,6 +214,12 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\CompilerTest.html">
+                                    CompilerTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\ParserTest.html">
                                     ParserTest.java
                                 </a>
@@ -222,6 +228,87 @@
                             <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\TestErrorListener.html">
                                     TestErrorListener.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\compilertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\articulation.html">
+                                    articulation.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\percussion.html">
+                                    percussion.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeChords.html">
+                                    strangeChords.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeMelodies.html">
+                                    strangeMelodies.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeRhythms.html">
+                                    strangeRhythms.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\varDeclarations.html">
+                                    varDeclarations.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\parsertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\chordNames.html">
+                                    chordNames.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\simpleBlock.html">
+                                    simpleBlock.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\varDeclaration.html">
+                                    varDeclaration.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\testdata</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\testdata\CompilerTestData.html">
+                                    CompilerTestData.json
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\testdata\ParserTestData.html">
+                                    ParserTestData.json
                                 </a>
                             </li>
                         
@@ -239,8 +326,8 @@
             <div class='highlight'><pre>
 <span class="hljs-keyword">package</span> cas.cs4tb3.mellowd.primitives;
 
-<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.midi.MidiNoteMessageSource;
 <span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.Pitch;
+<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.midi.MidiNoteMessageSource;
 
 <span class="hljs-keyword">import</span> javax.sound.midi.InvalidMidiDataException;
 <span class="hljs-keyword">import</span> javax.sound.midi.ShortMessage;
@@ -272,12 +359,12 @@ an undefined reference exception.</p>
         
       
         
-        <p>The pattern is <code>[A-G] ( &#39;#&#39; | &#39;$&#39; )? ( &#39;+&#39; | &#39;-&#39; [0-9]+ )? ( [a-z0-9]+ )?</code>
+        <p>The pattern is <code>[A-G] ( &#39;s&#39; | &#39;b&#39; )? ( &#39;u&#39; | &#39;d&#39; [0-9]+ )? ( [a-z0-9]+ )?</code>
 with named capturing groups to pull the data from the matcher.</p>
 
         
           <div class='highlight'><pre>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Pattern CHORD_NAME_PATTERN = Pattern.compile(
-            <span class="hljs-string">"^(?&lt;note&gt;[A-G])((?&lt;sharp&gt;#)|(?&lt;flat&gt;\\$))?(?&lt;octaveShift&gt;(\\+|\\-)[0-9]+)?(?&lt;name&gt;[a-z0-9]+)?$"</span>
+            <span class="hljs-string">"^(?&lt;note&gt;[A-G])((?&lt;sharp&gt;s)|(?&lt;flat&gt;b))?(?&lt;octaveShift&gt;((?&lt;shiftUp&gt;u)|(?&lt;shiftDown&gt;d))(?&lt;shiftAmt&gt;[0-9]+))?(?&lt;name&gt;[a-z0-9]+)?$"</span>
     );</pre></div>
         
       
@@ -345,10 +432,10 @@ for them to have any use.</p>
 
         
           <div class='highlight'><pre>    <span class="hljs-meta">@Override</span>
-    <span class="hljs-function"><span class="hljs-keyword">public</span> Chord <span class="hljs-title">inOctave</span><span class="hljs-params">(<span class="hljs-keyword">int</span> octave)</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Chord <span class="hljs-title">shiftOctave</span><span class="hljs-params">(<span class="hljs-keyword">int</span> octaveShift)</span> </span>{
         Pitch[] pitches = <span class="hljs-keyword">new</span> Pitch[<span class="hljs-keyword">this</span>.pitches.length];
         <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-keyword">this</span>.pitches.length; i++) {
-            pitches[i] = <span class="hljs-keyword">this</span>.pitches[i].inOctave(octave);
+            pitches[i] = <span class="hljs-keyword">this</span>.pitches[i].shiftOctave(octaveShift);
         }
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Chord(pitches);
     }</pre></div>
@@ -421,8 +508,13 @@ immediately returning null to specify that the identifier cannot be resolved.</p
             pitch = pitch.sharp();
         <span class="hljs-keyword">if</span> (m.group(<span class="hljs-string">"flat"</span>) != <span class="hljs-keyword">null</span>)
             pitch = pitch.flat();
-        <span class="hljs-keyword">if</span> (m.group(<span class="hljs-string">"octaveShift"</span>) != <span class="hljs-keyword">null</span>)
-            pitch = pitch.shiftOctave(Integer.parseInt(m.group(<span class="hljs-string">"octaveShift"</span>)));</pre></div>
+        <span class="hljs-keyword">if</span> (m.group(<span class="hljs-string">"octaveShift"</span>) != <span class="hljs-keyword">null</span>) {
+            <span class="hljs-keyword">if</span> (m.group(<span class="hljs-string">"shiftUp"</span>) != <span class="hljs-keyword">null</span>) {
+                pitch = pitch.shiftOctaveUp(Integer.parseInt(m.group(<span class="hljs-string">"shiftAmt"</span>)));
+            } <span class="hljs-keyword">else</span> {
+                pitch = pitch.shiftOctaveDown(Integer.parseInt(m.group(<span class="hljs-string">"shiftAmt"</span>)));
+            }
+        }</pre></div>
         
       
         

@@ -214,6 +214,12 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\java\cas\cs4tb3\mellowd\CompilerTest.html">
+                                    CompilerTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\test\java\cas\cs4tb3\mellowd\ParserTest.html">
                                     ParserTest.java
                                 </a>
@@ -222,6 +228,87 @@
                             <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\test\java\cas\cs4tb3\mellowd\TestErrorListener.html">
                                     TestErrorListener.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\compilertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\compilertest\articulation.html">
+                                    articulation.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\compilertest\percussion.html">
+                                    percussion.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\compilertest\strangeChords.html">
+                                    strangeChords.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\compilertest\strangeMelodies.html">
+                                    strangeMelodies.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\compilertest\strangeRhythms.html">
+                                    strangeRhythms.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\compilertest\varDeclarations.html">
+                                    varDeclarations.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\parsertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\parsertest\chordNames.html">
+                                    chordNames.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\parsertest\simpleBlock.html">
+                                    simpleBlock.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\parsertest\varDeclaration.html">
+                                    varDeclaration.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\testdata</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\testdata\CompilerTestData.html">
+                                    CompilerTestData.json
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\test\resources\testdata\ParserTestData.html">
+                                    ParserTestData.json
                                 </a>
                             </li>
                         
@@ -255,7 +342,7 @@ beat should be held for.</p>
       
         
         <p>All beats must start out as one of the following durations which can then
-later on be manipulated via dots to extend the duration or wrapping inside a tuple.</p>
+later on be manipulated via dots to extend the duration or wrapping inside a tuplet.</p>
 
         
           <div class='highlight'><pre>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Beat WHOLE          = <span class="hljs-keyword">new</span> Beat(<span class="hljs-number">4</span>d);
@@ -296,11 +383,18 @@ of</p>
         
       
         
+        <p>A tuplet is a sequence of equivalent notes played in the time it takes
+to play fewer of those notes. A 5:3 quarter note tuplet plays 5 quarter
+notes in the time it takes to play 3. A common tuplet is a triplet.</p>
+
+        
+      
+        
         <p>A triplet squeezes 3 of the wrapped beat into the same time frame
 that 2 of that beat would fit. For example an eighth note triplet
 will result in the performance of 3 eighth notes in 2 eight notes,
 equivalent of a quarter note. This is the same as scaling down the
-<code>numQuarters</code> by <sup>2</sup>&frasl;<sub>3</sub>.</p>
+<code>numQuarters</code> by <sup>2</sup>&frasl;<sub>3</sub> or <sup>div</sup>&fracsl;<sub>num</num></p>
 
         
       
@@ -319,8 +413,16 @@ equivalent of a quarter note. This is the same as scaling down the
 </pre>
 
         
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> Beat <span class="hljs-title">triplet</span><span class="hljs-params">()</span> </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Beat(numQuarters * <span class="hljs-number">2</span>/<span class="hljs-number">3</span>);
+          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> Beat <span class="hljs-title">tuplet</span><span class="hljs-params">(<span class="hljs-keyword">int</span> num)</span> </span>{
+        <span class="hljs-keyword">if</span> (num &lt;= <span class="hljs-number">1</span>)
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"Cannot create a tuplet of "</span>+num);
+        <span class="hljs-keyword">return</span> tuplet(num, num - <span class="hljs-number">1</span>);
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Beat <span class="hljs-title">tuplet</span><span class="hljs-params">(<span class="hljs-keyword">int</span> num, <span class="hljs-keyword">int</span> div)</span> </span>{
+        <span class="hljs-keyword">if</span> (num &lt;= <span class="hljs-number">0</span> || div &lt;= <span class="hljs-number">0</span>)
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"Cannot create a tuplet of "</span>+num+<span class="hljs-string">":"</span>+div);
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Beat(numQuarters * (div / (<span class="hljs-keyword">double</span>) num));
     }
 
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">double</span> <span class="hljs-title">getNumQuarters</span><span class="hljs-params">()</span> </span>{

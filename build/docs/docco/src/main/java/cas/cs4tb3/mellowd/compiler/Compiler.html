@@ -214,6 +214,12 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\CompilerTest.html">
+                                    CompilerTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\ParserTest.html">
                                     ParserTest.java
                                 </a>
@@ -222,6 +228,87 @@
                             <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\TestErrorListener.html">
                                     TestErrorListener.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\compilertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\articulation.html">
+                                    articulation.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\percussion.html">
+                                    percussion.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeChords.html">
+                                    strangeChords.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeMelodies.html">
+                                    strangeMelodies.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeRhythms.html">
+                                    strangeRhythms.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\varDeclarations.html">
+                                    varDeclarations.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\parsertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\chordNames.html">
+                                    chordNames.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\simpleBlock.html">
+                                    simpleBlock.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\varDeclaration.html">
+                                    varDeclaration.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\testdata</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\testdata\CompilerTestData.html">
+                                    CompilerTestData.json
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\testdata\ParserTestData.html">
+                                    ParserTestData.json
                                 </a>
                             </li>
                         
@@ -240,11 +327,11 @@
 <span class="hljs-keyword">package</span> cas.cs4tb3.mellowd.compiler;
 
 <span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.TimingEnvironment;
-<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.parser.TrackManager;
 <span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
 <span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.parser.MellowDLexer;
 <span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.parser.MellowDParser;
 <span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.parser.ParseException;
+<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.parser.TrackManager;
 <span class="hljs-keyword">import</span> net.sourceforge.argparse4j.ArgumentParsers;
 <span class="hljs-keyword">import</span> net.sourceforge.argparse4j.impl.Arguments;
 <span class="hljs-keyword">import</span> net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -253,10 +340,7 @@
 <span class="hljs-keyword">import</span> org.antlr.v4.runtime.*;
 <span class="hljs-keyword">import</span> org.antlr.v4.runtime.misc.ParseCancellationException;
 
-<span class="hljs-keyword">import</span> javax.sound.midi.InvalidMidiDataException;
-<span class="hljs-keyword">import</span> javax.sound.midi.MidiSystem;
-<span class="hljs-keyword">import</span> javax.sound.midi.MidiUnavailableException;
-<span class="hljs-keyword">import</span> javax.sound.midi.Sequence;
+<span class="hljs-keyword">import</span> javax.sound.midi.*;
 <span class="hljs-keyword">import</span> java.io.File;
 <span class="hljs-keyword">import</span> java.io.FileOutputStream;
 <span class="hljs-keyword">import</span> java.io.IOException;
@@ -272,8 +356,29 @@
         <p>The <code>Compiler</code> class is the main entry point for the program.</p>
 
         
-          <div class='highlight'><pre><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Compiler</span> </span>{
+          <div class='highlight'><pre><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Compiler</span> </span>{</pre></div>
+        
+      
+        
+        <p>Empty sequences will have this event appended to create a playable empty sequence.</p>
 
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ImmutableEndOfTrack</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">MetaMessage</span> </span>{
+        <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">byte</span> EOT_EVENT_CODE = <span class="hljs-number">0x2F</span>;
+
+        <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title">ImmutableEndOfTrack</span><span class="hljs-params">()</span> </span>{
+            <span class="hljs-keyword">super</span>(<span class="hljs-keyword">new</span> <span class="hljs-keyword">byte</span>[<span class="hljs-number">3</span>]);
+            data[<span class="hljs-number">0</span>] = (<span class="hljs-keyword">byte</span>) META;
+            data[<span class="hljs-number">1</span>] = EOT_EVENT_CODE;
+            data[<span class="hljs-number">2</span>] = <span class="hljs-number">0</span>;
+        }
+
+        <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setMessage</span><span class="hljs-params">(<span class="hljs-keyword">int</span> type, <span class="hljs-keyword">byte</span>[] data, <span class="hljs-keyword">int</span> length)</span> <span class="hljs-keyword">throws</span> InvalidMidiDataException </span>{
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> InvalidMidiDataException(<span class="hljs-string">"cannot modify end of track message"</span>);
+        }
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> MidiMessage EOT_MESSAGE = <span class="hljs-keyword">new</span> ImmutableEndOfTrack();
     <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String FILE_EXTENSION = <span class="hljs-string">".mlod"</span>;
 
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>{</pre></div>
@@ -412,7 +517,8 @@ out of the parser.</p>
           <div class='highlight'><pre>            compilationResult = compile(toCompile,
                     tempo.get(<span class="hljs-number">0</span>).byteValue(),
                     tempo.get(<span class="hljs-number">1</span>).byteValue(),
-                    arguments.getInt(<span class="hljs-string">"tempo"</span>));</pre></div>
+                    arguments.getInt(<span class="hljs-string">"tempo"</span>),
+                    <span class="hljs-keyword">true</span>);</pre></div>
         
       
         
@@ -536,13 +642,12 @@ with the <code>.mid</code> file extension instead.</p>
         
       
         
-        <p>If the compilation result is empty then stop the write as the Midi File Writer
-cannot write an empty sequence to the file.</p>
+        <p>If the compilation result is empty then add the EOT event to
+make the output file playable.</p>
 
         
           <div class='highlight'><pre>                    <span class="hljs-keyword">if</span> (compilationResult.getTickLength() == <span class="hljs-number">0</span>) {
-                        System.out.println(<span class="hljs-string">"Cannot write empty MIDI sequence to file."</span>);
-                        System.exit(<span class="hljs-number">1</span>);
+                        compilationResult.getTracks()[<span class="hljs-number">0</span>].add(<span class="hljs-keyword">new</span> MidiEvent(EOT_MESSAGE, <span class="hljs-number">1</span>));
                     }</pre></div>
         
       
@@ -708,7 +813,7 @@ and tell them we can’t use it.</p>
         <p><code>compile</code> is the method that actually runs the compiler.</p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> Sequence <span class="hljs-title">compile</span><span class="hljs-params">(File src, <span class="hljs-keyword">byte</span> numerator, <span class="hljs-keyword">byte</span> denominator, <span class="hljs-keyword">int</span> tempo)</span> <span class="hljs-keyword">throws</span> IOException </span>{</pre></div>
+          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> Sequence <span class="hljs-title">compile</span><span class="hljs-params">(File src, <span class="hljs-keyword">byte</span> numerator, <span class="hljs-keyword">byte</span> denominator, <span class="hljs-keyword">int</span> tempo, <span class="hljs-keyword">boolean</span> verbose)</span> <span class="hljs-keyword">throws</span> IOException </span>{</pre></div>
         
       
         
@@ -716,9 +821,11 @@ and tell them we can’t use it.</p>
 is as expected.</p>
 
         
-          <div class='highlight'><pre>        System.out.printf(<span class="hljs-string">"Time Signature: %d / %d\n"</span>, numerator, denominator);
-        System.out.printf(<span class="hljs-string">"Tempo: %d bpm\n"</span>, tempo);
-        System.out.printf(<span class="hljs-string">"Compiling file: %s\n"</span>, src.getPath());</pre></div>
+          <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (verbose) {
+            System.out.printf(<span class="hljs-string">"Time Signature: %d / %d\n"</span>, numerator, denominator);
+            System.out.printf(<span class="hljs-string">"Tempo: %d bpm\n"</span>, tempo);
+            System.out.printf(<span class="hljs-string">"Compiling file: %s\n"</span>, src.getPath());
+        }</pre></div>
         
       
         
@@ -755,7 +862,7 @@ error occurs the parser may be able to recover but the compilation most likely w
         
       
         
-        <p>Return the sequence generated while parseing.</p>
+        <p>Return the sequence generated while parsing.</p>
 
         
           <div class='highlight'><pre>        <span class="hljs-keyword">return</span> parser.getSequence();

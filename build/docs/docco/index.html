@@ -214,6 +214,12 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="src\test\java\cas\cs4tb3\mellowd\CompilerTest.html">
+                                    CompilerTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="src\test\java\cas\cs4tb3\mellowd\ParserTest.html">
                                     ParserTest.java
                                 </a>
@@ -227,6 +233,87 @@
                         
                         </div>
                     
+                    <div class="toc">
+                        <h3>src\test\resources\compilertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="src\test\resources\compilertest\articulation.html">
+                                    articulation.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="src\test\resources\compilertest\percussion.html">
+                                    percussion.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="src\test\resources\compilertest\strangeChords.html">
+                                    strangeChords.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="src\test\resources\compilertest\strangeMelodies.html">
+                                    strangeMelodies.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="src\test\resources\compilertest\strangeRhythms.html">
+                                    strangeRhythms.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="src\test\resources\compilertest\varDeclarations.html">
+                                    varDeclarations.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\parsertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="src\test\resources\parsertest\chordNames.html">
+                                    chordNames.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="src\test\resources\parsertest\simpleBlock.html">
+                                    simpleBlock.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="src\test\resources\parsertest\varDeclaration.html">
+                                    varDeclaration.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\testdata</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="src\test\resources\testdata\CompilerTestData.html">
+                                    CompilerTestData.json
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="src\test\resources\testdata\ParserTestData.html">
+                                    ParserTestData.json
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
           </div>
         
             
@@ -234,10 +321,83 @@
             
           
           <h1 id="mellow-d">Mellow D</h1>
+<p id="img_cont">
+<a href="tests/index.html" target="blank">
+<img src="public/images/clipboard-gears-check.png"/>
+Tests
+</a>
+<!--<a href="languagespec" target="blank">
+<img src="public/images/book.png" />
+Language Specification
+</a>-->
+<a></a>
+<a></a>
+<a></a>
+<a></a>
+</p>
+
+<h2 id="usage">Usage</h2>
+<p>To build the compiler from the source you can use the gradle wrapper to execute the <code>build</code> task. In
+the top directory of the project locate the file name <code>gradlew</code> or <code>gradlew.bat</code>. If on a *nix system
+in terminal/console execute <code>./gradlew build</code> or use <code>gradlew build</code> from the windows command
+prompt. You can find the build results inside <code>build/libs</code>.</p>
+<p>Now that you have a jar place it somewhere it will be comfortable and create a command to launch the
+jar. On windows go to a directory that is inside your PATH and execute</p>
+<pre><code class="lang-bat"><span class="hljs-built_in">echo</span> java -jar "<span class="hljs-built_in">path</span>\to\the\MellowD-<span class="hljs-number">1</span>.<span class="hljs-number">0</span>-SNAPSHOT.jar" %* &gt; mellowd.bat
+</code></pre>
+<p>Similarity on a *nix system you can create an alias with the command</p>
+<pre><code class="lang-bash"><span class="hljs-built_in">alias</span> mellowd=<span class="hljs-string">'java -jar "path/to/the/MellowD-1.0-SNAPSHOT.jar"'</span>
+</code></pre>
+<p>Now you should be able to execute the <code>mellowd</code> command from you terminal. Run <code>mellowd -h</code>
+for some help with the command line arguments.</p>
 <h2 id="tests">Tests</h2>
-<p><a href="tests/index.html">
-<img src="public/images/clipboard-gears-check.png" height="10%" width="10%"/>
-</a></p>
+<p>The <a href="src/test/java/cas/cs4tb3/mellowd/CompilerTest.html">Compiler Test</a> is the main
+test runner for the compiler. It takes input files from the <code>src/test/resources/compilertest</code>
+folder and compiles them putting the result inside <code>build/resources/test/compilertest/compTestOut</code>
+folder. Due to the compiler output being a sound it is unrealistic to test it automatically. The
+output files should be listened to manually for verification. Each of the compiler tests are considered
+passing if there are no exception thrown during parsing.</p>
+<p>The <a href="src/test/java/cas/cs4tb3/mellowd/ParserTest.html">Parser Test</a> does note create
+any output files. Some details about the parse result are printed to standard out for manual
+verification but as there is no intermediate representation a parser tests is considered successful
+if the parser accepts the input with no exceptions.</p>
+<h2 id="tools">Tools</h2>
+<p>The parser was generated with antlr <a href="#ref:4">[4]</a>. The <a href="src/main/antlr/MellowDLexer.html">lexer</a>
+and <a href="src/main/antlr/MellowDParser.html">parser</a> can be found in the <code>src/main/antlr</code> source folder. These
+grammar files instruct antlr on how to generate a parser that accepts the Mellow D language.</p>
+<p>MIDI is the a music protocol that is received by a MIDI synthesizer which can then produce
+the sound described in the messages. It is very similar to a networking protocol used in server
+communications today. There are a set of accepted messages (or packets in the networking analogy)
+that the MIDI synthesizer recognises. As with server protocols, the MIDI protocol has changed overtime
+and synthesizers accept various instrument and soundbank mappings. A standard protocol level named GM1 
+(General MIDI 1) <a href="#ref:1">[1]</a> was defined. The Mellow D compiler creates GM1 compatible sound files
+to improve the consistency of the playback across various synthesizers (which in most cases in a computer).</p>
+<p>A GM1 synthesizer must have 16 channels available with channel 10 designated for percussion. A quote from
+the GM1 sound set documentation <a href="#ref:1">[1]</a> describes how strictly GM1 devices must bind to the sound set:</p>
+<blockquote>
+<div>
+General MIDI’s most recognized feature is the defined list of sounds (or “patches”). However, General MIDI does not actually define the way the sound will be reproduced, only the name of that sound.&nbsp;Though this can obviously result in wide variations in performance from the same song data on different GM sound sources, the authors of General MIDI felt it important to allow each manufacturer to have their own ideas and express their personal aesthetics when it comes to picking the exact timbres for each sound.<br /><br />Each manufacturer must insure that their sounds provide an acceptable representation of song data written for General MIDI. Guidelines for developing GM compatible sound sets and song data are available.<br />
+<ul>
+<li>The names of the instruments indicate what sort of sound will be heard when that instrument number (MIDI Program Change or “PC#”) is selected on the GM1 synthesizer.<br /><br /></li>
+<li>These sounds are the same for all MIDI Channels except Channel 10, which has only “percussion” sounds.</li>
+</ul>
+</div>
+
+</blockquote>
+<p>In Mellow D these numbers are all mapped from nice names. The percussion names can be found in
+<a href="src\main\java\cas\cs4tb3\mellowd\midi\GeneralMidiPercussion.html">GeneralMidiPercussion</a> and the instrument
+names in <a href="src\main\java\cas\cs4tb3\mellowd\midi\GeneralMidiInstrument.html">GeneralMidiInstrument</a>.</p>
+<h2 id="references">References</h2>
+<p>The following online resources were frequently consulted during the development of
+Mellow D:</p>
+<p><a name="ref:1"></a>[1] “GM 1 Sound Set”, Midi.org, 2016. [Online]. 
+Available: <a href="https://www.midi.org/specifications/item/gm-level-1-sound-set">https://www.midi.org/specifications/item/gm-level-1-sound-set</a>. [Accessed: 01- Apr- 2016].</p>
+<p><a name="ref:2"></a>[2]”Summary of MIDI Messages”, Midi.org, 2016. [Online]. 
+Available: <a href="https://www.midi.org/specifications/item/table-1-summary-of-midi-message">https://www.midi.org/specifications/item/table-1-summary-of-midi-message</a>. [Accessed: 01- Apr- 2016].</p>
+<p><a name="ref:3"></a>[3]”Control Change Messages (Data Bytes)”, Midi.org, 2016. [Online].
+Available: <a href="https://www.midi.org/specifications/item/table-3-control-change-messages-data-bytes-2">https://www.midi.org/specifications/item/table-3-control-change-messages-data-bytes-2</a>. [Accessed: 01- Apr- 2016].</p>
+<p><a name="ref:4"></a>[4]T.  Parr, “ANTLR 4 Documentation”, GitHub, 2015. [Online]. 
+Available: <a href="https://github.com/antlr/antlr4/blob/master/doc/index.md">https://github.com/antlr/antlr4/blob/master/doc/index.md</a>. [Accessed: 01- Apr- 2016].</p>
 
           
         

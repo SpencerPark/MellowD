@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>TestErrorListener.java</title>
+  <title>Compiler Test</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
   <link rel="stylesheet" media="all" href="..\..\..\..\..\..\docco.css" />
@@ -319,44 +319,178 @@
             
             <!-- Moved TOC above header -->
             
-          <h1>TestErrorListener.java</h1>
+          
+          <h1 id="compiler-test">Compiler Test</h1>
+
+          
+            <div class='highlight'><pre>
+<span class="hljs-keyword">package</span> cas.cs4tb3.mellowd;
+
+<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.compiler.Compiler;
+<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.parser.ParseException;
+<span class="hljs-keyword">import</span> com.google.gson.Gson;
+<span class="hljs-keyword">import</span> com.google.gson.GsonBuilder;
+<span class="hljs-keyword">import</span> org.antlr.v4.runtime.RecognitionException;
+<span class="hljs-keyword">import</span> org.antlr.v4.runtime.misc.ParseCancellationException;
+<span class="hljs-keyword">import</span> org.junit.Test;
+<span class="hljs-keyword">import</span> org.junit.runner.RunWith;
+<span class="hljs-keyword">import</span> org.junit.runners.Parameterized;
+
+<span class="hljs-keyword">import</span> javax.sound.midi.MidiEvent;
+<span class="hljs-keyword">import</span> javax.sound.midi.MidiSystem;
+<span class="hljs-keyword">import</span> javax.sound.midi.Sequence;
+<span class="hljs-keyword">import</span> java.io.*;
+<span class="hljs-keyword">import</span> java.net.URISyntaxException;
+<span class="hljs-keyword">import</span> java.util.ArrayList;
+<span class="hljs-keyword">import</span> java.util.Collection;
+<span class="hljs-keyword">import</span> java.util.List;
+<span class="hljs-keyword">import</span> java.util.concurrent.atomic.AtomicInteger;
+
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">static</span> org.junit.Assert.fail;
+
+<span class="hljs-meta">@RunWith</span>(Parameterized.class)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CompilerTest</span> </span>{</pre></div>
+          
         
       </div>
 
       
         
+        <p>A class used to teach Gson how to parse the input data. Gson used a reflection
+based deserialization strategy to translate from JSON a json description to
+a java object. Each field is the name of the JSON object parameter.</p>
+
         
+          <div class='highlight'><pre>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CompilerTestData</span> </span>{
+        <span class="hljs-keyword">public</span> String compFileName;
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">byte</span> timeNumerator;
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">byte</span> timeDenominator;
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> tempo;
+    }
+
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> File OUTDIR = <span class="hljs-keyword">new</span> File(<span class="hljs-string">"compTestOut"</span>);
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> AtomicInteger TEST_NUM = <span class="hljs-keyword">new</span> AtomicInteger(<span class="hljs-number">0</span>);</pre></div>
         
-          <div class='highlight'><pre><span class="hljs-keyword">package</span> cas.cs4tb3.mellowd;
+      
+        
+        <h2 id="test-data-loader">Test Data Loader</h2>
+<p>Read the test data input configuration and build a test instance for each
+case described in the file. Each <code>Object[]</code> is a set of constructor arguments
+that will be used to create a new <code>CompilerTest</code> instance who’s <a href="#test-case">compileTest()</a>
+will be invoked.</p>
 
-<span class="hljs-keyword">import</span> org.antlr.v4.runtime.BaseErrorListener;
-<span class="hljs-keyword">import</span> org.antlr.v4.runtime.RecognitionException;
-<span class="hljs-keyword">import</span> org.antlr.v4.runtime.Recognizer;
+        
+          <div class='highlight'><pre>    <span class="hljs-meta">@Parameterized</span>.Parameters(name = <span class="hljs-string">"{index}: {0}"</span>)
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> Collection&lt;Object[]&gt; loadTests() <span class="hljs-keyword">throws</span> IOException {
+        BufferedReader reader = <span class="hljs-keyword">new</span> BufferedReader(<span class="hljs-keyword">new</span> InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(<span class="hljs-string">"testdata/CompilerTestData.json"</span>)));
+        Gson gson = <span class="hljs-keyword">new</span> GsonBuilder().create();
+        CompilerTestData[] data = gson.fromJson(reader, CompilerTestData[].class);
+        reader.close();
+        List&lt;Object[]&gt; constructorArgs = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;(data.length);
+        <span class="hljs-keyword">for</span> (CompilerTestData testData : data) {
+            constructorArgs.add(<span class="hljs-keyword">new</span> Object[]{
+                    testData.compFileName,
+                    testData.timeNumerator,
+                    testData.timeDenominator,
+                    testData.tempo
+            });
+        }
+        <span class="hljs-keyword">return</span> constructorArgs;
+    }</pre></div>
+        
+      
+        
+        <p>Each test will have a file to compile and the time signature and tempo to compile it
+with. The <code>outFile</code> will be a file of the same name inside the <code>compTestOut</code> directory.</p>
 
-<span class="hljs-keyword">import</span> java.util.ArrayList;
-<span class="hljs-keyword">import</span> java.util.List;
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">private</span> File outFile;
+    <span class="hljs-keyword">private</span> File toCompile;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">byte</span> timeNumerator;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">byte</span> timeDenominator;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> tempo;
 
-<span class="hljs-comment">/**
- * Created on 2016-03-07.
- */</span>
-<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestErrorListener</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseErrorListener</span> </span>{
-    <span class="hljs-keyword">private</span> List&lt;String&gt; errors;
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">CompilerTest</span><span class="hljs-params">(String toCompName, <span class="hljs-keyword">byte</span> timeNumerator, <span class="hljs-keyword">byte</span> timeDenominator, <span class="hljs-keyword">int</span> tempo)</span> <span class="hljs-keyword">throws</span> URISyntaxException </span>{
+        <span class="hljs-keyword">this</span>.timeNumerator = timeNumerator;
+        <span class="hljs-keyword">this</span>.timeDenominator = timeDenominator;
+        <span class="hljs-keyword">this</span>.tempo = tempo;
+        String toCompPath = Thread.currentThread().getContextClassLoader().getResource(<span class="hljs-string">"compilertest"</span> + File.separator + toCompName).toURI().getPath();
+        <span class="hljs-keyword">this</span>.toCompile = <span class="hljs-keyword">new</span> File(toCompPath);
+        <span class="hljs-keyword">this</span>.outFile = <span class="hljs-keyword">new</span> File(toCompile.getParentFile(), OUTDIR + File.separator + toCompile.getName().replace(Compiler.FILE_EXTENSION, <span class="hljs-string">".mid"</span>));
+        <span class="hljs-keyword">if</span> (!outFile.getParentFile().exists())
+            outFile.getParentFile().mkdirs();
+    }</pre></div>
+        
+      
+        
+        <h2 id="test-case">Test Case</h2>
 
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">TestErrorListener</span><span class="hljs-params">()</span> </span>{
-        <span class="hljs-keyword">this</span>.errors = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();
+        
+          <div class='highlight'><pre>    <span class="hljs-meta">@Test</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">compileTest</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">try</span> {</pre></div>
+        
+      
+        
+        <p>Print out some information about the test. This includes a marker ID which is simply
+a number that uniquely identifies a test from this set. It also displays some test
+parameters.</p>
+
+        
+          <div class='highlight'><pre>            System.out.printf(<span class="hljs-string">"Compiler Test %d: InFile=%s  OutFile=%s  Tempo=%d TimSig=%d/%d\n"</span>,
+                    TEST_NUM.getAndIncrement(), <span class="hljs-keyword">this</span>.toCompile.getName(), <span class="hljs-keyword">this</span>.outFile.getName(),
+                    <span class="hljs-keyword">this</span>.tempo, <span class="hljs-keyword">this</span>.timeNumerator, <span class="hljs-keyword">this</span>.timeDenominator);
+            System.out.print(<span class="hljs-string">"-----------------------------------------------------------------------------------\n"</span>);
+            Sequence compilationResult = Compiler.compile(toCompile, timeNumerator, timeDenominator, tempo, <span class="hljs-keyword">false</span>);
+            writeOut(compilationResult);
+            System.out.println();
+        } <span class="hljs-keyword">catch</span> (IOException e) {
+            e.printStackTrace();
+            fail(<span class="hljs-string">"IOException encountered while compiling. "</span>+e.getLocalizedMessage());
+        } <span class="hljs-keyword">catch</span> (ParseCancellationException e) {
+            RecognitionException ex = (RecognitionException) e.getCause();
+            fail(String.format(<span class="hljs-string">"Parse exception in rule %s. Offending token: line %d@%d:'%s'. Expected: %s\n"</span>,
+                    ex.getCtx().toString(ex.getRecognizer()),
+                    ex.getOffendingToken().getLine(),
+                    ex.getOffendingToken().getCharPositionInLine(),
+                    ex.getOffendingToken().getText(),
+                    ex.getExpectedTokens().toString(ex.getRecognizer().getVocabulary())));
+        } <span class="hljs-keyword">catch</span> (ParseException e) {
+            fail(String.format(<span class="hljs-string">"Compilation exception. %s"</span>, e.getMessage()));
+        }
     }
 
-    <span class="hljs-meta">@Override</span>
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">syntaxError</span><span class="hljs-params">(Recognizer&lt;?, ?&gt; recognizer, Object offendingSymbol, <span class="hljs-keyword">int</span> line, <span class="hljs-keyword">int</span> charPositionInLine, String msg, RecognitionException e)</span> </span>{
-        <span class="hljs-keyword">this</span>.errors.add(<span class="hljs-string">"line "</span> + line + <span class="hljs-string">":"</span> + charPositionInLine + <span class="hljs-string">" "</span> + msg);
-    }
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">writeOut</span><span class="hljs-params">(Sequence compilationResult)</span> <span class="hljs-keyword">throws</span> IOException </span>{</pre></div>
+        
+      
+        
+        <p>Create the output file if it doesn’t exist.</p>
 
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">encounteredError</span><span class="hljs-params">()</span> </span>{
-        <span class="hljs-keyword">return</span> !<span class="hljs-keyword">this</span>.errors.isEmpty();
-    }
+        
+          <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (!outFile.exists()) {
+            outFile.getParentFile().mkdirs();
+            outFile.createNewFile();
+        }</pre></div>
+        
+      
+        
+        <p>If the compilation result is empty then add the EOT_MESSAGE to make the track playable</p>
 
-    <span class="hljs-function"><span class="hljs-keyword">public</span> List&lt;String&gt; <span class="hljs-title">getErrors</span><span class="hljs-params">()</span> </span>{
-        <span class="hljs-keyword">return</span> errors;
+        
+          <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (compilationResult.getTickLength() == <span class="hljs-number">0</span>) {
+            compilationResult.getTracks()[<span class="hljs-number">0</span>].add(<span class="hljs-keyword">new</span> MidiEvent(Compiler.EOT_MESSAGE, <span class="hljs-number">1</span>));
+        }</pre></div>
+        
+      
+        
+        <p>Write the result to the out file. The type 1 midi format is the standard
+type for multi track sequences which we have in our case.</p>
+
+        
+          <div class='highlight'><pre>        OutputStream outStream = <span class="hljs-keyword">new</span> FileOutputStream(outFile);
+        MidiSystem.write(compilationResult, <span class="hljs-number">1</span>, outStream);
+        outStream.close();
+        System.out.println(<span class="hljs-string">"Compilation successful."</span>);
     }
 }</pre></div>
         

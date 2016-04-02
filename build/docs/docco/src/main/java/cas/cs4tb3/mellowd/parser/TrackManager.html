@@ -214,6 +214,12 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\CompilerTest.html">
+                                    CompilerTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\ParserTest.html">
                                     ParserTest.java
                                 </a>
@@ -222,6 +228,87 @@
                             <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\TestErrorListener.html">
                                     TestErrorListener.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\compilertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\articulation.html">
+                                    articulation.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\percussion.html">
+                                    percussion.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeChords.html">
+                                    strangeChords.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeMelodies.html">
+                                    strangeMelodies.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeRhythms.html">
+                                    strangeRhythms.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\varDeclarations.html">
+                                    varDeclarations.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\parsertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\chordNames.html">
+                                    chordNames.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\simpleBlock.html">
+                                    simpleBlock.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\varDeclaration.html">
+                                    varDeclaration.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc">
+                        <h3>src\test\resources\testdata</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\testdata\CompilerTestData.html">
+                                    CompilerTestData.json
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\testdata\ParserTestData.html">
+                                    ParserTestData.json
                                 </a>
                             </li>
                         
@@ -242,8 +329,8 @@
         
           <div class='highlight'><pre><span class="hljs-keyword">package</span> cas.cs4tb3.mellowd.parser;
 
-<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.TimingEnvironment;
 <span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.Dynamic;
+<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.TimingEnvironment;
 <span class="hljs-keyword">import</span> org.antlr.v4.runtime.Token;
 
 <span class="hljs-keyword">import</span> javax.sound.midi.InvalidMidiDataException;
@@ -348,6 +435,12 @@ that help make decisions on which channel a channel specific event should happen
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.blocks.get(blockName);
     }
 
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">finish</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">for</span> (Block block : <span class="hljs-keyword">this</span>.blocks.values()) {
+            block.finish();
+        }
+    }
+
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">requestChannel</span><span class="hljs-params">(Block block)</span> </span>{
         List&lt;Channel&gt; empties = <span class="hljs-keyword">new</span> LinkedList&lt;&gt;();
         <span class="hljs-keyword">if</span> (block.getOptions().isPercussion()) {
@@ -429,7 +522,7 @@ least we may have an instrument mismatch. This is a problem we unfortunately can
 fix.</p>
 
         
-          <div class='highlight'><pre>                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Ran out of channels. Mellow D source is overloaded and cannot fit the channels."</span>);
+          <div class='highlight'><pre>                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Ran out of channels. Mellow D source is overloaded and cannot fit in the MIDI channels."</span>);
             } <span class="hljs-keyword">else</span> {</pre></div>
         
       
@@ -526,6 +619,10 @@ fix.</p>
     }
 
     <span class="hljs-function"><span class="hljs-keyword">public</span> Channel <span class="hljs-title">getChannel</span><span class="hljs-params">(Block block)</span> </span>{
+        Channel channel = <span class="hljs-keyword">this</span>.channelMap.get(block.getName());
+        <span class="hljs-keyword">if</span> (channel != <span class="hljs-keyword">null</span>)
+            <span class="hljs-keyword">return</span> channel;
+        <span class="hljs-keyword">this</span>.requestChannel(block);
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.channelMap.get(block.getName());
     }
 }</pre></div>
