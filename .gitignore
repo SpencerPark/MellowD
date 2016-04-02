@@ -1,0 +1,9 @@
+.gradle/
+.idea/
+build/
+
+#Ignore everything except the docs directory
+!build/docs/
+
+gen/
+site/
