@@ -73,6 +73,7 @@ task docco << {
                     args += toRelFile(file(srcFile))
         }
         args += toRelFile(file('index.md'))
+        args += toRelFile(file('langRef.md'))
     }
     copy {
         from 'site\\public'

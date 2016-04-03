@@ -47,5 +47,7 @@ public enum Articulation {
     //on the direction of bend). These changes will be equally spaced over the duration of the note
     //as to not interfere with the next note. Additionally a reset message will be queued for the
     //next note to take.
+    //A gliscando on a chord will be performed as a *roll*. A quick melody made up of each note in
+    //the chord in order.
     GLISCANDO
 }

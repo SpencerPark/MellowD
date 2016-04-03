@@ -54,14 +54,15 @@ options {
         return this.midiSequence;
     }
 
-    private int getOctaveShiftRequired(int target) {
-        return target - this.globalOptions.getOctave();
+    private int getOctaveShiftRequired(BlockOptions options) {
+        if (options.isPercussion()) return 0;
+        return options.getOctave() - this.globalOptions.getOctave();
     }
 
     //[Chords](../primitives/Chord.html) are resolved differently then a direct symbol table lookup.
     //There are a standard set of names for chords and we want to lookup these names as if they
     //exist in the symbol table without actually putting them in there.
-    private Chord lookupChord(Token identifier, int octave) {
+    private Chord lookupChord(Token identifier, BlockOptions options) {
         //Preforming a type check will throw an exception if the identifier is defined for something
         //other than a chord. This means if the identifier is defined as a chord or is undefined
         //the program will continue.
@@ -70,11 +71,11 @@ options {
         //The value in the table is pulled out of the table. If this value is not null then
         //a chord definition exists so we can simply put it in the correct octave and return it.
         Chord chord = this.symbolTable.getDeclarationValue(identifier.getText(), Chord.class);
-        if (chord != null) return chord.shiftOctave(this.getOctaveShiftRequired(octave));
+        if (chord != null) return chord.shiftOctave(this.getOctaveShiftRequired(options));
 
         //Otherwise the reference is not defined in the symbol table so try to resolve one of the
         //default chords based on the name.
-        chord = Chord.resolve(identifier.getText(), octave);
+        chord = Chord.resolve(identifier.getText(), options.getOctave());
 
         //If the chord is still null then it could not be resolved and we should therefor throw
         //an undefined reference exception.
@@ -83,29 +84,6 @@ options {
 
         //Otherwise the resolution was successful and the chord can be returned.
         return chord;
-    }
-
-    //[Melody](../primitives/Melody.html) concatenation may be spimply adding a single note to the end of
-    //the sequence or looking up a pointer to a melody and adding the entire melody to the root.
-    private void appendToMelody(Melody root, BlockOptions context, MidiNoteMessageSource notes, Token identifier, Articulation articulation) {
-        //Although the approach is not very clean, this method assumes that `notes == null` &rarr; `identifier != null`. This allows
-        //this method to control how to resolve the code to add.
-        if (notes == null) {
-            //The notes are null so try and lookup the data pointed to by the identifier. If the type
-            //of the pointer is a melody then get the data and append it to the root.
-            if (this.symbolTable.identifierTypeIs(identifier.getText(), Melody.class)) {
-                Melody mel = this.symbolTable.getDeclarationValue(identifier.getText(), Melody.class).shiftOctave(this.getOctaveShiftRequired(context.getOctave()));
-                root.add(mel);
-            //Otherwise attempt to resolve the identifier as a chord and add the chord as a single sound.
-            } else {
-                Chord chord = lookupChord(identifier, context.getOctave());
-                root.add(new ArticulatedSound(chord, articulation));
-            }
-        //If the notes are not null then we have the simple case of appending a single sound
-        //to the end of the root melody.
-        } else {
-            root.add(new ArticulatedSound(notes, articulation));
-        }
     }
 
     private GeneralMidiPercussion resolvePercussionID(Token identifier, Token indexNum) {
@@ -120,8 +98,8 @@ options {
         return drumSound;
     }
 
-    private MidiNoteMessageSource resolveChordID(Token identifier, Token indexNum, int octave) {
-        Chord chord = lookupChord(identifier, octave);
+    private MidiNoteMessageSource resolveChordID(Token identifier, Token indexNum, BlockOptions options) {
+        Chord chord = lookupChord(identifier, options);
         //If the indexNum is null there is no indexing and we can return the chord.
         if (indexNum == null) {
             return chord;
@@ -136,10 +114,10 @@ options {
         }
     }
 
-    private void resolveChordParamID(List<Pitch> pitches, Token identifier, Token indexNum, int octave, boolean percussion) {
+    private void resolveChordParamID(List<Pitch> pitches, Token identifier, Token indexNum, BlockOptions options) {
         //If inside a percussion block, first attempt to resolve the identifier as the
         //name of a percussion sound.
-        if (percussion) {
+        if (options.isPercussion()) {
             GeneralMidiPercussion drumSound = resolvePercussionID(identifier, indexNum);
             if (drumSound != null) {
                 pitches.add(drumSound.getAsPitch());
@@ -150,15 +128,15 @@ options {
         //If pitches is still null then it was not resolved to a percussion sound. Now whether
         //or not we are in a percussion block the next step is to try and resolve a chord from
         //the identifier.
-        MidiNoteMessageSource noteSource = resolveChordID(identifier, indexNum, octave);
+        MidiNoteMessageSource noteSource = resolveChordID(identifier, indexNum, options);
         if (noteSource instanceof Chord) pitches.addAll(((Chord) noteSource).getPitches());
         else                             pitches.add((Pitch) noteSource);
     }
 
-    private void resolveMelodyParamID(Melody root, Token identifier, Token indexNum, Articulation art, int octave, boolean percussion) {
+    private void resolveMelodyParamID(Melody root, Token identifier, Token indexNum, Articulation art, BlockOptions options) {
         //If inside a percussion block, first attempt to resolve the identifier as the
         //name of a percussion sound.
-        if (percussion) {
+        if (options.isPercussion()) {
             GeneralMidiPercussion drumSound = resolvePercussionID(identifier, indexNum);
             if (drumSound != null) {
                 root.add(new ArticulatedSound(drumSound.getAsPitch(), art));
@@ -170,13 +148,15 @@ options {
         //If the type of the pointer is a melody then get the data and append it to the root.
         if (this.symbolTable.identifierTypeIs(identifier.getText(), Melody.class)) {
             Melody mel = this.symbolTable.getDeclarationValue(identifier.getText(), Melody.class);
-            mel = mel.shiftOctave(this.getOctaveShiftRequired(octave));
+            mel = mel.shiftOctave(this.getOctaveShiftRequired(options));
             root.add(mel);
+            if (indexNum != null)
+                throw new IncorrectTypeException(identifier, "Cannot index a melody.");
             if (art != Articulation.NONE)
                 throw new IncorrectTypeException(identifier, "Cannot articulate a melody with "+art.name().toLowerCase());
         //Otherwise attempt to resolve the identifier as a chord and add the chord as a single sound.
         } else {
-            MidiNoteMessageSource noteSource = resolveChordID(identifier, indexNum, octave);
+            MidiNoteMessageSource noteSource = resolveChordID(identifier, indexNum, options);
             root.add(new ArticulatedSound(noteSource, art));
         }
     }
@@ -248,8 +228,7 @@ chordParam[BlockOptions options, List<Pitch> pitches]
     :   noteDef[$options]
             { $pitches.add($noteDef.pitch); }
     |   IDENTIFIER ( COLON NUMBER )?
-            { resolveChordParamID($pitches, $IDENTIFIER, $NUMBER, $options.getOctave(),
-                $options.isPercussion()); }
+            { resolveChordParamID($pitches, $IDENTIFIER, $NUMBER, $options); }
     ;
 
 
@@ -272,8 +251,7 @@ locals [Articulation art = Articulation.NONE]
     :   noteDef[$options] ( articulation {$art = $articulation.art;} )?
             { $mel.add(new ArticulatedSound($noteDef.pitch, $art)); }
     |   IDENTIFIER ( COLON NUMBER )? ( articulation {$art = $articulation.art;})?
-            { this.resolveMelodyParamID($mel, $IDENTIFIER, $NUMBER, $art, $options.getOctave(),
-                $options.isPercussion()); }
+            { this.resolveMelodyParamID($mel, $IDENTIFIER, $NUMBER, $art, $options); }
     |   chord[$options]
             { $mel.add($chord.sound); }
     |   STAR
@@ -377,7 +355,7 @@ locals [boolean wasPercussion]
                                                                     if (val != null)
                                                                         this.symbolTable.addDeclaration($id.text, val);
                                                                     else
-                                                                        this.symbolTable.addDeclaration($id.text, lookupChord($ref, this.globalOptions.getOctave()));
+                                                                        this.symbolTable.addDeclaration($id.text, lookupChord($ref, this.globalOptions));
                                                                 }
                                 | chord [this.globalOptions]    {this.symbolTable.addDeclaration($id.text, $chord.sound.getSound());}
                                 | melody[this.globalOptions]    {this.symbolTable.addDeclaration($id.text, $melody.mel);}
@@ -508,7 +486,7 @@ locals [Melody mel]
                             {
                                 //If the identifier points to a melody use it as the melody
                                 if (this.symbolTable.identifierTypeIs($IDENTIFIER.getText(), Melody.class)) {
-                                    $mel = this.symbolTable.getDeclarationValue($IDENTIFIER.getText(), Melody.class).shiftOctave(this.getOctaveShiftRequired($options.getOctave()));
+                                    $mel = this.symbolTable.getDeclarationValue($IDENTIFIER.getText(), Melody.class).shiftOctave(this.getOctaveShiftRequired($options));
                                     //A melody cannot be articulated so throw an exception if an articulation
                                     //was given.
                                     if ($articulation.ctx != null)
@@ -516,7 +494,7 @@ locals [Melody mel]
                                 //Otherwise attempt to resolve a chord. This resolution will throw an exception
                                 //if it can't be resolved.
                                 } else {
-                                    Chord chord = lookupChord($IDENTIFIER, $options.getOctave());
+                                    Chord chord = lookupChord($IDENTIFIER, $options);
                                     //Build a melody with a single element, the chord.
                                     List<ArticulatedSound> notes = Arrays.asList(new ArticulatedSound(chord, $articulation.ctx == null ? Articulation.NONE : $articulation.art));
                                     $mel = new Melody(notes);
@@ -531,7 +509,7 @@ locals [Melody mel]
         )
         |
         //The other option is to specify a variable name that points to a phrase
-        ( IDENTIFIER {$phr = this.symbolTable.getDeclarationValueOrThrow($IDENTIFIER, Phrase.class).shiftOctave(this.getOctaveShiftRequired($options.getOctave()));} )
+        ( IDENTIFIER {$phr = this.symbolTable.getDeclarationValueOrThrow($IDENTIFIER, Phrase.class).shiftOctave(this.getOctaveShiftRequired($options));} )
     ;
 
 //A block is a collection of phrases and dynamic declarations.

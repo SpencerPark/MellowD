@@ -125,10 +125,14 @@ public class TrackManager {
                 }
             }
             if (empties.isEmpty()) {
-                //We really can't just put 2 random regular blocks together because at the very
+                //If the block already has channel it will just stick with it
+                if (channelMap.containsKey(block.getName())) return;
+
+                //Otherwise we really can't just put 2 random regular blocks together because at the very
                 //least we may have an instrument mismatch. This is a problem we unfortunately cannot
                 //fix.
-                throw new IllegalStateException("Ran out of channels. Mellow D source is overloaded and cannot fit in the MIDI channels.");
+                throw new IllegalStateException("Ran out of channels. Mellow D source is overloaded and cannot fit in the MIDI channels." +
+                        " Try to use the \"sharechannel\" options to compact blocks on the same channel.");
             } else {
                 //Take the first empty channel.
                 switchChannels(empties.get(0), block);

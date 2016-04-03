@@ -1,3 +1,6 @@
+//Chord Resolution Test
+//=====================
+
 package cas.cs4tb3.mellowd;
 
 import cas.cs4tb3.mellowd.primitives.Chord;

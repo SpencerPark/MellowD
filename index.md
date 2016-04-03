@@ -6,10 +6,10 @@ Mellow D
         <img src="public/images/clipboard-gears-check.png"/>
         Tests
     </a>
-    <!--<a href="languagespec" target="blank">
+    <a href="langRef.html" target="blank">
         <img src="public/images/book.png" />
         Language Specification
-    </a>-->
+    </a>
     <a></a>
     <a></a>
     <a></a>

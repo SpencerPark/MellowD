@@ -1,3 +1,6 @@
+//Test Error Listener
+//===================
+
 package cas.cs4tb3.mellowd;
 
 import org.antlr.v4.runtime.BaseErrorListener;
@@ -7,9 +10,7 @@ import org.antlr.v4.runtime.Recognizer;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created on 2016-03-07.
- */
+//This error listener simply remembers the errors that occurred during parsing.
 public class TestErrorListener extends BaseErrorListener {
     private List<String> errors;
 
