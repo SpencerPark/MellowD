@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>TestErrorListener.java</title>
+  <title>Test Error Listener</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
   <link rel="stylesheet" media="all" href="..\..\..\..\..\..\docco.css" />
@@ -220,6 +220,12 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="ErrorResponseTest.html">
+                                    ErrorResponseTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="ParserTest.html">
                                     ParserTest.java
                                 </a>
@@ -275,6 +281,23 @@
                         </div>
                     
                     <div class="toc" onclick="">
+                        <h3>src\test\resources\errortest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\errortest\largeInput.html">
+                                    largeInput.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\resources\errortest\largeInputShared.html">
+                                    largeInputShared.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc" onclick="">
                         <h3>src\test\resources\parsertest</h3>
                         
                             <li class="tocelem">
@@ -319,27 +342,29 @@
             
             <!-- Moved TOC above header -->
             
-          <h1>TestErrorListener.java</h1>
-        
-      </div>
+          
+          <h1 id="test-error-listener">Test Error Listener</h1>
 
-      
-        
-        
-        
-          <div class='highlight'><pre><span class="hljs-keyword">package</span> cas.cs4tb3.mellowd;
+          
+            <div class='highlight'><pre>
+<span class="hljs-keyword">package</span> cas.cs4tb3.mellowd;
 
 <span class="hljs-keyword">import</span> org.antlr.v4.runtime.BaseErrorListener;
 <span class="hljs-keyword">import</span> org.antlr.v4.runtime.RecognitionException;
 <span class="hljs-keyword">import</span> org.antlr.v4.runtime.Recognizer;
 
 <span class="hljs-keyword">import</span> java.util.ArrayList;
-<span class="hljs-keyword">import</span> java.util.List;
+<span class="hljs-keyword">import</span> java.util.List;</pre></div>
+          
+        
+      </div>
 
-<span class="hljs-comment">/**
- * Created on 2016-03-07.
- */</span>
-<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestErrorListener</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseErrorListener</span> </span>{
+      
+        
+        <p>This error listener simply remembers the errors that occurred during parsing.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestErrorListener</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseErrorListener</span> </span>{
     <span class="hljs-keyword">private</span> List&lt;String&gt; errors;
 
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">TestErrorListener</span><span class="hljs-params">()</span> </span>{

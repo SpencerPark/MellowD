@@ -220,6 +220,12 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\ErrorResponseTest.html">
+                                    ErrorResponseTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\ParserTest.html">
                                     ParserTest.java
                                 </a>
@@ -269,6 +275,23 @@
                             <li class="tocelem">
                                 <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\varDeclarations.html">
                                     varDeclarations.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc" onclick="">
+                        <h3>src\test\resources\errortest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\errortest\largeInput.html">
+                                    largeInput.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\errortest\largeInputShared.html">
+                                    largeInputShared.mlod
                                 </a>
                             </li>
                         
@@ -517,12 +540,20 @@ we have to share a channel.</p>
         
       
         
-        <p>We really can’t just put 2 random regular blocks together because at the very
+        <p>If the block already has channel it will just stick with it</p>
+
+        
+          <div class='highlight'><pre>                <span class="hljs-keyword">if</span> (channelMap.containsKey(block.getName())) <span class="hljs-keyword">return</span>;</pre></div>
+        
+      
+        
+        <p>Otherwise we really can’t just put 2 random regular blocks together because at the very
 least we may have an instrument mismatch. This is a problem we unfortunately cannot
 fix.</p>
 
         
-          <div class='highlight'><pre>                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Ran out of channels. Mellow D source is overloaded and cannot fit in the MIDI channels."</span>);
+          <div class='highlight'><pre>                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Ran out of channels. Mellow D source is overloaded and cannot fit in the MIDI channels."</span> +
+                        <span class="hljs-string">" Try to use the \"sharechannel\" options to compact blocks on the same channel."</span>);
             } <span class="hljs-keyword">else</span> {</pre></div>
         
       

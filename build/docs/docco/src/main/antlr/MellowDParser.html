@@ -220,6 +220,12 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="..\..\test\java\cas\cs4tb3\mellowd\ErrorResponseTest.html">
+                                    ErrorResponseTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="..\..\test\java\cas\cs4tb3\mellowd\ParserTest.html">
                                     ParserTest.java
                                 </a>
@@ -269,6 +275,23 @@
                             <li class="tocelem">
                                 <a class="source" href="..\..\test\resources\compilertest\varDeclarations.html">
                                     varDeclarations.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc" onclick="">
+                        <h3>src\test\resources\errortest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\test\resources\errortest\largeInput.html">
+                                    largeInput.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\test\resources\errortest\largeInputShared.html">
+                                    largeInputShared.mlod
                                 </a>
                             </li>
                         
@@ -417,8 +440,9 @@ blocks which wrap a MIDI track.</p>
         <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.midiSequence;
     }
 
-    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> <span class="hljs-title">getOctaveShiftRequired</span><span class="hljs-params">(<span class="hljs-keyword">int</span> target)</span> </span>{
-        <span class="hljs-keyword">return</span> target - <span class="hljs-keyword">this</span>.globalOptions.getOctave();
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> <span class="hljs-title">getOctaveShiftRequired</span><span class="hljs-params">(BlockOptions options)</span> </span>{
+        <span class="hljs-keyword">if</span> (options.isPercussion()) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">return</span> options.getOctave() - <span class="hljs-keyword">this</span>.globalOptions.getOctave();
     }</pre></div>
         
       
@@ -428,7 +452,7 @@ There are a standard set of names for chords and we want to lookup these names a
 exist in the symbol table without actually putting them in there.</p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">private</span> Chord <span class="hljs-title">lookupChord</span><span class="hljs-params">(Token identifier, <span class="hljs-keyword">int</span> octave)</span> </span>{</pre></div>
+          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">private</span> Chord <span class="hljs-title">lookupChord</span><span class="hljs-params">(Token identifier, BlockOptions options)</span> </span>{</pre></div>
         
       
         
@@ -446,7 +470,7 @@ a chord definition exists so we can simply put it in the correct octave and retu
 
         
           <div class='highlight'><pre>        Chord chord = <span class="hljs-keyword">this</span>.symbolTable.getDeclarationValue(identifier.getText(), Chord.class);
-        <span class="hljs-keyword">if</span> (chord != <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span> chord.shiftOctave(<span class="hljs-keyword">this</span>.getOctaveShiftRequired(octave));</pre></div>
+        <span class="hljs-keyword">if</span> (chord != <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span> chord.shiftOctave(<span class="hljs-keyword">this</span>.getOctaveShiftRequired(options));</pre></div>
         
       
         
@@ -454,7 +478,7 @@ a chord definition exists so we can simply put it in the correct octave and retu
 default chords based on the name.</p>
 
         
-          <div class='highlight'><pre>        chord = Chord.resolve(identifier.getText(), octave);</pre></div>
+          <div class='highlight'><pre>        chord = Chord.resolve(identifier.getText(), options.getOctave());</pre></div>
         
       
         
@@ -471,53 +495,6 @@ an undefined reference exception.</p>
 
         
           <div class='highlight'><pre>        <span class="hljs-keyword">return</span> chord;
-    }</pre></div>
-        
-      
-        
-        <p><a href="../primitives/Melody.html">Melody</a> concatenation may be spimply adding a single note to the end of
-the sequence or looking up a pointer to a melody and adding the entire melody to the root.</p>
-
-        
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">appendToMelody</span><span class="hljs-params">(Melody root, BlockOptions context, MidiNoteMessageSource notes, Token identifier, Articulation articulation)</span> </span>{</pre></div>
-        
-      
-        
-        <p>Although the approach is not very clean, this method assumes that <code>notes == null</code> &rarr; <code>identifier != null</code>. This allows
-this method to control how to resolve the code to add.</p>
-
-        
-          <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (notes == <span class="hljs-keyword">null</span>) {</pre></div>
-        
-      
-        
-        <p>The notes are null so try and lookup the data pointed to by the identifier. If the type
-of the pointer is a melody then get the data and append it to the root.</p>
-
-        
-          <div class='highlight'><pre>            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.symbolTable.identifierTypeIs(identifier.getText(), Melody.class)) {
-                Melody mel = <span class="hljs-keyword">this</span>.symbolTable.getDeclarationValue(identifier.getText(), Melody.class).shiftOctave(<span class="hljs-keyword">this</span>.getOctaveShiftRequired(context.getOctave()));
-                root.add(mel);</pre></div>
-        
-      
-        
-        <p>Otherwise attempt to resolve the identifier as a chord and add the chord as a single sound.</p>
-
-        
-          <div class='highlight'><pre>            } <span class="hljs-keyword">else</span> {
-                Chord chord = lookupChord(identifier, context.getOctave());
-                root.add(<span class="hljs-keyword">new</span> ArticulatedSound(chord, articulation));
-            }</pre></div>
-        
-      
-        
-        <p>If the notes are not null then we have the simple case of appending a single sound
-to the end of the root melody.</p>
-
-        
-          <div class='highlight'><pre>        } <span class="hljs-keyword">else</span> {
-            root.add(<span class="hljs-keyword">new</span> ArticulatedSound(notes, articulation));
-        }
     }
 
     <span class="hljs-function"><span class="hljs-keyword">private</span> GeneralMidiPercussion <span class="hljs-title">resolvePercussionID</span><span class="hljs-params">(Token identifier, Token indexNum)</span> </span>{
@@ -542,8 +519,8 @@ issue. A single sound cannot be indexed.</p>
         <span class="hljs-keyword">return</span> drumSound;
     }
 
-    <span class="hljs-function"><span class="hljs-keyword">private</span> MidiNoteMessageSource <span class="hljs-title">resolveChordID</span><span class="hljs-params">(Token identifier, Token indexNum, <span class="hljs-keyword">int</span> octave)</span> </span>{
-        Chord chord = lookupChord(identifier, octave);</pre></div>
+    <span class="hljs-function"><span class="hljs-keyword">private</span> MidiNoteMessageSource <span class="hljs-title">resolveChordID</span><span class="hljs-params">(Token identifier, Token indexNum, BlockOptions options)</span> </span>{
+        Chord chord = lookupChord(identifier, options);</pre></div>
         
       
         
@@ -573,7 +550,7 @@ that is must match to become the NUMBER token is an int description.</p>
         }
     }
 
-    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">resolveChordParamID</span><span class="hljs-params">(List&lt;Pitch&gt; pitches, Token identifier, Token indexNum, <span class="hljs-keyword">int</span> octave, <span class="hljs-keyword">boolean</span> percussion)</span> </span>{</pre></div>
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">resolveChordParamID</span><span class="hljs-params">(List&lt;Pitch&gt; pitches, Token identifier, Token indexNum, BlockOptions options)</span> </span>{</pre></div>
         
       
         
@@ -581,7 +558,7 @@ that is must match to become the NUMBER token is an int description.</p>
 name of a percussion sound.</p>
 
         
-          <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (percussion) {
+          <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (options.isPercussion()) {
             GeneralMidiPercussion drumSound = resolvePercussionID(identifier, indexNum);
             <span class="hljs-keyword">if</span> (drumSound != <span class="hljs-keyword">null</span>) {
                 pitches.add(drumSound.getAsPitch());
@@ -596,12 +573,12 @@ or not we are in a percussion block the next step is to try and resolve a chord 
 the identifier.</p>
 
         
-          <div class='highlight'><pre>        MidiNoteMessageSource noteSource = resolveChordID(identifier, indexNum, octave);
+          <div class='highlight'><pre>        MidiNoteMessageSource noteSource = resolveChordID(identifier, indexNum, options);
         <span class="hljs-keyword">if</span> (noteSource <span class="hljs-keyword">instanceof</span> Chord) pitches.addAll(((Chord) noteSource).getPitches());
         <span class="hljs-keyword">else</span>                             pitches.add((Pitch) noteSource);
     }
 
-    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">resolveMelodyParamID</span><span class="hljs-params">(Melody root, Token identifier, Token indexNum, Articulation art, <span class="hljs-keyword">int</span> octave, <span class="hljs-keyword">boolean</span> percussion)</span> </span>{</pre></div>
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">resolveMelodyParamID</span><span class="hljs-params">(Melody root, Token identifier, Token indexNum, Articulation art, BlockOptions options)</span> </span>{</pre></div>
         
       
         
@@ -609,7 +586,7 @@ the identifier.</p>
 name of a percussion sound.</p>
 
         
-          <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (percussion) {
+          <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (options.isPercussion()) {
             GeneralMidiPercussion drumSound = resolvePercussionID(identifier, indexNum);
             <span class="hljs-keyword">if</span> (drumSound != <span class="hljs-keyword">null</span>) {
                 root.add(<span class="hljs-keyword">new</span> ArticulatedSound(drumSound.getAsPitch(), art));
@@ -625,8 +602,10 @@ If the type of the pointer is a melody then get the data and append it to the ro
         
           <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.symbolTable.identifierTypeIs(identifier.getText(), Melody.class)) {
             Melody mel = <span class="hljs-keyword">this</span>.symbolTable.getDeclarationValue(identifier.getText(), Melody.class);
-            mel = mel.shiftOctave(<span class="hljs-keyword">this</span>.getOctaveShiftRequired(octave));
+            mel = mel.shiftOctave(<span class="hljs-keyword">this</span>.getOctaveShiftRequired(options));
             root.add(mel);
+            <span class="hljs-keyword">if</span> (indexNum != <span class="hljs-keyword">null</span>)
+                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IncorrectTypeException(identifier, <span class="hljs-string">"Cannot index a melody."</span>);
             <span class="hljs-keyword">if</span> (art != Articulation.NONE)
                 <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IncorrectTypeException(identifier, <span class="hljs-string">"Cannot articulate a melody with "</span>+art.name().toLowerCase());</pre></div>
         
@@ -636,7 +615,7 @@ If the type of the pointer is a melody then get the data and append it to the ro
 
         
           <div class='highlight'><pre>        } <span class="hljs-keyword">else</span> {
-            MidiNoteMessageSource noteSource = resolveChordID(identifier, indexNum, octave);
+            MidiNoteMessageSource noteSource = resolveChordID(identifier, indexNum, options);
             root.add(<span class="hljs-keyword">new</span> ArticulatedSound(noteSource, art));
         }
     }
@@ -736,8 +715,7 @@ and the list is the collection required to accomplish this.</p>
     :   noteDef[$options]
             { $pitches.add($noteDef.pitch); }
     |   IDENTIFIER ( COLON NUMBER )?
-            { resolveChordParamID($pitches, $IDENTIFIER, $NUMBER, $options.getOctave(),
-                $options.isPercussion()); }
+            { resolveChordParamID($pitches, $IDENTIFIER, $NUMBER, $options); }
     ;</pre></div>
         
       
@@ -766,8 +744,7 @@ locals [Articulation art = Articulation.NONE]
     :   noteDef[$options] ( articulation {$art = $articulation.art;} )?
             { $mel.add(<span class="hljs-keyword">new</span> ArticulatedSound($noteDef.pitch, $art)); }
     |   IDENTIFIER ( COLON NUMBER )? ( articulation {$art = $articulation.art;})?
-            { <span class="hljs-keyword">this</span>.resolveMelodyParamID($mel, $IDENTIFIER, $NUMBER, $art, $options.getOctave(),
-                $options.isPercussion()); }
+            { <span class="hljs-keyword">this</span>.resolveMelodyParamID($mel, $IDENTIFIER, $NUMBER, $art, $options); }
     |   chord[$options]
             { $mel.add($chord.sound); }
     |   STAR
@@ -931,7 +908,7 @@ locals [<span class="hljs-keyword">boolean</span> wasPercussion]
                                                                     <span class="hljs-keyword">if</span> (val != <span class="hljs-keyword">null</span>)
                                                                         <span class="hljs-keyword">this</span>.symbolTable.addDeclaration($id.text, val);
                                                                     <span class="hljs-keyword">else</span>
-                                                                        <span class="hljs-keyword">this</span>.symbolTable.addDeclaration($id.text, lookupChord($ref, <span class="hljs-keyword">this</span>.globalOptions.getOctave()));
+                                                                        <span class="hljs-keyword">this</span>.symbolTable.addDeclaration($id.text, lookupChord($ref, <span class="hljs-keyword">this</span>.globalOptions));
                                                                 }
                                 | chord [<span class="hljs-keyword">this</span>.globalOptions]    {<span class="hljs-keyword">this</span>.symbolTable.addDeclaration($id.text, $chord.sound.getSound());}
                                 | melody[<span class="hljs-keyword">this</span>.globalOptions]    {<span class="hljs-keyword">this</span>.symbolTable.addDeclaration($id.text, $melody.mel);}
@@ -1132,7 +1109,7 @@ locals [Melody mel]
 
         
           <div class='highlight'><pre>                                <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.symbolTable.identifierTypeIs($IDENTIFIER.getText(), Melody.class)) {
-                                    $mel = <span class="hljs-keyword">this</span>.symbolTable.getDeclarationValue($IDENTIFIER.getText(), Melody.class).shiftOctave(<span class="hljs-keyword">this</span>.getOctaveShiftRequired($options.getOctave()));</pre></div>
+                                    $mel = <span class="hljs-keyword">this</span>.symbolTable.getDeclarationValue($IDENTIFIER.getText(), Melody.class).shiftOctave(<span class="hljs-keyword">this</span>.getOctaveShiftRequired($options));</pre></div>
         
       
         
@@ -1150,7 +1127,7 @@ if it can’t be resolved.</p>
 
         
           <div class='highlight'><pre>                                } <span class="hljs-keyword">else</span> {
-                                    Chord chord = lookupChord($IDENTIFIER, $options.getOctave());</pre></div>
+                                    Chord chord = lookupChord($IDENTIFIER, $options);</pre></div>
         
       
         
@@ -1180,7 +1157,7 @@ if it can’t be resolved.</p>
         <p>The other option is to specify a variable name that points to a phrase</p>
 
         
-          <div class='highlight'><pre>        ( IDENTIFIER {$phr = <span class="hljs-keyword">this</span>.symbolTable.getDeclarationValueOrThrow($IDENTIFIER, Phrase.class).shiftOctave(<span class="hljs-keyword">this</span>.getOctaveShiftRequired($options.getOctave()));} )
+          <div class='highlight'><pre>        ( IDENTIFIER {$phr = <span class="hljs-keyword">this</span>.symbolTable.getDeclarationValueOrThrow($IDENTIFIER, Phrase.class).shiftOctave(<span class="hljs-keyword">this</span>.getOctaveShiftRequired($options));} )
     ;</pre></div>
         
       
