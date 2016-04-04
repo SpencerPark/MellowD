@@ -13,8 +13,25 @@ Mellow D
     <a></a>
     <a></a>
     <a></a>
-    <a></a>
 </p>
+
+What is it?
+-----------
+
+Mellow D is a musical notation language. The developer writes a Mellow D source (.mlod) file and 
+passes it to the compiler that create a MIDI sequence. This MIDI sequence can then be converted to
+various formats with external tools or played directly with various media players such as windows
+media player. The compiler also has an option (`-p`) to play the song rather than write the song to a file.
+
+See the language reference above (the book) for more information about the contents of a source file
+or checkout the test resources for a few examples.
+
+Documentation
+-------------
+
+The documentation was generated from the literate source with a [fork](https://github.com/deezahyn/docco)
+of [docco](https://jashkenas.github.io/docco/). With docco installed (the docco command is accessible from
+command line) the documented source can be generated with `./gradlew docco` at the top level of the project.
 
 Usage
 -----
@@ -28,12 +45,12 @@ Now that you have a jar place it somewhere it will be comfortable and create a c
 jar. On windows go to a directory that is inside your PATH and execute
 
 ```bat
-echo java -jar "path\to\the\MellowD-1.0-SNAPSHOT.jar" %* > mellowd.bat
+echo java -jar "path\to\the\MellowD-1.0.jar" %* > mellowd.bat
 ```
 
 Similarity on a *nix system you can create an alias with the command
 ```bash
-alias mellowd='java -jar "path/to/the/MellowD-1.0-SNAPSHOT.jar"'
+alias mellowd='java -jar "path/to/the/MellowD-1.0.jar"'
 ```
 
 Now you should be able to execute the `mellowd` command from you terminal. Run `mellowd -h`
@@ -41,6 +58,9 @@ for some help with the command line arguments.
 
 Tests
 -----
+
+The tests can be run with `./gradlew test` from the top level of the project. The test reports
+can then be found in `build/docs/docco/tests/index.html`.
 
 The [Compiler Test](src/test/java/cas/cs4tb3/mellowd/CompilerTest.html) is the main
 test runner for the compiler. It takes input files from the `src/test/resources/compilertest`

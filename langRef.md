@@ -180,10 +180,10 @@ Ex: `[a, b$, c#]` `[a!, (c, e, g)~, e-1.]` `[C:0, C:1, C:2]` `[a, *, b, *]`
 Rhythms
 -------
 
-A rhythm is a collection of [beats](#beats) that can be understood as how the song
+A rhythm is a collection of [beats](#beat) that can be understood as how the song
 would sound if the only sound was a tapping sound. A rhythm is combined with a [melody](#melodies)
-or [chord](#chords) to create a [phrase](#phrase). In a Mellow D source it is declared as a `,`
-separated list of [beats](#beats) with an opening `<` and closing `>`.
+or [chord](#chords) to create a [phrase](#phrases). In a Mellow D source it is declared as a `,`
+separated list of [beats](#beat) with an opening `<` and closing `>`.
  
 Ex: `<w, h, q, e, s>` `<q., q>`
 

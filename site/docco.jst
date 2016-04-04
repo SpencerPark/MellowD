@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title><%= title %></title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="<%= css %>" />
+</head>
+<body>
+<a href="https://github.com/SpencerPark/MellowD"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        <% if (sources.length > 1) { %>
+          <div class="toctop" onclick="">
+            <a class="source" href="<%= relative(destination('index.html')) %>">Home</a>
+            <h3>Table of Contents</h3>
+              <%    var dirs = new Map();
+                    for (var i=0, l = sources.length; i < l; i++) {
+                        var source = path.basename(sources[i]);
+                        var dir = path.dirname(sources[i]);
+                        if (dir.startsWith('site') || dir.startsWith('.')) continue;
+                        if (dirs.has(dir)) {
+                            dirs.get(dir).push(source);                         
+                        } else {
+                            dirs.set(dir, [source]);
+                        }
+                    }
+              %>
+                    <%dirs.forEach(function(files, dir) { %>
+                    <div class="toc" onclick="">
+                        <h3><%= dir%></h3>
+                        <% for (var file of files) { %>
+                            <li class="tocelem">
+                                <a class="source" href="<%= relative(destination(path.join(dir, file))) %>">
+                                    <%= file %>
+                                </a>
+                            </li>
+                        <%}%>
+                        </div>
+                    <%})%>
+          </div>
+        <% } %>
+            
+            <!-- Moved TOC above header -->
+            <% if (hasTitle) { %>
+          <% var section = sections.shift(); %>
+          <%= section.docsHtml %>
+          <% if (!(/^\s*$/).test(section.codeText)) { %>
+            <%= section.codeHtml %>
+          <% } %>
+        <% } else { %>
+          <h1><%= title %></h1>
+        <% } %>
+      </div>
+
+      <% for (var i = 0, l = sections.length; i<l; i++) { %>
+        <% var section = sections[i]; %>
+        <%= section.docsHtml %>
+        <% if (!(/^\s*$/).test(section.codeText)) { %>
+          <%= section.codeHtml %>
+        <% } %>
+      <% } %>
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>

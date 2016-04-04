@@ -1,5 +1,5 @@
 group 'cas.cs4tb3'
-version '1.0-SNAPSHOT'
+version '1.0'
 
 apply plugin: 'java'
 apply plugin: 'antlr'
@@ -45,7 +45,7 @@ jar {
 }
 
 def doccoMode = 'linear' /* linear, parallel, classic */
-def pathToLanguages = 'C:\\dev\\literate\\docco\\languages.json'
+def pathToLanguages = 'languages.json'
 
 def toRelFile(File file) {
     String relPath = file.absolutePath.replace(projectDir.absolutePath, '');
