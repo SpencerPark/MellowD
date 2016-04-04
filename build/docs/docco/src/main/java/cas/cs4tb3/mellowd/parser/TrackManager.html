@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>TrackManager.java</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="..\..\..\..\..\..\..\docco.css" />
+</head>
+<body>
+<a href="https://github.com/SpencerPark/MellowD"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          <div class="toctop" onclick="">
+            <a class="source" href="..\..\..\..\..\..\..\index.html">Home</a>
+            <h3>Table of Contents</h3>
+              
+                    
+                    <div class="toc" onclick="">
+                        <h3>src\main\antlr</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\antlr\MellowDLexer.html">
+                                    MellowDLexer.g4
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\antlr\MellowDParser.html">
+                                    MellowDParser.g4
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc" onclick="">
+                        <h3>src\main\java\cas\cs4tb3\mellowd</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\ArticulatedSound.html">
+                                    ArticulatedSound.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\Articulation.html">
+                                    Articulation.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\Beat.html">
+                                    Beat.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\Dynamic.html">
+                                    Dynamic.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\Pitch.html">
+                                    Pitch.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\PlayableSound.html">
+                                    PlayableSound.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\TimingEnvironment.html">
+                                    TimingEnvironment.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc" onclick="">
+                        <h3>src\main\java\cas\cs4tb3\mellowd\compiler</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\compiler\Compiler.html">
+                                    Compiler.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\compiler\SequencePlayer.html">
+                                    SequencePlayer.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc" onclick="">
+                        <h3>src\main\java\cas\cs4tb3\mellowd\midi</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\midi\GeneralMidiConstants.html">
+                                    GeneralMidiConstants.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\midi\GeneralMidiInstrument.html">
+                                    GeneralMidiInstrument.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\midi\GeneralMidiPercussion.html">
+                                    GeneralMidiPercussion.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\midi\MidiNoteMessageSource.html">
+                                    MidiNoteMessageSource.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc" onclick="">
+                        <h3>src\main\java\cas\cs4tb3\mellowd\parser</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="Block.html">
+                                    Block.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="BlockOptions.html">
+                                    BlockOptions.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="IncorrectTypeException.html">
+                                    IncorrectTypeException.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="ParseException.html">
+                                    ParseException.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="SymbolTable.html">
+                                    SymbolTable.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="TrackManager.html">
+                                    TrackManager.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="UndefinedReferenceException.html">
+                                    UndefinedReferenceException.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc" onclick="">
+                        <h3>src\main\java\cas\cs4tb3\mellowd\primitives</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\primitives\Chord.html">
+                                    Chord.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\primitives\Melody.html">
+                                    Melody.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\primitives\Phrase.html">
+                                    Phrase.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\primitives\Rhythm.html">
+                                    Rhythm.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc" onclick="">
+                        <h3>src\test\java\cas\cs4tb3\mellowd</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\ChordResolutionTest.html">
+                                    ChordResolutionTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\CompilerTest.html">
+                                    CompilerTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\ErrorResponseTest.html">
+                                    ErrorResponseTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\ParserTest.html">
+                                    ParserTest.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\java\cas\cs4tb3\mellowd\TestErrorListener.html">
+                                    TestErrorListener.java
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc" onclick="">
+                        <h3>src\test\resources\compilertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\articulation.html">
+                                    articulation.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\percussion.html">
+                                    percussion.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeChords.html">
+                                    strangeChords.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeMelodies.html">
+                                    strangeMelodies.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\strangeRhythms.html">
+                                    strangeRhythms.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\compilertest\varDeclarations.html">
+                                    varDeclarations.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc" onclick="">
+                        <h3>src\test\resources\errortest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\errortest\largeInput.html">
+                                    largeInput.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\errortest\largeInputShared.html">
+                                    largeInputShared.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc" onclick="">
+                        <h3>src\test\resources\parsertest</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\chordNames.html">
+                                    chordNames.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\simpleBlock.html">
+                                    simpleBlock.mlod
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\parsertest\varDeclaration.html">
+                                    varDeclaration.mlod
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+                    <div class="toc" onclick="">
+                        <h3>src\test\resources\testdata</h3>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\testdata\CompilerTestData.html">
+                                    CompilerTestData.json
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\..\..\..\..\..\test\resources\testdata\ParserTestData.html">
+                                    ParserTestData.json
+                                </a>
+                            </li>
+                        
+                        </div>
+                    
+          </div>
+        
+            
+            <!-- Moved TOC above header -->
+            
+          <h1>TrackManager.java</h1>
+        
+      </div>
+
+      
+        
+        
+        
+          <div class='highlight'><pre><span class="hljs-keyword">package</span> cas.cs4tb3.mellowd.parser;
+
+<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.Dynamic;
+<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.TimingEnvironment;
+<span class="hljs-keyword">import</span> org.antlr.v4.runtime.Token;
+
+<span class="hljs-keyword">import</span> javax.sound.midi.InvalidMidiDataException;
+<span class="hljs-keyword">import</span> javax.sound.midi.Track;
+<span class="hljs-keyword">import</span> java.util.*;</pre></div>
+        
+      
+        
+        <p>This is a state based class that is tracking the virtual state of the playback sequencer
+that help make decisions on which channel a channel specific event should happen on.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TrackManager</span> </span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Channel</span> </span>{
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">boolean</span> isDrum;
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> midiChannelNum;
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> Set&lt;Block&gt; usedBy = <span class="hljs-keyword">new</span> HashSet&lt;&gt;();
+
+        <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title">Channel</span><span class="hljs-params">(<span class="hljs-keyword">boolean</span> isDrum, <span class="hljs-keyword">int</span> midiChannelNum)</span> </span>{
+            <span class="hljs-keyword">this</span>.isDrum = isDrum;
+            <span class="hljs-keyword">this</span>.midiChannelNum = midiChannelNum;
+        }
+    }
+
+    <span class="hljs-keyword">private</span> Map&lt;String, Block&gt; blocks;
+    <span class="hljs-keyword">private</span> Map&lt;String, Channel&gt; channelMap;
+
+    <span class="hljs-keyword">private</span> List&lt;Channel&gt; channels;
+    <span class="hljs-keyword">private</span> List&lt;Channel&gt; drumChannels;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">TrackManager</span><span class="hljs-params">(Set&lt;Integer&gt; regChannels, Set&lt;Integer&gt; drumChannels)</span> </span>{</pre></div>
+        
+      
+        
+        <p>Check a few preconditions to make sure we have the expected channel inputs.</p>
+
+        
+          <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (regChannels == <span class="hljs-keyword">null</span> || regChannels.isEmpty())
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"No regular channels specified."</span>);
+        <span class="hljs-keyword">if</span> (drumChannels == <span class="hljs-keyword">null</span> || drumChannels.isEmpty())
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"No drum channels specified."</span>);
+
+        blocks = <span class="hljs-keyword">new</span> HashMap&lt;&gt;();
+        <span class="hljs-keyword">this</span>.channels = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;(regChannels.size());
+        <span class="hljs-keyword">this</span>.drumChannels = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;(drumChannels.size());
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> channel : regChannels) {
+            <span class="hljs-keyword">this</span>.channels.add(<span class="hljs-keyword">new</span> Channel(<span class="hljs-keyword">false</span>, channel));
+        }
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> dChannel : drumChannels) {
+            <span class="hljs-keyword">this</span>.drumChannels.add(<span class="hljs-keyword">new</span> Channel(<span class="hljs-keyword">true</span>, dChannel));
+        }
+        <span class="hljs-keyword">this</span>.channelMap = <span class="hljs-keyword">new</span> HashMap&lt;&gt;();
+        <span class="hljs-keyword">this</span>.blocks = <span class="hljs-keyword">new</span> HashMap&lt;&gt;();
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Block <span class="hljs-title">createBlock</span><span class="hljs-params">(Token blockToken, TimingEnvironment timingEnvironment, Track track, BlockOptions options)</span> </span>{</pre></div>
+        
+      
+        
+        <p>Check to make sure the block doesn’t exist yet</p>
+
+        
+          <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.blocks.containsKey(blockToken.getText()))
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ParseException(blockToken, <span class="hljs-string">"A block with the name "</span> + blockToken.getText() + <span class="hljs-string">" already exists."</span>);</pre></div>
+        
+      
+        
+        <p>Instantiate the new block</p>
+
+        
+          <div class='highlight'><pre>        Block block = <span class="hljs-keyword">new</span> Block(<span class="hljs-keyword">this</span>, timingEnvironment, track, options, blockToken.getText(), Dynamic.mf);</pre></div>
+        
+      
+        
+        <p>Register the block</p>
+
+        
+          <div class='highlight'><pre>        <span class="hljs-keyword">this</span>.blocks.put(block.getName(), block);</pre></div>
+        
+      
+        
+        <p>Put it on a channel</p>
+
+        
+          <div class='highlight'><pre>        requestChannel(block);
+
+        <span class="hljs-keyword">try</span> {
+            block.updateBlockOptions(blockToken, options, <span class="hljs-keyword">true</span>);
+        } <span class="hljs-keyword">catch</span> (InvalidMidiDataException e) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ParseException(blockToken, <span class="hljs-string">"Invalid midi data in "</span> + blockToken.getText() + <span class="hljs-string">"'s block options. "</span>+e.getLocalizedMessage());
+        }</pre></div>
+        
+      
+        
+        <p>Return the newly created block</p>
+
+        
+          <div class='highlight'><pre>        <span class="hljs-keyword">return</span> block;
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Block <span class="hljs-title">getBlock</span><span class="hljs-params">(String blockName)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.blocks.get(blockName);
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">finish</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">for</span> (Block block : <span class="hljs-keyword">this</span>.blocks.values()) {
+            block.finish();
+        }
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">requestChannel</span><span class="hljs-params">(Block block)</span> </span>{
+        List&lt;Channel&gt; empties = <span class="hljs-keyword">new</span> LinkedList&lt;&gt;();
+        <span class="hljs-keyword">if</span> (block.getOptions().isPercussion()) {
+            <span class="hljs-keyword">for</span> (Channel channel : drumChannels) {
+                <span class="hljs-keyword">if</span> (channel.usedBy.isEmpty()) {</pre></div>
+        
+      
+        
+        <p>Don’t take an empty channel yet because it would be better to share if possible.</p>
+
+        
+          <div class='highlight'><pre>                    empties.add(channel);
+                } <span class="hljs-keyword">else</span> {
+                    <span class="hljs-keyword">for</span> (Block user : channel.usedBy) {
+                        <span class="hljs-keyword">if</span> (block.getName().equals(user.getOptions().getShareChannel())
+                                || user.getName().equals(block.getOptions().getShareChannel())) {</pre></div>
+        
+      
+        
+        <p>Found a channel to share! We can pack these together.</p>
+
+        
+          <div class='highlight'><pre>                            switchChannels(channel, block);
+                            <span class="hljs-keyword">return</span>;
+                        }
+                    }
+                }
+            }
+            <span class="hljs-keyword">if</span> (empties.isEmpty()) {</pre></div>
+        
+      
+        
+        <p>Because this block is a percussion block it is not that bad if
+we have to share a channel.</p>
+
+        
+          <div class='highlight'><pre>                switchChannels(drumChannels.get(<span class="hljs-number">0</span>), block);
+            } <span class="hljs-keyword">else</span> {</pre></div>
+        
+      
+        
+        <p>Take the first empty channel.</p>
+
+        
+          <div class='highlight'><pre>                switchChannels(empties.get(<span class="hljs-number">0</span>), block);
+            }
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">for</span> (Channel channel : channels) {
+                <span class="hljs-keyword">if</span> (channel.usedBy.isEmpty()) {</pre></div>
+        
+      
+        
+        <p>Don’t take an empty channel yet because it would be better to share if possible.</p>
+
+        
+          <div class='highlight'><pre>                    empties.add(channel);
+                } <span class="hljs-keyword">else</span> {
+                    <span class="hljs-keyword">for</span> (Block user : channel.usedBy) {
+                        <span class="hljs-keyword">if</span> (block.getName().equals(user.getOptions().getShareChannel())
+                                || user.getName().equals(block.getOptions().getShareChannel())) {</pre></div>
+        
+      
+        
+        <p>Found a channel to share! We can pack these together.</p>
+
+        
+          <div class='highlight'><pre>                            switchChannels(channel, block);
+                            <span class="hljs-keyword">return</span>;
+                        }
+                    }
+                }
+            }
+            <span class="hljs-keyword">if</span> (empties.isEmpty()) {</pre></div>
+        
+      
+        
+        <p>If the block already has channel it will just stick with it</p>
+
+        
+          <div class='highlight'><pre>                <span class="hljs-keyword">if</span> (channelMap.containsKey(block.getName())) <span class="hljs-keyword">return</span>;</pre></div>
+        
+      
+        
+        <p>Otherwise we really can’t just put 2 random regular blocks together because at the very
+least we may have an instrument mismatch. This is a problem we unfortunately cannot
+fix.</p>
+
+        
+          <div class='highlight'><pre>                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Ran out of channels. Mellow D source is overloaded and cannot fit in the MIDI channels."</span> +
+                        <span class="hljs-string">" Try to use the \"sharechannel\" options to compact blocks on the same channel."</span>);
+            } <span class="hljs-keyword">else</span> {</pre></div>
+        
+      
+        
+        <p>Take the first empty channel.</p>
+
+        
+          <div class='highlight'><pre>                switchChannels(empties.get(<span class="hljs-number">0</span>), block);
+            }
+        }
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">requestChannel</span><span class="hljs-params">(Block block, <span class="hljs-keyword">int</span> channelNum)</span> </span>{
+        <span class="hljs-keyword">if</span> (block.getOptions().isPercussion()) {
+            <span class="hljs-keyword">for</span> (Channel channel : drumChannels) {
+                <span class="hljs-keyword">if</span> (channel.midiChannelNum == channelNum) {</pre></div>
+        
+      
+        
+        <p>Try and take this channel</p>
+
+        
+          <div class='highlight'><pre>                    <span class="hljs-keyword">if</span> (channel.usedBy.isEmpty()) {
+                        switchChannels(channel, block);
+                        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+                    } <span class="hljs-keyword">else</span> {
+                        <span class="hljs-keyword">for</span> (Block user : channel.usedBy) {
+                            <span class="hljs-keyword">if</span> (block.getName().equals(user.getOptions().getShareChannel())
+                                    || user.getName().equals(block.getOptions().getShareChannel())) {</pre></div>
+        
+      
+        
+        <p>The channel is occupied but a sharing relationship has been specified.</p>
+
+        
+          <div class='highlight'><pre>                                switchChannels(channel, block);
+                                <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+                            }
+                        }
+                        <span class="hljs-keyword">return</span> <span class="hljs-string">"The requested channel ("</span> + channelNum + <span class="hljs-string">") is occupied by a block that does not allow sharing."</span>;
+                    }
+                }
+            }
+            <span class="hljs-keyword">return</span> <span class="hljs-string">"The requested channel ("</span> + channelNum + <span class="hljs-string">") is not an available drum channel and the block ("</span> + block.getName() + <span class="hljs-string">") is a percussion block."</span>;
+
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">for</span> (Channel channel : channels) {
+                <span class="hljs-keyword">if</span> (channel.midiChannelNum == channelNum) {</pre></div>
+        
+      
+        
+        <p>Try and take this channel</p>
+
+        
+          <div class='highlight'><pre>                    <span class="hljs-keyword">if</span> (channel.usedBy.isEmpty()) {
+                        switchChannels(channel, block);
+                        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+                    } <span class="hljs-keyword">else</span> {
+                        <span class="hljs-keyword">for</span> (Block user : channel.usedBy) {
+                            <span class="hljs-keyword">if</span> (block.getName().equals(user.getOptions().getShareChannel())
+                                    || user.getName().equals(block.getOptions().getShareChannel())) {</pre></div>
+        
+      
+        
+        <p>The channel is occupied but a sharing relationship has been specified.</p>
+
+        
+          <div class='highlight'><pre>                                switchChannels(channel, block);
+                                <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+                            }
+                        }
+                        <span class="hljs-keyword">return</span> <span class="hljs-string">"The requested channel ("</span> + channelNum + <span class="hljs-string">") is occupied by a block that does not allow sharing."</span>;
+                    }
+                }
+            }
+            <span class="hljs-keyword">return</span> <span class="hljs-string">"The requested channel ("</span> + channelNum + <span class="hljs-string">") is not an available channel and the block ("</span> + block.getName() + <span class="hljs-string">") is a regular block."</span>;
+        }
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">joinChannel</span><span class="hljs-params">(Channel channel, Block block)</span> </span>{
+        channel.usedBy.add(block);
+        <span class="hljs-keyword">this</span>.channelMap.put(block.getName(), channel);
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">leaveChannel</span><span class="hljs-params">(Channel channel, Block block)</span> </span>{
+        channel.usedBy.remove(block);
+        <span class="hljs-keyword">this</span>.channelMap.remove(block.getName());
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">switchChannels</span><span class="hljs-params">(Channel to, Block block)</span> </span>{
+        Channel from = channelMap.get(block.getName());
+        <span class="hljs-keyword">if</span> (from != <span class="hljs-keyword">null</span>) leaveChannel(from, block);
+        joinChannel(to, block);
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Channel <span class="hljs-title">getChannel</span><span class="hljs-params">(Block block)</span> </span>{
+        Channel channel = <span class="hljs-keyword">this</span>.channelMap.get(block.getName());
+        <span class="hljs-keyword">if</span> (channel != <span class="hljs-keyword">null</span>)
+            <span class="hljs-keyword">return</span> channel;
+        <span class="hljs-keyword">this</span>.requestChannel(block);
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.channelMap.get(block.getName());
+    }
+}</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>
