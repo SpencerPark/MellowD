@@ -8,6 +8,7 @@
   <link rel="stylesheet" media="all" href="docco.css" />
 </head>
 <body>
+<a href="https://github.com/SpencerPark/MellowD"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
   <div class="container">
     <div class="page">
 
@@ -356,9 +357,19 @@ Language Specification
 <a></a>
 <a></a>
 <a></a>
-<a></a>
 </p>
 
+<h2 id="what-is-it-">What is it?</h2>
+<p>Mellow D is a musical notation language. The developer writes a Mellow D source (.mlod) file and 
+passes it to the compiler that create a MIDI sequence. This MIDI sequence can then be converted to
+various formats with external tools or played directly with various media players such as windows
+media player. The compiler also has an option (<code>-p</code>) to play the song rather than write the song to a file.</p>
+<p>See the language reference above (the book) for more information about the contents of a source file
+or checkout the test resources for a few examples.</p>
+<h2 id="documentation">Documentation</h2>
+<p>The documentation was generated from the literate source with a <a href="https://github.com/deezahyn/docco">fork</a>
+of <a href="https://jashkenas.github.io/docco/">docco</a>. With docco installed (the docco command is accessible from
+command line) the documented source can be generated with <code>./gradlew docco</code> at the top level of the project.</p>
 <h2 id="usage">Usage</h2>
 <p>To build the compiler from the source you can use the gradle wrapper to execute the <code>build</code> task. In
 the top directory of the project locate the file name <code>gradlew</code> or <code>gradlew.bat</code>. If on a *nix system
@@ -366,14 +377,16 @@ in terminal/console execute <code>./gradlew build</code> or use <code>gradlew bu
 prompt. You can find the build results inside <code>build/libs</code>.</p>
 <p>Now that you have a jar place it somewhere it will be comfortable and create a command to launch the
 jar. On windows go to a directory that is inside your PATH and execute</p>
-<pre><code class="lang-bat"><span class="hljs-built_in">echo</span> java -jar "<span class="hljs-built_in">path</span>\to\the\MellowD-<span class="hljs-number">1</span>.<span class="hljs-number">0</span>-SNAPSHOT.jar" %* &gt; mellowd.bat
+<pre><code class="lang-bat"><span class="hljs-built_in">echo</span> java -jar "<span class="hljs-built_in">path</span>\to\the\MellowD-<span class="hljs-number">1</span>.<span class="hljs-number">0</span>.jar" %* &gt; mellowd.bat
 </code></pre>
 <p>Similarity on a *nix system you can create an alias with the command</p>
-<pre><code class="lang-bash"><span class="hljs-built_in">alias</span> mellowd=<span class="hljs-string">'java -jar "path/to/the/MellowD-1.0-SNAPSHOT.jar"'</span>
+<pre><code class="lang-bash"><span class="hljs-built_in">alias</span> mellowd=<span class="hljs-string">'java -jar "path/to/the/MellowD-1.0.jar"'</span>
 </code></pre>
 <p>Now you should be able to execute the <code>mellowd</code> command from you terminal. Run <code>mellowd -h</code>
 for some help with the command line arguments.</p>
 <h2 id="tests">Tests</h2>
+<p>The tests can be run with <code>./gradlew test</code> from the top level of the project. The test reports
+can then be found in <code>build/docs/docco/tests/index.html</code>.</p>
 <p>The <a href="src/test/java/cas/cs4tb3/mellowd/CompilerTest.html">Compiler Test</a> is the main
 test runner for the compiler. It takes input files from the <code>src/test/resources/compilertest</code>
 folder and compiles them putting the result inside <code>build/resources/test/compilertest/compTestOut</code>
