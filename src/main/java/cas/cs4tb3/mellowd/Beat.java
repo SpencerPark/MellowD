@@ -50,7 +50,7 @@ public class Beat {
     //that 2 of that beat would fit. For example an eighth note triplet
     //will result in the performance of 3 eighth notes in 2 eight notes,
     //equivalent of a quarter note. This is the same as scaling down the
-    //`numQuarters` by <sup>2</sup>&frasl;<sub>3</sub> or <sup>div</sup>&fracsl;<sub>num</num>
+    //`numQuarters` by <sup>2</sup>&frasl;<sub>3</sub> or <sup>div</sup>&fracsl;<sub>num</sub>
 
     //For example: an eight note is <sup>1</sup>&frasl;<sub>2</sub> quarter notes.
     //<pre>

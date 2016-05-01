@@ -89,7 +89,7 @@ public class TimingEnvironment {
         try {
             timeSigMessage = new MetaMessage(TIME_SIGNATURE_MIDI_SUBTYPE, new byte[] {
                     timeSigNum,
-                    timeSigDen,
+                    (byte) (Math.log(timeSigDen) / Math.log(2)),
                     TICKS_PER_METER_CLICK,
                     THIRTY_SECOND_NOTES_PER_QUARTER
             }, 4);

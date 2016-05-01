@@ -93,8 +93,38 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="MIDIIODelegate.html">
+                                    MIDIIODelegate.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="SequenceIODelegate.html">
+                                    SequenceIODelegate.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="SequencePlayer.html">
                                     SequencePlayer.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="TimeStampedMIDIMessage.html">
+                                    TimeStampedMIDIMessage.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="VirtualMIDIPlayer.html">
+                                    VirtualMIDIPlayer.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="WavIODelegate.html">
+                                    WavIODelegate.java
                                 </a>
                             </li>
                         
@@ -358,9 +388,7 @@
 <span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.parser.TrackManager;
 <span class="hljs-keyword">import</span> net.sourceforge.argparse4j.ArgumentParsers;
 <span class="hljs-keyword">import</span> net.sourceforge.argparse4j.impl.Arguments;
-<span class="hljs-keyword">import</span> net.sourceforge.argparse4j.inf.ArgumentParser;
-<span class="hljs-keyword">import</span> net.sourceforge.argparse4j.inf.ArgumentParserException;
-<span class="hljs-keyword">import</span> net.sourceforge.argparse4j.inf.Namespace;
+<span class="hljs-keyword">import</span> net.sourceforge.argparse4j.inf.*;
 <span class="hljs-keyword">import</span> org.antlr.v4.runtime.*;
 <span class="hljs-keyword">import</span> org.antlr.v4.runtime.misc.ParseCancellationException;
 
@@ -474,6 +502,25 @@ beats per minute.</p>
                 .type(<span class="hljs-keyword">int</span>.class)
                 .setDefault(<span class="hljs-number">120</span>)
                 .help(<span class="hljs-string">"Specify the tempo of the compiled song in BPM."</span>);</pre></div>
+        
+      
+        
+        <p>There are various flags that can specify what output formats to write the file as.</p>
+
+        
+          <div class='highlight'><pre>        MutuallyExclusiveGroup outputFormat = argParser.addMutuallyExclusiveGroup(<span class="hljs-string">"output format"</span>)
+                .description(<span class="hljs-string">"Set the output format of the compiler. This defaults to MIDI (.mid)"</span>);
+        outputFormat.addArgument(<span class="hljs-string">"--mid"</span>, <span class="hljs-string">"--midi"</span>)
+                .dest(<span class="hljs-string">"IODelegate"</span>)
+                .action(Arguments.storeConst())
+                .setConst(MIDIIODelegate.getInstance())
+                .setDefault(MIDIIODelegate.getInstance())
+                .help(<span class="hljs-string">"Set the output type of the compiler to a MIDI file (.mid). Default: MIDI (.mid)"</span>);
+        outputFormat.addArgument(<span class="hljs-string">"--wav"</span>, <span class="hljs-string">"--wave"</span>)
+                .dest(<span class="hljs-string">"IODelegate"</span>)
+                .action(Arguments.storeConst())
+                .setConst(WavIODelegate.getInstance())
+                .help(<span class="hljs-string">"Set the output type of the compiler to a WAVE file (.wav). Default: MIDI (.mid)"</span>);</pre></div>
         
       
         
@@ -646,23 +693,8 @@ completed and exit.</p>
 located in the <code>outdir</code>.</p>
 
         
-          <div class='highlight'><pre>            } <span class="hljs-keyword">else</span> {</pre></div>
-        
-      
-        
-        <p>The <code>outFile</code> is a file in the <code>outDir</code> with the same name as the file to compile
-with the <code>.mid</code> file extension instead.</p>
-
-        
-          <div class='highlight'><pre>                File outFile = <span class="hljs-keyword">new</span> File(outDir, toCompile.getName().replace(FILE_EXTENSION, <span class="hljs-string">".mid"</span>));
+          <div class='highlight'><pre>            } <span class="hljs-keyword">else</span> {
                 <span class="hljs-keyword">try</span> {</pre></div>
-        
-      
-        
-        <p>Create the output file if it doesn’t exist.</p>
-
-        
-          <div class='highlight'><pre>                    <span class="hljs-keyword">if</span> (!outFile.exists()) outFile.createNewFile();</pre></div>
         
       
         
@@ -672,15 +704,34 @@ make the output file playable.</p>
         
           <div class='highlight'><pre>                    <span class="hljs-keyword">if</span> (compilationResult.getTickLength() == <span class="hljs-number">0</span>) {
                         compilationResult.getTracks()[<span class="hljs-number">0</span>].add(<span class="hljs-keyword">new</span> MidiEvent(EOT_MESSAGE, <span class="hljs-number">1</span>));
-                    }</pre></div>
+                    }
+
+                    SequenceIODelegate ioDelegate = arguments.get(<span class="hljs-string">"IODelegate"</span>);</pre></div>
         
       
         
-        <p>Write the result to the out file. The type 1 midi format is the standard
-type for multi track sequences which we have in our case.</p>
+        <p>The <code>outFile</code> is a file in the <code>outDir</code> with the same name as the file to compile
+with the <code>.mid</code> file extension instead.</p>
 
         
-          <div class='highlight'><pre>                    MidiSystem.write(compilationResult, <span class="hljs-number">1</span>, <span class="hljs-keyword">new</span> FileOutputStream(outFile));</pre></div>
+          <div class='highlight'><pre>                    File outFile = <span class="hljs-keyword">new</span> File(outDir, toCompile.getName().replace(FILE_EXTENSION, ioDelegate.getExtension()));
+                    <span class="hljs-keyword">if</span> (!outFile.exists()) outFile.createNewFile();
+
+                    <span class="hljs-keyword">long</span> writeStartTime = System.nanoTime();
+                    ioDelegate.save(compilationResult, outFile);
+                    <span class="hljs-keyword">if</span> (ioDelegate != MIDIIODelegate.getInstance()) {</pre></div>
+        
+      
+        
+        <p>If we are not writing to a MIDI file then we should inform the user
+that the expensive operation is converting to sound to the specified
+type.</p>
+
+        
+          <div class='highlight'><pre>                        <span class="hljs-keyword">long</span> writeTime = System.nanoTime() - writeStartTime;
+                        System.out.printf(<span class="hljs-string">"Conversion to %s took %.6f s\n"</span>,
+                                ioDelegate.getExtension(), writeTime / <span class="hljs-number">1E9</span>d);
+                    }</pre></div>
         
       
         
@@ -689,7 +740,7 @@ letting them know that the compilation was successful.</p>
 
         
           <div class='highlight'><pre>                    System.out.printf(<span class="hljs-string">"%s compiled to %s\n"</span>,
-                            toCompile.getName().replace(FILE_EXTENSION, <span class="hljs-string">""</span>),
+                            toCompile.getName().replace(FILE_EXTENSION, <span class="hljs-string">".mlod"</span>),
                             outFile.getPath());</pre></div>
         
       
@@ -698,8 +749,7 @@ letting them know that the compilation was successful.</p>
 
         
           <div class='highlight'><pre>                } <span class="hljs-keyword">catch</span> (IOException e) {
-                    System.out.printf(<span class="hljs-string">"Error writing compilation result to %s. Reason: %s.\n"</span>,
-                            outFile.getAbsolutePath(), e.getLocalizedMessage());
+                    System.out.printf(<span class="hljs-string">"Error writing compilation result. Reason: %s.\n"</span>, e.getLocalizedMessage());
                     System.exit(<span class="hljs-number">1</span>);
                 }
             }</pre></div>

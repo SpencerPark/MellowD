@@ -109,6 +109,9 @@ public class TrackManager {
                 switchChannels(empties.get(0), block);
             }
         } else {
+            Channel current = channelMap.get(block.getName());
+            if (current != null && !current.isDrum) return;
+
             for (Channel channel : channels) {
                 if (channel.usedBy.isEmpty()) {
                     //Don't take an empty channel yet because it would be better to share if possible.
@@ -125,9 +128,6 @@ public class TrackManager {
                 }
             }
             if (empties.isEmpty()) {
-                //If the block already has channel it will just stick with it
-                if (channelMap.containsKey(block.getName())) return;
-
                 //Otherwise we really can't just put 2 random regular blocks together because at the very
                 //least we may have an instrument mismatch. This is a problem we unfortunately cannot
                 //fix.

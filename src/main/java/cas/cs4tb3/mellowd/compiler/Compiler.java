@@ -11,9 +11,7 @@ import cas.cs4tb3.mellowd.parser.ParseException;
 import cas.cs4tb3.mellowd.parser.TrackManager;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
-import net.sourceforge.argparse4j.inf.ArgumentParser;
-import net.sourceforge.argparse4j.inf.ArgumentParserException;
-import net.sourceforge.argparse4j.inf.Namespace;
+import net.sourceforge.argparse4j.inf.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
@@ -88,6 +86,20 @@ public class Compiler {
                 .type(int.class)
                 .setDefault(120)
                 .help("Specify the tempo of the compiled song in BPM.");
+        //There are various flags that can specify what output formats to write the file as.
+        MutuallyExclusiveGroup outputFormat = argParser.addMutuallyExclusiveGroup("output format")
+                .description("Set the output format of the compiler. This defaults to MIDI (.mid)");
+        outputFormat.addArgument("--mid", "--midi")
+                .dest("IODelegate")
+                .action(Arguments.storeConst())
+                .setConst(MIDIIODelegate.getInstance())
+                .setDefault(MIDIIODelegate.getInstance())
+                .help("Set the output type of the compiler to a MIDI file (.mid). Default: MIDI (.mid)");
+        outputFormat.addArgument("--wav", "--wave")
+                .dest("IODelegate")
+                .action(Arguments.storeConst())
+                .setConst(WavIODelegate.getInstance())
+                .help("Set the output type of the compiler to a WAVE file (.wav). Default: MIDI (.mid)");
         //The last argument is a required argument. The file to compile. The given file must exist
         //and be readable.
         argParser.addArgument("file")
@@ -179,32 +191,39 @@ public class Compiler {
             //If the play flag is not set the we will write the result to a file of the same name
             //located in the `outdir`.
             } else {
-                //The `outFile` is a file in the `outDir` with the same name as the file to compile
-                //with the `.mid` file extension instead.
-                File outFile = new File(outDir, toCompile.getName().replace(FILE_EXTENSION, ".mid"));
                 try {
-                    //Create the output file if it doesn't exist.
-                    if (!outFile.exists()) outFile.createNewFile();
-
                     //If the compilation result is empty then add the EOT event to
                     //make the output file playable.
                     if (compilationResult.getTickLength() == 0) {
                         compilationResult.getTracks()[0].add(new MidiEvent(EOT_MESSAGE, 1));
                     }
 
-                    //Write the result to the out file. The type 1 midi format is the standard
-                    //type for multi track sequences which we have in our case.
-                    MidiSystem.write(compilationResult, 1, new FileOutputStream(outFile));
+                    SequenceIODelegate ioDelegate = arguments.get("IODelegate");
+
+                    //The `outFile` is a file in the `outDir` with the same name as the file to compile
+                    //with the `.mid` file extension instead.
+                    File outFile = new File(outDir, toCompile.getName().replace(FILE_EXTENSION, ioDelegate.getExtension()));
+                    if (!outFile.exists()) outFile.createNewFile();
+
+                    long writeStartTime = System.nanoTime();
+                    ioDelegate.save(compilationResult, outFile);
+                    if (ioDelegate != MIDIIODelegate.getInstance()) {
+                        //If we are not writing to a MIDI file then we should inform the user
+                        //that the expensive operation is converting to sound to the specified
+                        //type.
+                        long writeTime = System.nanoTime() - writeStartTime;
+                        System.out.printf("Conversion to %s took %.6f s\n",
+                                ioDelegate.getExtension(), writeTime / 1E9d);
+                    }
 
                     //Display the compilation input and output locations for the user also
                     //letting them know that the compilation was successful.
                     System.out.printf("%s compiled to %s\n",
-                            toCompile.getName().replace(FILE_EXTENSION, ""),
+                            toCompile.getName().replace(FILE_EXTENSION, ".mlod"),
                             outFile.getPath());
                     //If an IOException occurred let the user know the issue and exit.
                 } catch (IOException e) {
-                    System.out.printf("Error writing compilation result to %s. Reason: %s.\n",
-                            outFile.getAbsolutePath(), e.getLocalizedMessage());
+                    System.out.printf("Error writing compilation result. Reason: %s.\n", e.getLocalizedMessage());
                     System.exit(1);
                 }
             }
