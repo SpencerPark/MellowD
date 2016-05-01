@@ -93,8 +93,38 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="..\compiler\MIDIIODelegate.html">
+                                    MIDIIODelegate.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\compiler\SequenceIODelegate.html">
+                                    SequenceIODelegate.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="..\compiler\SequencePlayer.html">
                                     SequencePlayer.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\compiler\TimeStampedMIDIMessage.html">
+                                    TimeStampedMIDIMessage.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\compiler\VirtualMIDIPlayer.html">
+                                    VirtualMIDIPlayer.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="..\compiler\WavIODelegate.html">
+                                    WavIODelegate.java
                                 </a>
                             </li>
                         
@@ -512,6 +542,9 @@ we have to share a channel.</p>
           <div class='highlight'><pre>                switchChannels(empties.get(<span class="hljs-number">0</span>), block);
             }
         } <span class="hljs-keyword">else</span> {
+            Channel current = channelMap.get(block.getName());
+            <span class="hljs-keyword">if</span> (current != <span class="hljs-keyword">null</span> &amp;&amp; !current.isDrum) <span class="hljs-keyword">return</span>;
+
             <span class="hljs-keyword">for</span> (Channel channel : channels) {
                 <span class="hljs-keyword">if</span> (channel.usedBy.isEmpty()) {</pre></div>
         
@@ -538,13 +571,6 @@ we have to share a channel.</p>
                 }
             }
             <span class="hljs-keyword">if</span> (empties.isEmpty()) {</pre></div>
-        
-      
-        
-        <p>If the block already has channel it will just stick with it</p>
-
-        
-          <div class='highlight'><pre>                <span class="hljs-keyword">if</span> (channelMap.containsKey(block.getName())) <span class="hljs-keyword">return</span>;</pre></div>
         
       
         

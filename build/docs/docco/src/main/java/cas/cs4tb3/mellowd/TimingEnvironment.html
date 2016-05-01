@@ -93,8 +93,38 @@
                             </li>
                         
                             <li class="tocelem">
+                                <a class="source" href="compiler\MIDIIODelegate.html">
+                                    MIDIIODelegate.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="compiler\SequenceIODelegate.html">
+                                    SequenceIODelegate.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
                                 <a class="source" href="compiler\SequencePlayer.html">
                                     SequencePlayer.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="compiler\TimeStampedMIDIMessage.html">
+                                    TimeStampedMIDIMessage.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="compiler\VirtualMIDIPlayer.html">
+                                    VirtualMIDIPlayer.java
+                                </a>
+                            </li>
+                        
+                            <li class="tocelem">
+                                <a class="source" href="compiler\WavIODelegate.html">
+                                    WavIODelegate.java
                                 </a>
                             </li>
                         
@@ -492,7 +522,7 @@ the sequence to this time signature.</p>
         <span class="hljs-keyword">try</span> {
             timeSigMessage = <span class="hljs-keyword">new</span> MetaMessage(TIME_SIGNATURE_MIDI_SUBTYPE, <span class="hljs-keyword">new</span> <span class="hljs-keyword">byte</span>[] {
                     timeSigNum,
-                    timeSigDen,
+                    (<span class="hljs-keyword">byte</span>) (Math.log(timeSigDen) / Math.log(<span class="hljs-number">2</span>)),
                     TICKS_PER_METER_CLICK,
                     THIRTY_SECOND_NOTES_PER_QUARTER
             }, <span class="hljs-number">4</span>);

@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>Rhythm</title>
+  <title>VirtualMIDIPlayer.java</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
   <link rel="stylesheet" media="all" href="..\..\..\..\..\..\..\docco.css" />
@@ -87,43 +87,43 @@
                         <h3>src\main\java\cas\cs4tb3\mellowd\compiler</h3>
                         
                             <li class="tocelem">
-                                <a class="source" href="..\compiler\Compiler.html">
+                                <a class="source" href="Compiler.html">
                                     Compiler.java
                                 </a>
                             </li>
                         
                             <li class="tocelem">
-                                <a class="source" href="..\compiler\MIDIIODelegate.html">
+                                <a class="source" href="MIDIIODelegate.html">
                                     MIDIIODelegate.java
                                 </a>
                             </li>
                         
                             <li class="tocelem">
-                                <a class="source" href="..\compiler\SequenceIODelegate.html">
+                                <a class="source" href="SequenceIODelegate.html">
                                     SequenceIODelegate.java
                                 </a>
                             </li>
                         
                             <li class="tocelem">
-                                <a class="source" href="..\compiler\SequencePlayer.html">
+                                <a class="source" href="SequencePlayer.html">
                                     SequencePlayer.java
                                 </a>
                             </li>
                         
                             <li class="tocelem">
-                                <a class="source" href="..\compiler\TimeStampedMIDIMessage.html">
+                                <a class="source" href="TimeStampedMIDIMessage.html">
                                     TimeStampedMIDIMessage.java
                                 </a>
                             </li>
                         
                             <li class="tocelem">
-                                <a class="source" href="..\compiler\VirtualMIDIPlayer.html">
+                                <a class="source" href="VirtualMIDIPlayer.html">
                                     VirtualMIDIPlayer.java
                                 </a>
                             </li>
                         
                             <li class="tocelem">
-                                <a class="source" href="..\compiler\WavIODelegate.html">
+                                <a class="source" href="WavIODelegate.html">
                                     WavIODelegate.java
                                 </a>
                             </li>
@@ -210,25 +210,25 @@
                         <h3>src\main\java\cas\cs4tb3\mellowd\primitives</h3>
                         
                             <li class="tocelem">
-                                <a class="source" href="Chord.html">
+                                <a class="source" href="..\primitives\Chord.html">
                                     Chord.java
                                 </a>
                             </li>
                         
                             <li class="tocelem">
-                                <a class="source" href="Melody.html">
+                                <a class="source" href="..\primitives\Melody.html">
                                     Melody.java
                                 </a>
                             </li>
                         
                             <li class="tocelem">
-                                <a class="source" href="Phrase.html">
+                                <a class="source" href="..\primitives\Phrase.html">
                                     Phrase.java
                                 </a>
                             </li>
                         
                             <li class="tocelem">
-                                <a class="source" href="Rhythm.html">
+                                <a class="source" href="..\primitives\Rhythm.html">
                                     Rhythm.java
                                 </a>
                             </li>
@@ -373,241 +373,316 @@
             
             <!-- Moved TOC above header -->
             
-          
-          <h1 id="rhythm">Rhythm</h1>
-
-          
-            <div class='highlight'><pre>
-<span class="hljs-keyword">package</span> cas.cs4tb3.mellowd.primitives;
-
-<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.ArticulatedSound;
-<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.Beat;
-<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.PlayableSound;
-<span class="hljs-keyword">import</span> cas.cs4tb3.mellowd.TimingEnvironment;
-
-<span class="hljs-keyword">import</span> java.util.ArrayList;
-<span class="hljs-keyword">import</span> java.util.Collections;
-<span class="hljs-keyword">import</span> java.util.List;</pre></div>
-          
+          <h1>VirtualMIDIPlayer.java</h1>
         
       </div>
 
       
         
-        <p>The <code>Rhythm</code> is responsible for the timing considerations in playable sounds. It specifies
-the duration in the form of a <a href="../Beat.html">Beat</a>. In a Mellow D source file a rhythm is
-a comma separated list of beats wrapped in <code>&lt;</code> and <code>&gt;</code>. Each beat is referred to by the first
-letter in it’s name. Additionally beats can be slurred together. This results in the durations
-overlapping and the notes connecting more smoothly.</p>
-
         
-          <div class='highlight'><pre><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Rhythm</span> </span>{</pre></div>
+        
+          <div class='highlight'><pre><span class="hljs-keyword">package</span> cas.cs4tb3.mellowd.compiler;
+
+<span class="hljs-keyword">import</span> javax.sound.midi.*;
+<span class="hljs-keyword">import</span> java.util.ArrayList;
+<span class="hljs-keyword">import</span> java.util.Collection;</pre></div>
         
       
         
-        <p>These two lists are maintained by the rhythm class making sure that both remain the same
-length. Each beat has a slurred value associated with it, true marking the beat as slurred
-and false being the default, un-slurred, state.</p>
+        <p>A <code>VirtualMIDIPlayer</code> force feeds a sequence to a midi receiver. This simulates play-though
+of the entire sequence without the delay in between notes.</p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-keyword">private</span> List&lt;Beat&gt; beats;
-    <span class="hljs-keyword">private</span> List&lt;Boolean&gt; slurred;</pre></div>
+          <div class='highlight'><pre><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VirtualMIDIPlayer</span> </span>{</pre></div>
         
       
         
-        <p>Creating a rhythm is done by specifying zero or more beats that make up the rhythm.</p>
+        <p>The number of microseconds in each minute (60,000,000). This constant aids
+in calculating the microseconds per beat for a BPM conversion.</p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Rhythm</span><span class="hljs-params">(Beat... beats)</span> </span>{</pre></div>
+          <div class='highlight'><pre>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> MICROSECONDS_PER_MINUTE = <span class="hljs-number">60000000</span>;</pre></div>
         
       
         
-        <p>A copy of the input data is stored in the <code>beats</code> list.</p>
+        <p>The number of microseconds in each second (1,000,000).</p>
 
         
-          <div class='highlight'><pre>        <span class="hljs-keyword">this</span>.beats = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();
-        Collections.addAll(<span class="hljs-keyword">this</span>.beats, beats);</pre></div>
+          <div class='highlight'><pre>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">double</span> MICROSECONDS_PER_SECOND = <span class="hljs-number">1000000.0</span>;</pre></div>
         
       
         
-        <p>The <code>slurred</code> list is filled in with the default value keeping it the same size as the
-<code>beats</code> list.</p>
+        <p>The default tempo (120) describing the number of beats in a minute.</p>
 
         
-          <div class='highlight'><pre>        <span class="hljs-keyword">this</span>.slurred = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();
-        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-keyword">this</span>.beats.size(); i++) {
-            slurred.add(<span class="hljs-keyword">false</span>);
-        }
-    }</pre></div>
+          <div class='highlight'><pre>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> DEFAULT_BPM = <span class="hljs-number">120</span>;</pre></div>
         
       
         
-        <p>This utility method calculates the total duration of this rhythm if performed in the given
-<a href="../TimingEnvironment.html">timing environment</a>. The returned duration is in ticks.</p>
+        <p>The default number of micro seconds (&mu;s) per beat. There are <code>DEFAULT_BPM</code> beats in a
+minute and therefor the <code>DEFAULT_US_PER_BEAT</code> is <sup>MICROSECONDS_PER_MINUTE</sup>&frasl;<sub>DEFAULT_BPM</sub></p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">long</span> <span class="hljs-title">getTotalTickDuration</span><span class="hljs-params">(TimingEnvironment environment)</span> </span>{</pre></div>
+          <div class='highlight'><pre>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> DEFAULT_US_PER_BEAT = MICROSECONDS_PER_MINUTE / DEFAULT_BPM;</pre></div>
         
       
         
-        <p>To calculate this duration simply sum up the result of calculating
-the ticks in each beat in this rhythm.</p>
+        <p>The MIDI meta message identifier for a tempo message.</p>
 
         
-          <div class='highlight'><pre>        <span class="hljs-keyword">long</span> duration = <span class="hljs-number">0</span>;
-        <span class="hljs-keyword">for</span> (Beat beat : beats) {
-            duration += environment.ticksInBeat(beat);
-        }
-        <span class="hljs-keyword">return</span> duration;
-    }</pre></div>
+          <div class='highlight'><pre>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">byte</span> TEMPO_MIDI_SUBTYPE = <span class="hljs-number">0x51</span>;</pre></div>
         
       
         
-        <p>Rhythm also defines some methods for manipulating and retrieving the data
-stored in this class.</p>
+        <p>A utility class for keeping some tracking information about the tracks in the sequence.
+When iterating over the tacks we need to find the next message in the sequence but the tracks
+all play concurrently. This class holds the current playback position (as the number of MIDI messages
+already played) so that we can switch between tracks but remember where we were in the others.</p>
 
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">private</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TrackTracker</span> </span>{
+        <span class="hljs-keyword">protected</span> Track midiTrack;
+        <span class="hljs-keyword">protected</span> <span class="hljs-keyword">int</span> position = <span class="hljs-number">0</span>;</pre></div>
         
       
         
-        <p><code>numBeats</code> returns the number of beats in this Rhythm which is just the size
-of the <code>beats</code> list.</p>
+        <p>Create a new track tracker wrapping the given track.</p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">numBeats</span><span class="hljs-params">()</span> </span>{
-        <span class="hljs-keyword">return</span> beats.size();
-    }</pre></div>
-        
-      
-        
-        <p><code>getBeat</code> returns the beat at a given position in the rhythm. This will throw
-an index out of bounds exception if the <code>index</code> is &lt; 0 or &ge; numBeats().</p>
-
-        
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> Beat <span class="hljs-title">getBeat</span><span class="hljs-params">(<span class="hljs-keyword">int</span> index)</span></span>{
-        <span class="hljs-keyword">return</span> beats.get(index);
-    }</pre></div>
-        
-      
-        
-        <p><code>isSlurred</code> checks if the beat at the given index is slurred. This returns true
-if the beat is slurred and false otherwise.</p>
-
-        
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">isSlurred</span><span class="hljs-params">(<span class="hljs-keyword">int</span> index)</span> </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.slurred.get(index);
-    }</pre></div>
-        
-      
-        
-        <p><code>slur</code> sets the slur flag to true for all beats in the index range <code>[start, end)</code>.
-If <code>end</code> is larger than the number of beats in the rhythm this method will stop at
-the largest beat index available.</p>
-
-        
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">slur</span><span class="hljs-params">(<span class="hljs-keyword">int</span> start, <span class="hljs-keyword">int</span> end)</span> </span>{
-        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = start; i &lt; <span class="hljs-keyword">this</span>.beats.size() &amp;&amp; i &lt; end; i++) {
-            <span class="hljs-keyword">this</span>.slurred.set(i, <span class="hljs-keyword">true</span>);
-        }
-    }</pre></div>
-        
-      
-        
-        <p><code>append</code> adds a beat to the rhythm. It is equivalent to calling <code>append(beat, false)</code>
-as the added beat will not be slurred.</p>
-
-        
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">append</span><span class="hljs-params">(Beat beat)</span> </span>{
-        <span class="hljs-keyword">this</span>.beats.add(beat);
-        <span class="hljs-keyword">this</span>.slurred.add(<span class="hljs-keyword">false</span>);
-    }</pre></div>
-        
-      
-        
-        <p><code>appendSlurred</code> adds a beat to the rhythm. It is equivalent to calling <code>append(beat, true)</code>
-as the added beat will not be slurred.</p>
-
-        
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">appendSlurred</span><span class="hljs-params">(Beat beat)</span> </span>{
-        <span class="hljs-keyword">this</span>.beats.add(beat);
-        <span class="hljs-keyword">this</span>.slurred.add(<span class="hljs-keyword">true</span>);
-    }</pre></div>
-        
-      
-        
-        <p><code>append</code> adds a beat to the rhythm setting the slurred flag to <code>slur</code>.</p>
-
-        
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">append</span><span class="hljs-params">(Beat beat, <span class="hljs-keyword">boolean</span> slur)</span> </span>{
-        <span class="hljs-keyword">this</span>.beats.add(beat);
-        <span class="hljs-keyword">this</span>.slurred.add(slur);
-    }</pre></div>
-        
-      
-        
-        <p><code>append</code> preforms a concatenation between this rhythm and the given rhythm. The order
-of the elements remain the same with each beat in the new rhythm being added to the end
-of this rhythm. All slurred beats will remain slurred.</p>
-
-        
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">append</span><span class="hljs-params">(Rhythm rhythm)</span> </span>{
-        <span class="hljs-keyword">this</span>.beats.addAll(rhythm.beats);
-        <span class="hljs-keyword">this</span>.slurred.addAll(rhythm.slurred);
-    }</pre></div>
-        
-      
-        
-        <p><code>append</code> preforms a concatenation between this rhythm and the given rhythm. If the <code>slurred</code>
-flag is set to true then all appended beats will have their slurred flag set to true. If the
-flag is false then the beats in the given rhythm will retain their slurred state.</p>
-
-        
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">append</span><span class="hljs-params">(Rhythm rhythm, <span class="hljs-keyword">boolean</span> slurred)</span> </span>{
-        <span class="hljs-keyword">this</span>.beats.addAll(rhythm.beats);
-        <span class="hljs-keyword">if</span> (!slurred) {
-            <span class="hljs-keyword">this</span>.slurred.addAll(rhythm.slurred);
-        } <span class="hljs-keyword">else</span> {
-            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; rhythm.slurred.size(); i++) {
-                <span class="hljs-keyword">this</span>.slurred.add(<span class="hljs-keyword">true</span>);
-            }
-        }
-    }</pre></div>
-        
-      
-        
-        <p><code>createPhrase</code> is the method that preforms the <code>*</code> operation to turn a <a href="Melody.html">Melody</a>
-and a rhythm into a <a href="Phrase.html">Phrase</a>.</p>
-
-        
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> Phrase <span class="hljs-title">createPhrase</span><span class="hljs-params">(Melody melody)</span> </span>{</pre></div>
-        
-      
-        
-        <p>First we need to take some space to save the created phrase. The length of the phrase is the length
-of the longer of the melody or rhythm.</p>
-
-        
-          <div class='highlight'><pre>        PlayableSound[] sounds = <span class="hljs-keyword">new</span> PlayableSound[Math.max(<span class="hljs-keyword">this</span>.beats.size(), melody.getNotes().size())];
-        List&lt;ArticulatedSound&gt; notes = melody.getNotes();</pre></div>
-        
-      
-        
-        <p>Fill in the array by creating a new sound from the sound and beat. Iteration
-over the melody and rhythm are modulo so that the shorter collection wraps
-around to the front to make the sizes of the collections always match up.</p>
-
-        
-          <div class='highlight'><pre>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; sounds.length; i++) {
-            sounds[i] = <span class="hljs-keyword">new</span> PlayableSound(notes.get(i % notes.size()),
-                    <span class="hljs-keyword">this</span>.beats.get(i % <span class="hljs-keyword">this</span>.beats.size()),
-                    <span class="hljs-keyword">this</span>.slurred.get(i % <span class="hljs-keyword">this</span>.slurred.size()));
+          <div class='highlight'><pre>        <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">TrackTracker</span><span class="hljs-params">(Track midiTrack)</span> </span>{
+            <span class="hljs-keyword">this</span>.midiTrack = midiTrack;
         }</pre></div>
         
       
         
-        <p>Create and return a phrase backed by the sounds just created.</p>
+        <p>Move the pointer forward one position. This is the equivalent of consuming
+a message.</p>
 
         
-          <div class='highlight'><pre>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Phrase(sounds);
+          <div class='highlight'><pre>        <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">advancePointer</span><span class="hljs-params">()</span> </span>{
+            <span class="hljs-keyword">this</span>.position++;
+        }</pre></div>
+        
+      
+        
+        <p>Obtain the next message in the sequence. Note that this does NOT advance the pointer.
+That should be done manually if it is desired. This method will return null if
+<code>hasNext()</code> returns false.</p>
+
+        
+          <div class='highlight'><pre>        <span class="hljs-function"><span class="hljs-keyword">public</span> MidiEvent <span class="hljs-title">getNext</span><span class="hljs-params">()</span> </span>{
+            <span class="hljs-keyword">if</span> (hasNext())
+                <span class="hljs-keyword">return</span> midiTrack.get(position);
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+        }</pre></div>
+        
+      
+        
+        <p>Check if there is another message still not consumed in this track.</p>
+
+        
+          <div class='highlight'><pre>        <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">hasNext</span><span class="hljs-params">()</span> </span>{
+            <span class="hljs-keyword">return</span> position &lt; midiTrack.size();
+        }
+    }
+
+    <span class="hljs-keyword">private</span> Collection&lt;TimeStampedMIDIMessage&gt; stampedMIDIMessages;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">double</span> duration;</pre></div>
+        
+      
+        
+        <p>Create a new virtual player that is playing the given sequence.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">VirtualMIDIPlayer</span><span class="hljs-params">(Sequence sequence)</span> </span>{
+        <span class="hljs-keyword">if</span> (sequence.getDivisionType() != Sequence.PPQ)
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"Sequence division type was not PPQ. Virtual playback only supports PPQ sequences"</span>);
+
+        initStampedMIDIMessages(sequence);
+    }</pre></div>
+        
+      
+        
+        <p>Set the sequence playing in this virtual midi player.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setSequence</span><span class="hljs-params">(Sequence sequence)</span> </span>{
+        <span class="hljs-keyword">if</span> (sequence.getDivisionType() != Sequence.PPQ)
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"Sequence division type was not PPQ. Virtual playback only supports PPQ sequences"</span>);
+
+        initStampedMIDIMessages(sequence);
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initStampedMIDIMessages</span><span class="hljs-params">(Sequence sequence)</span> </span>{
+        stampedMIDIMessages = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();</pre></div>
+        
+      
+        
+        <p>Wrap all of the tracks in the sequence in a tracker.</p>
+
+        
+          <div class='highlight'><pre>        TrackTracker[] tracks = <span class="hljs-keyword">new</span> TrackTracker[sequence.getTracks().length];
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; tracks.length; i++) {
+            tracks[i] = <span class="hljs-keyword">new</span> TrackTracker(sequence.getTracks()[i]);
+        }</pre></div>
+        
+      
+        
+        <p>If no tempo is specified this is the tempo</p>
+
+        
+          <div class='highlight'><pre>        <span class="hljs-keyword">int</span> usPerBeat = DEFAULT_US_PER_BEAT;</pre></div>
+        
+      
+        
+        <p>The tracks must use the <code>PPQ</code> division type and therefor the resolution is in
+pulses per quarter note or <code>ticksPerBeat</code></p>
+
+        
+          <div class='highlight'><pre>        <span class="hljs-keyword">int</span> ticksPerBeat = sequence.getResolution();</pre></div>
+        
+      
+        
+        <p>Track the tick number of the last played message to calculate how much time has elapsed</p>
+
+        
+          <div class='highlight'><pre>        <span class="hljs-keyword">long</span> lastTick = <span class="hljs-number">0</span>;</pre></div>
+        
+      
+        
+        <p>The current time is also updated with the lastTick. It tracks the imaginary time (in &mu;s)</p>
+
+        
+          <div class='highlight'><pre>        <span class="hljs-keyword">long</span> currentTime = <span class="hljs-number">0</span>;</pre></div>
+        
+      
+        
+        <p>Crawl through the tracks grabbing the first occurring event (tick-wise)</p>
+
+        
+          <div class='highlight'><pre>        <span class="hljs-keyword">while</span> (<span class="hljs-keyword">true</span>) {
+            MidiEvent nextEvent = <span class="hljs-keyword">null</span>;
+            TrackTracker selectedTracker = <span class="hljs-keyword">null</span>;
+            <span class="hljs-keyword">for</span> (TrackTracker tracker : tracks) {
+                <span class="hljs-keyword">if</span> (tracker.hasNext()) {</pre></div>
+        
+      
+        
+        <p>Pull the next event on this track</p>
+
+        
+          <div class='highlight'><pre>                    MidiEvent event = tracker.getNext();</pre></div>
+        
+      
+        
+        <p>If we haven’t picked an event yet or this event occurs before the selected one
+then pick it as the working event</p>
+
+        
+          <div class='highlight'><pre>                    <span class="hljs-keyword">if</span> (nextEvent == <span class="hljs-keyword">null</span> || event.getTick() &lt; nextEvent.getTick()) {
+                        nextEvent = event;
+                        selectedTracker = tracker;
+                    }
+                }
+            }</pre></div>
+        
+      
+        
+        <p>If no tracker is selected that means we have reached the end of the sequence
+and we can break out of this loop.</p>
+
+        
+          <div class='highlight'><pre>            <span class="hljs-keyword">if</span> (selectedTracker == <span class="hljs-keyword">null</span>)
+                <span class="hljs-keyword">break</span>;</pre></div>
+        
+      
+        
+        <p>We have pulled a message from this track so update our trakers pointer
+to point to the next message</p>
+
+        
+          <div class='highlight'><pre>            selectedTracker.advancePointer();</pre></div>
+        
+      
+        
+        <p>Update the current time to properly track the new event</p>
+
+        
+          <div class='highlight'><pre>            <span class="hljs-keyword">long</span> tick = nextEvent.getTick();</pre></div>
+        
+      
+        
+        <p>The units for the following calculations look like the following:<br>
+<sup>&mu;</sup>&fracsl;<sub>beat</sub> &middot; <sup>beat</sup>&fracsl;<sub>ticks</sub> &middot; ticks = &mu;
+This gives us the number of microseconds that has passed since the last tick</p>
+
+        
+          <div class='highlight'><pre>            currentTime += ((tick - lastTick) * usPerBeat) / ticksPerBeat;</pre></div>
+        
+      
+        
+        <p>Update the <code>lastTick</code> to the current tick</p>
+
+        
+          <div class='highlight'><pre>            lastTick = tick;
+
+            MidiMessage msg = nextEvent.getMessage();
+            <span class="hljs-keyword">if</span> (msg <span class="hljs-keyword">instanceof</span> MetaMessage) {</pre></div>
+        
+      
+        
+        <p>This is updating synthesiser info and therefore doesn’t need to be played back in the
+receiver. If the message is a tempo change then we need to update our micro seconds per beat.</p>
+
+        
+          <div class='highlight'><pre>                <span class="hljs-keyword">if</span> (((MetaMessage) msg).getType() == <span class="hljs-number">0x51</span>) {
+                    <span class="hljs-keyword">byte</span>[] data = ((MetaMessage) msg).getData();</pre></div>
+        
+      
+        
+        <p>The data for this message is the number of micro seconds per beat written over 3 bytes
+so we need to combine them again.</p>
+
+        
+          <div class='highlight'><pre>                    usPerBeat = ((data[<span class="hljs-number">0</span>] &amp; <span class="hljs-number">0xff</span>) &lt;&lt; <span class="hljs-number">16</span>) | ((data[<span class="hljs-number">1</span>] &amp; <span class="hljs-number">0xff</span>) &lt;&lt; <span class="hljs-number">8</span>) | (data[<span class="hljs-number">2</span>] &amp; <span class="hljs-number">0xff</span>);
+                }
+            } <span class="hljs-keyword">else</span> {</pre></div>
+        
+      
+        
+        <p>It should be stamped and remembered</p>
+
+        
+          <div class='highlight'><pre>                stampedMIDIMessages.add(<span class="hljs-keyword">new</span> TimeStampedMIDIMessage(currentTime, msg));
+            }
+        }</pre></div>
+        
+      
+        
+        <p>Convert the duration which is in microseconds, to seconds</p>
+
+        
+          <div class='highlight'><pre>        <span class="hljs-keyword">this</span>.duration = currentTime / MICROSECONDS_PER_SECOND;
+    }</pre></div>
+        
+      
+        
+        <p>Play the last set sequence fot the given receiver.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">playTrackFor</span><span class="hljs-params">(Receiver receiver)</span> </span>{
+        <span class="hljs-keyword">for</span> (TimeStampedMIDIMessage message : <span class="hljs-keyword">this</span>.stampedMIDIMessages) {
+            message.feedTo(receiver);
+        }
+    }</pre></div>
+        
+      
+        
+        <p>Get the duration of the last set sequence in seconds.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">double</span> <span class="hljs-title">getDuration</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.duration;
     }
 }</pre></div>
         
