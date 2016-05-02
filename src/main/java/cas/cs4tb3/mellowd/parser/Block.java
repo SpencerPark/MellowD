@@ -16,9 +16,7 @@ import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiEvent;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Track;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 //This class is a core element in the compiler. It does a good majority of the actual translation
 //to MIDI events. It is responsible for keeping its own time so that it knows where to place events
@@ -57,6 +55,13 @@ public class Block {
     //note but at the time the note is received the compiler doesn't know when the next
     //note will be so we can hold onto the reset up here.
     private ShortMessage queuedPitchReset;
+
+    //The `lastAddedSlurOffs` is a list of NoteOff messages that have been added but the notes
+    //need to be slurred. As a result they may need to be pushed further into the future and
+    //so they need to be remembered for atleast one extra note addition.
+    private Set<MidiEvent> lastAddedSlurOffs = new HashSet<>();
+
+    private long lastTick = 0L;
 
     protected Block(TrackManager trackManager, TimingEnvironment timingEnv, Track track, BlockOptions options, String name, Dynamic dynamic) {
         this.trackManager = trackManager;
@@ -189,10 +194,13 @@ public class Block {
         //then pass through the articulation modifications to tweak it for a more
         //custom sound.
         long tickDuration = this.timingEnv.ticksInBeat(sound.getDuration());
-        if (sound.isSlurred() || sound.getArticulation().equals(Articulation.TENUTO))
+        boolean slurred = false;
+        if (sound.isSlurred()) {
+            slurred = true;
             tickDuration += tickDuration/8;
+        }
         int velocity = sound.getVelocity();
-        int offVelocity = sound.isSlurred() ? 1 : 96;
+        int offVelocity = slurred ? 1 : 96;
         boolean roll = false;
         long offsetStep = 0;
 
@@ -234,7 +242,8 @@ public class Block {
             //and so in order to preform a tenuto note the note will be let off as slow as possible with
             //a slightly longer duration.
             case TENUTO:
-                tickDuration = tickDuration + (tickDuration / 8);
+                slurred = true;
+                tickDuration += (tickDuration / 8);
                 offVelocity = 1;
                 break;
             //Gliscando is a glide. It can be preformed as a pitch bend. To preform a gliscando a total of
@@ -270,21 +279,60 @@ public class Block {
 
         //Now that all of the performance data is set we can create the events and add them to the
         //track.
+        NoteOnLoop:
         for (ShortMessage message : sound.getSound().noteOn(channel.midiChannelNum, velocity)) {
+            if (slurred) {
+                for (MidiEvent lastOffEvent : lastAddedSlurOffs) {
+                    if (((ShortMessage) lastOffEvent.getMessage()).getData1() == message.getData1()) {
+                        //We have a slurred note with the same value that is waiting for a completion
+                        //so we shouldn't add a duplicate.
+                        break NoteOnLoop;
+                    }
+                }
+            }
             addEventToTrack(new MidiEvent(message, this.time + offset));
             if (roll) offset += offsetStep;
         }
 
         offset = 0;
 
+        Collection<MidiEvent> newSlurOffEvents = new LinkedList<>();
         //The off events will occur after the note completion hence the `this.time + tickDuration`
         for (ShortMessage message : sound.getSound().noteOff(channel.midiChannelNum, offVelocity)) {
-            addEventToTrack(new MidiEvent(message, this.time + tickDuration + offset));
+            long endTime = this.time + tickDuration + offset;
+
+            MidiEvent event = null;
+            Iterator<MidiEvent> eventIterator = lastAddedSlurOffs.iterator();
+            while (eventIterator.hasNext()) {
+                MidiEvent lastOffEvent = eventIterator.next();
+                if (((ShortMessage) lastOffEvent.getMessage()).getData1() == message.getData1()) {
+                    //The lastOffEvent should be delayed to this off's time
+                    lastOffEvent.setTick(endTime);
+                    event = lastOffEvent;
+                    eventIterator.remove();
+                }
+            }
+            if (event == null) event = new MidiEvent(message, endTime);
+
+            if (slurred) newSlurOffEvents.add(event);
+            else         addEventToTrack(event);
             if (roll) offset += offsetStep;
         }
 
+        //Empty the last queue
+        for (MidiEvent event : lastAddedSlurOffs) {
+            addEventToTrack(event);
+        }
+        lastAddedSlurOffs.clear();
+
+        //Add all of the newSlurOffEvents
+        lastAddedSlurOffs.addAll(newSlurOffEvents);
+
         //Lastly we need to increase the state time as we just played some music!
         this.time += this.timingEnv.ticksInBeat(sound.getDuration());
+
+        //Keep track of the state time for the end of the song represented by this block
+        this.lastTick = this.time + tickDuration + offset;
     }
 
     //This method repeats all of the events added in the most recent block fragment
@@ -368,7 +416,7 @@ public class Block {
         if (loopCount > 0) addLoopedEvents();
 
         MidiEvent endOfTrackEvent = track.get(track.size()-1);
-        endOfTrackEvent.setTick(endOfTrackEvent.getTick() + timingEnv.getPPQ());
+        endOfTrackEvent.setTick(this.lastTick + timingEnv.getPPQ());
     }
 
     //When the song is finished we may need to report some "unclosed" operations like a

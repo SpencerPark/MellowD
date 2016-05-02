@@ -61,8 +61,8 @@ public class WavIODelegate implements SequenceIODelegate {
             throw new IOException("Cannot play the track back to the receiver. Reason: " + e.getLocalizedMessage(), e);
         }
 
-        // Calculate how long the WAV file needs to be. Add 40 so that the end of the track isnt chopped
-        final long len = (long) (stream.getFormat().getFrameRate() * (player.getDuration() + 40));
+        // Calculate how long the WAV file needs to be
+        final long len = (long) (stream.getFormat().getFrameRate() * player.getDuration());
         stream = new AudioInputStream(stream, stream.getFormat(), len);
 
         // Write WAVE file to disk.

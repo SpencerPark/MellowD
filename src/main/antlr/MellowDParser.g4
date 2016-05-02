@@ -300,10 +300,16 @@ slurredRhythm[Rhythm rhy]
 //To slur the notes in the tuplet the `rhythmDef` is wrapped in `(` and `)`. Each tuplet can only consist
 //of beats of the same duration so there is no reason to write the beat out multiple times. It is
 //therefore only written once but adds `num` beats to the rhythm.
-tuplet[Rhythm rhy]
+tuplet[Rhythm rhy] locals [boolean slur = false, List<Beat> customDef = new LinkedList<>();]
     : num=NUMBER ( COLON div=NUMBER )?
-        ( PAREN_OPEN rhythmDef PAREN_CLOSE
-        | rhythmDef
+        ( PAREN_OPEN {$slur = true;}
+            ( rhythmDef
+            | BRACKET_OPEN rhythmDef {$customDef.add($rhythmDef.beat);} ( COMMA rhythmDef {$customDef.add($rhythmDef.beat);} )* BRACKET_CLOSE
+            )
+          PAREN_CLOSE
+        | ( rhythmDef
+          | BRACKET_OPEN rhythmDef {$customDef.add($rhythmDef.beat);} ( COMMA rhythmDef {$customDef.add($rhythmDef.beat);} )* BRACKET_CLOSE
+          )
         )
         {
             //Check the preconditions on the num and div
@@ -312,19 +318,23 @@ tuplet[Rhythm rhy]
             if ($div != null && $div.int == 0)
                 throw new ParseException($div, "Tuplet division cannot be 0");
 
-            //If the PAREN_OPEN is present then the tuplet is slurred
-            boolean slur = $PAREN_OPEN != null;
-            //Expand the beat to the number of beats in the numerator
-            for (int i = 0; i < $num.int; i++) {
-                Beat beat;
-                //If the division is present use it in the duration calculation
-                if ($div != null)
-                    beat = $rhythmDef.beat.tuplet($num.int, $div.int);
-                //Otherwise use the default (num only) duration calculation
-                else
-                    beat = $rhythmDef.beat.tuplet($num.int);
-                //Append the beat to the rhythm
-                rhy.append(beat, slur);
+            if ($customDef.isEmpty()) {
+                //Expand the beat to the number of beats in the numerator
+                for (int i = 0; i < $num.int; i++) {
+                    //If the division is present use it in the duration calculation
+                    if ($div != null)
+                        rhy.append($rhythmDef.beat.tuplet($num.int, $div.int), $slur);
+                    //Otherwise use the default (num only) duration calculation
+                    else
+                        rhy.append($rhythmDef.beat.tuplet($num.int), $slur);
+                }
+            } else {
+                for (Beat beat : $customDef) {
+                    if ($div != null)
+                        rhy.append(beat.tuplet($num.int, $div.int), $slur);
+                    else
+                        rhy.append(beat.tuplet($num.int), $slur);
+                }
             }
         }
     ;

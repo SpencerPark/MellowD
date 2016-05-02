@@ -93,7 +93,6 @@ public class Compiler {
                 .dest("IODelegate")
                 .action(Arguments.storeConst())
                 .setConst(MIDIIODelegate.getInstance())
-                .setDefault(MIDIIODelegate.getInstance())
                 .help("Set the output type of the compiler to a MIDI file (.mid). Default: MIDI (.mid)");
         outputFormat.addArgument("--wav", "--wave")
                 .dest("IODelegate")
@@ -198,7 +197,10 @@ public class Compiler {
                         compilationResult.getTracks()[0].add(new MidiEvent(EOT_MESSAGE, 1));
                     }
 
+                    //If not specified the MIDI delegate should be used
                     SequenceIODelegate ioDelegate = arguments.get("IODelegate");
+                    if (ioDelegate == null)
+                        ioDelegate = MIDIIODelegate.getInstance();
 
                     //The `outFile` is a file in the `outDir` with the same name as the file to compile
                     //with the `.mid` file extension instead.
