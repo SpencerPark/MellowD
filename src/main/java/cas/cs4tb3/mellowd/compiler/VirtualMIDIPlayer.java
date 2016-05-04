@@ -117,7 +117,7 @@ public class VirtualMIDIPlayer {
             if (selectedTracker == null)
                 break;
 
-            //We have pulled a message from this track so update our trakers pointer
+            //We have pulled a message from this track so update our tracker's pointer
             //to point to the next message
             selectedTracker.advancePointer();
 

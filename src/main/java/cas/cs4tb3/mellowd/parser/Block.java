@@ -414,9 +414,6 @@ public class Block {
         //If a loop request was made now is the time to cash in all the newly
         //added events.
         if (loopCount > 0) addLoopedEvents();
-
-        MidiEvent endOfTrackEvent = track.get(track.size()-1);
-        endOfTrackEvent.setTick(this.lastTick + timingEnv.getPPQ());
     }
 
     //When the song is finished we may need to report some "unclosed" operations like a
@@ -425,5 +422,10 @@ public class Block {
         if (!this.dynBuffer.isEmpty())
             throw new ParseException(this.cresToken, "Gradual change specified but found EOF before the target" +
                     " dynamic is specified.");
+
+        MidiEvent endOfTrackEvent = track.get(track.size()-1);
+        track.remove(endOfTrackEvent);
+        endOfTrackEvent.setTick(this.lastTick + timingEnv.getPPQ());
+        track.add(endOfTrackEvent);
     }
 }
