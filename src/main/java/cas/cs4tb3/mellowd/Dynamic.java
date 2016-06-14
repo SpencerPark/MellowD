@@ -61,4 +61,11 @@ public enum Dynamic {
             stateTime += timingEnv.ticksInBeat(sound.getDuration());
         }
     }
+
+    //Clip the velocity to top or bottom out to the min or max if it is out of bounds.
+    public static int clip(int velocity) {
+        return Math.max(0, Math.min(velocity, 127));
+    }
+
+
 }

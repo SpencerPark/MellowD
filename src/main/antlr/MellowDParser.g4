@@ -560,7 +560,7 @@ locals [Block b, BlockOptions options]
                                             try {
                                                 $b.addPhrase($phrase.phr);
                                             } catch (InvalidMidiDataException e) {
-                                                throw new ParseException($dynamicDeclaration.start, e.getMessage());
+                                                throw new ParseException($phrase.start, e.getMessage());
                                             }
                                         }
         )*

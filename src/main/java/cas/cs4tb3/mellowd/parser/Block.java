@@ -219,7 +219,7 @@ public class Block {
             //played with a bit more velocity.
             case STACCATISSIMO:
                 tickDuration = tickDuration / 2;
-                velocity = Math.max(127, velocity + 3);
+                velocity = Dynamic.clip(velocity + 3);
                 offVelocity = 127;
                 break;
             //Marcato is the same a staccato but with more power. It is referred to
@@ -228,14 +228,14 @@ public class Block {
             //and the note will be release very quickly.
             case MARCATO:
                 tickDuration = tickDuration / 3;
-                velocity = Math.max(127, velocity + 5);
+                velocity = Dynamic.clip(velocity + 5);
                 offVelocity = 127;
                 break;
             //An accent is played by attacking the note. This gives it a much faster velocity and
             //will also drop off a bit quicker than the average note. This is sometimes referred to
             //as `dah` by jazz musicians.
             case ACCENT:
-                velocity = Math.max(127, velocity + 6);
+                velocity = Dynamic.clip(velocity + 6);
                 offVelocity = 113;
                 break;
             //Tenuto is the equivalent of a single note slur. It is also called `doo` by jazz musicians

@@ -140,7 +140,7 @@ public class Compiler {
 
             //Calculate the compilation time and display it in seconds to 6 decimal places.
             long compileTime = System.nanoTime() - startTime;
-            System.out.printf("Compilation took %.6f s\n",
+            System.out.printf("Compilation took %.4f s\n",
                     compileTime / 1E9d);
             //Display the duration of the compiled song in seconds.
             System.out.printf("Song length: %d s\n",
@@ -214,7 +214,7 @@ public class Compiler {
                         //that the expensive operation is converting to sound to the specified
                         //type.
                         long writeTime = System.nanoTime() - writeStartTime;
-                        System.out.printf("Conversion to %s took %.6f s\n",
+                        System.out.printf("Conversion to %s took %.4f s\n",
                                 ioDelegate.getExtension(), writeTime / 1E9d);
                     }
 

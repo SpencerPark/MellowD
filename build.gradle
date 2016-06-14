@@ -3,6 +3,7 @@ version '1.1.0'
 
 apply plugin: 'java'
 apply plugin: 'antlr'
+apply plugin: 'maven-publish'
 
 //Use java 7 source and class files
 compileJava {
@@ -87,4 +88,12 @@ test {
 
 generateGrammarSource {
     arguments += ['-package', 'cas.cs4tb3.mellowd.parser']
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 }
