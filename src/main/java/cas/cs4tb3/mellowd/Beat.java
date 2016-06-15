@@ -19,7 +19,8 @@ public class Beat {
 
     private final double numQuarters;
 
-    private Beat(double numQuarters) {
+    //TODO should this stay public or create a static initializer with some pooling?
+    public Beat(double numQuarters) {
         this.numQuarters = numQuarters;
     }
 

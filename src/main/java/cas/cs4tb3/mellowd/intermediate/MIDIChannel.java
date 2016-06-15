@@ -296,13 +296,12 @@ public class MIDIChannel {
         Track track = sequence.createTrack();
         MIDIChannel channel = new MIDIChannel(track, false, 1, timingEnvironment);
 
-        new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER).play(channel);
+        Sound sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
 
-        ArticulatedSound.Gliscando sound = (ArticulatedSound.Gliscando) ArticulatedSound.newSound(Chord.major(Pitch.B.shiftOctave(5)), Beat.QUARTER, Articulation.GLISCANDO);
-        sound.play(channel);
+        GradualDynamicChange dynamicChange = new GradualDynamicChange(Dynamic.p, Dynamic.ffff, new Beat(16));
+        dynamicChange.play(channel);
 
-        sound = new ArticulatedSound.Gliscando(Pitch.C.shiftOctave(5), Beat.EIGHTH);
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 16; i++) {
             //sound.setBendUp(i % 2 == 0);
             sound.play(channel);
         }
