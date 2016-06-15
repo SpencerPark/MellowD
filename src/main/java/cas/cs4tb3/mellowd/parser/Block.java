@@ -3,7 +3,6 @@
 
 package cas.cs4tb3.mellowd.parser;
 
-import cas.cs4tb3.mellowd.Articulation;
 import cas.cs4tb3.mellowd.Dynamic;
 import cas.cs4tb3.mellowd.PlayableSound;
 import cas.cs4tb3.mellowd.TimingEnvironment;

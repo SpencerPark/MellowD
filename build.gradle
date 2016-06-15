@@ -5,10 +5,10 @@ apply plugin: 'java'
 apply plugin: 'antlr'
 apply plugin: 'maven-publish'
 
-//Use java 7 source and class files
+//Use java 8 source and class files
 compileJava {
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 }
 
 //All required libs are on the maven central repo

@@ -46,9 +46,9 @@ public class TimingEnvironment {
 
     //The numerator and denominator for the time signature gives the synthesiser some hints
     //on what are the down and up beats. The bpm is the tempo.
-    public TimingEnvironment(byte numerator, byte denominator, int bpm) {
-        this.timeSigNum = numerator;
-        this.timeSigDen = denominator;
+    public TimingEnvironment(int numerator, int denominator, int bpm) {
+        this.timeSigNum = (byte) numerator;
+        this.timeSigDen = (byte) denominator;
         this.ppqn = DEFAULT_PPQN;
         this.bpm = bpm;
     }

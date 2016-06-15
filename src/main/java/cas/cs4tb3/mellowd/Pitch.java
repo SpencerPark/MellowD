@@ -9,7 +9,6 @@ import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.ShortMessage;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 //Pitch is a key building block in the Mellow D compiler. It specifies the value of the played
 //note. MIDI restricts the note value to 7 bits, hence we have 0-127 to work with. 0 corresponds
@@ -168,7 +167,7 @@ public final class Pitch implements MidiNoteMessageSource {
     }
 
     @Override
-    public List<ShortMessage> noteOff(int channel, int velocity) throws InvalidMidiDataException {
+    public Collection<ShortMessage> noteOff(int channel, int velocity) throws InvalidMidiDataException {
         if (this == REST)
             return Collections.emptyList();
         return Collections.singletonList(new ShortMessage(ShortMessage.NOTE_OFF, channel, midiNum, velocity));

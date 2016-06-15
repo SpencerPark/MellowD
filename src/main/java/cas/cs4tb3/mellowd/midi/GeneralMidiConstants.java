@@ -52,4 +52,9 @@ public class GeneralMidiConstants {
     public static final int BANK_SELECT_CC_1 = 0;
     public static final int BANK_SELECT_CC_1_VAL = 121;
     public static final int BANK_SELECT_CC_2 = 32;
+
+    public static final int DEFAULT_SOUND_BANK = 0;
+
+    public static final int MAX_VELOCITY = 127;
+    public static final int MIN_VELOCITY = 0;
 }

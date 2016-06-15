@@ -3,16 +3,17 @@
 
 package cas.cs4tb3.mellowd.compiler;
 
+import cas.cs4tb3.mellowd.ArticulatedSound;
+
 import javax.sound.midi.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.io.Closeable;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 //This class is a simple playback manager that provides some concurrency features
 //wrapped around the java midi sequencer. It provides `play()` and `stop()` methods
 //for starting and stopping the sequence passed in at construction time.
-public class SequencePlayer {
+public class SequencePlayer implements Closeable {
     //The `PLAYER_NUM` will be used to better track the various threads created for playback
     private static final AtomicInteger PLAYER_NUM = new AtomicInteger(0);
     //This is the midi message type for the end of track meta message
@@ -23,6 +24,7 @@ public class SequencePlayer {
     private final Sequence sequence;
     //Track the state of this player such that `true` &harr; music playing.
     private boolean isPlaying;
+    private final ExecutorService player = Executors.newSingleThreadExecutor(r -> new Thread(r, "SequencePlayer-"+PLAYER_NUM.getAndIncrement()));
 
     //This constructor simply takes the desired sequence player and sequence to play
     public SequencePlayer(Sequencer sequencer, Sequence sequence) {
@@ -31,12 +33,9 @@ public class SequencePlayer {
 
         //To correctly update the `isPlaying` state variable we will register a listener
         //that sets the flag to false when it hears the sequencer end a track.
-        sequencer.addMetaEventListener(new MetaEventListener() {
-            @Override
-            public void meta(MetaMessage meta) {
-                if (meta.getType() == END_OF_TRACK_MESSAGE) {
-                    isPlaying = false;
-                }
+        sequencer.addMetaEventListener(meta -> {
+            if (meta.getType() == END_OF_TRACK_MESSAGE) {
+                isPlaying = false;
             }
         });
     }
@@ -60,32 +59,16 @@ public class SequencePlayer {
         //every 50ms to check if the playback is complete. If it is the playback is finished and
         //the task completes. This allows for syncing with this task or polling its `isDone()`
         //method to integrate the playback into the application.
-        final FutureTask<SequencePlayer> player = new FutureTask<SequencePlayer>(new Runnable() {
-            @Override
-            public void run() {
-                while (isPlaying) {
-                    try {
-                        Thread.sleep(50L);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
+        return this.player.submit(() -> {
+            while (isPlaying) {
+                try {
+                    Thread.sleep(50L);
+                } catch (InterruptedException e) {
+                    break;
                 }
             }
-        }, this) {
-            @Override
-            protected void done() {
-                stop();
-            }
-        };
-
-        //Lastly we can startup a new thread and run the worker on it.
-        new Thread("SequencePlayer-"+PLAYER_NUM.getAndIncrement()) {
-            @Override
-            public void run() {
-                player.run();
-            }
-        }.start();
-        return player;
+            SequencePlayer.this.stop();
+        }, this);
     }
 
     //This convenience method just executes it's asynchronous counterpart and block until
@@ -102,5 +85,12 @@ public class SequencePlayer {
             this.isPlaying = false;
             this.sequencer.stop();
         }
+    }
+
+    @Override
+    public void close() {
+        stop();
+        this.sequencer.close();
+        this.player.shutdown();
     }
 }

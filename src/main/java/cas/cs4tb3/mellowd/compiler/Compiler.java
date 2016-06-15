@@ -45,7 +45,7 @@ public class Compiler {
     public static final MidiMessage EOT_MESSAGE = new ImmutableEndOfTrack();
     public static final String FILE_EXTENSION = ".mlod";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         //The ArgumentParser is from the [argparse4j](https://argparse4j.github.io/). It is
         //a library for parsing command line arguments.
 
@@ -121,8 +121,8 @@ public class Compiler {
 
         //Now that we have valid arguments we need to pull the information
         //out of the parser.
-        File outDir = handleOutDir(arguments.<File>get("outdir"));
-        File toCompile = handleInFile(arguments.<File>get("file"));
+        File outDir = handleOutDir(arguments.get("outdir"));
+        File toCompile = handleInFile(arguments.get("file"));
         List<Number> tempo = arguments.getList("timesig");
 
         //Now we can begin compiling
@@ -182,6 +182,8 @@ public class Compiler {
 
                 //Make a blocking call to start playing the song
                 player.playSync();
+
+                player.close();
 
                 //When playSync returns this means the song is done. Tell the user that the play is
                 //completed and exit.
