@@ -14,6 +14,10 @@ public class Phrase implements Playable {
         this.elements = new LinkedList<>(toCopy.elements);
     }
 
+    public void addElement(Playable playable) {
+        this.elements.add(playable);
+    }
+
     @Override
     public void play(MIDIChannel channel) {
         elements.forEach(p -> p.play(channel));

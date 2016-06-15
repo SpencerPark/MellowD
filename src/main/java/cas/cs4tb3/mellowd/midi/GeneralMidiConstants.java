@@ -55,6 +55,10 @@ public class GeneralMidiConstants {
 
     public static final int DEFAULT_SOUND_BANK = 0;
 
+    public static final int SUSTAIN_CC = 64;
+    public static final int SUSTAIN_CC_VAL_ON = 127;
+    public static final int SUSTAIN_CC_VAL_OFF = 0;
+
     public static final int MAX_VELOCITY = 127;
     public static final int MIN_VELOCITY = 0;
 }

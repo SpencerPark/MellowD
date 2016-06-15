@@ -1,6 +1,7 @@
 package cas.cs4tb3.mellowd.intermediate;
 
 import cas.cs4tb3.mellowd.*;
+import cas.cs4tb3.mellowd.compiler.Compiler;
 import cas.cs4tb3.mellowd.compiler.SequencePlayer;
 import cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
 import cas.cs4tb3.mellowd.midi.GeneralMidiInstrument;
@@ -158,6 +159,22 @@ public class MIDIChannel {
         return this.slurred > 0;
     }
 
+    private void turnSustainPedalOn() {
+        try {
+            this.midiTrack.add(new MidiEvent(new ShortMessage(ShortMessage.CONTROL_CHANGE, channelNum, GeneralMidiConstants.SUSTAIN_CC, GeneralMidiConstants.SUSTAIN_CC_VAL_ON), this.stateTime));
+        } catch (InvalidMidiDataException e) {
+            throw new MidiRuntimeException("Cannot turn sustain pedal on.", e);
+        }
+    }
+
+    private void turnSustainPedalOff() {
+        try {
+            this.midiTrack.add(new MidiEvent(new ShortMessage(ShortMessage.CONTROL_CHANGE, channelNum, GeneralMidiConstants.SUSTAIN_CC, GeneralMidiConstants.SUSTAIN_CC_VAL_OFF), this.stateTime));
+        } catch (InvalidMidiDataException e) {
+            throw new MidiRuntimeException("Cannot turn sustain pedal off.", e);
+        }
+    }
+
     public boolean setSlurred(boolean slurred) {
         if (slurred) {
             this.slurred++;
@@ -187,15 +204,7 @@ public class MIDIChannel {
     //have finished playing and therefor this message must be properly placed at the end with the invocation
     //of this method.
     public final void finalizeEOT() {
-        //Remove the last event which we know to be the end of track message
-        MidiEvent endOfTrackEvent = midiTrack.get(midiTrack.size()-1);
-        midiTrack.remove(endOfTrackEvent);
-
-        //Put the event 1 quarter note after the last event so the ending is not clipped.
-        endOfTrackEvent.setTick(this.stateTime + 4 * timingEnvironment.getPPQ());
-
-        //Add the message back to the track so it is sorted into the correct order
-        midiTrack.add(endOfTrackEvent);
+        midiTrack.add(new MidiEvent(Compiler.EOT_MESSAGE, this.stateTime + timingEnvironment.getPPQ()));
     }
 
     public final void setPitchBend(int bendAmt) {
@@ -295,16 +304,74 @@ public class MIDIChannel {
         Sequence sequence = timingEnvironment.createSequence();
         Track track = sequence.createTrack();
         MIDIChannel channel = new MIDIChannel(track, false, 1, timingEnvironment);
+        channel.setVelocity(Dynamic.mp);
 
         Sound sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
+        sound.play(channel);
 
-        GradualDynamicChange dynamicChange = new GradualDynamicChange(Dynamic.p, Dynamic.ffff, new Beat(16));
-        dynamicChange.play(channel);
+        sound = new Sound(Pitch.REST, Beat.HALF);
+        sound.play(channel);
+        sound = new ArticulatedSound.Staccato(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
+        sound.play(channel);
+        sound = new Sound(Pitch.REST, Beat.HALF);
+        sound.play(channel);
 
-        for (int i = 0; i < 16; i++) {
-            //sound.setBendUp(i % 2 == 0);
-            sound.play(channel);
-        }
+        sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
+        sound.play(channel);
+        sound = new Sound(Pitch.REST, Beat.HALF);
+        sound.play(channel);
+        sound = new ArticulatedSound.Staccatissimo(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
+        sound.play(channel);
+        sound = new Sound(Pitch.REST, Beat.HALF);
+        sound.play(channel);
+
+        sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
+        sound.play(channel);
+        sound = new Sound(Pitch.REST, Beat.HALF);
+        sound.play(channel);
+        sound = new ArticulatedSound.Marcato(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
+        sound.play(channel);
+        sound = new Sound(Pitch.REST, Beat.HALF);
+        sound.play(channel);
+
+        sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
+        sound.play(channel);
+        sound = new Sound(Pitch.REST, Beat.HALF);
+        sound.play(channel);
+        sound = new ArticulatedSound.Accent(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
+        sound.play(channel);
+        sound = new Sound(Pitch.REST, Beat.HALF);
+        sound.play(channel);
+
+        sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
+        sound.play(channel);
+        sound = new Sound(Pitch.REST, Beat.HALF);
+        sound.play(channel);
+        sound = new ArticulatedSound.Tenuto(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
+        sound.play(channel);
+        sound = new Sound(Pitch.REST, Beat.HALF);
+        sound.play(channel);
+
+        sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
+        sound.play(channel);
+        sound = new Sound(Pitch.REST, Beat.HALF);
+        sound.play(channel);
+        sound = new ArticulatedSound.Gliscando(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
+        sound.play(channel);
+        sound = new Sound(Pitch.REST, Beat.HALF);
+        sound.play(channel);
+
+        sound = new Sound(Pitch.REST, Beat.HALF);
+        sound.play(channel);
+/*
+        Phrase phrase = new Phrase();
+
+        for (int i = 64; i < 64 + 12; i++)
+            phrase.addElement(new Sound(Pitch.getPitch(i), Beat.EIGHTH));
+
+        phrase.addElement(new SlurredPhrase(phrase));
+
+        phrase.play(channel)*/;
 
         channel.finalizeEOT();
 

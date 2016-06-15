@@ -12,8 +12,8 @@ import java.util.List;
  * the duration of the beat has passed.
  */
 public class Sound implements Playable {
-    protected final List<Pitch> pitches;
-    protected final Beat duration;
+    private final List<Pitch> pitches;
+    private final Beat duration;
 
     public Sound(Chord chord, Beat duration) {
         this.pitches = chord.getPitches();
@@ -27,6 +27,38 @@ public class Sound implements Playable {
 
     public Beat getDuration() {
         return duration;
+    }
+
+    public int getNumNotes() {
+        return pitches.size();
+    }
+
+    public boolean isChord() {
+        return getNumNotes() > 1;
+    }
+
+    protected void notesOn(MIDIChannel channel, long delay, int volumeIncrease) {
+        channel.doLater(delay, () -> pitches.forEach(p -> channel.noteOn(p, volumeIncrease)));
+    }
+
+    protected void noteOn(MIDIChannel channel, long delay, int noteIndex, int volumeIncrease) {
+        channel.doLater(delay, () -> channel.noteOn(pitches.get(noteIndex), volumeIncrease));
+    }
+
+    protected void notesOff(MIDIChannel channel, long delay, int offVolume) {
+        channel.doLater(delay, () -> pitches.forEach(p -> channel.noteOff(p, offVolume)));
+    }
+
+    protected void noteOff(MIDIChannel channel, long delay, int noteIndex, int offVolume) {
+        channel.doLater(delay, () -> channel.noteOff(pitches.get(noteIndex), offVolume));
+    }
+
+    protected long getDuration(MIDIChannel channel) {
+        return channel.ticksInBeat(this.duration);
+    }
+
+    protected void advanceDuration(MIDIChannel channel) {
+        channel.stepIntoFuture(this.duration);
     }
 
     @Override

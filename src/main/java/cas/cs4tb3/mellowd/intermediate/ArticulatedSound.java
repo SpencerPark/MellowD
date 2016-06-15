@@ -79,24 +79,22 @@ public abstract class ArticulatedSound extends Sound {
 
         @Override
         public void play(MIDIChannel channel) {
-            super.pitches.forEach(channel::noteOn);
+            super.notesOn(channel, 0, 0);
 
             //Staccato makes the performance short and choppy. Described in jazz
             //as `dit`. To achieve this effect the duration will be chopped to a
-            //third of its value and the note will be ended very quickly.
-            long tickDuration = channel.ticksInBeat(super.duration);
-            tickDuration /= 3;
+            //forth of its value and the note will be ended very quickly.
+            long tickDuration = super.getDuration(channel);
+            tickDuration /= 6;
 
-            int offVelocity = GeneralMidiConstants.MAX_VELOCITY;
+            super.notesOff(channel, tickDuration, GeneralMidiConstants.MAX_VELOCITY);
 
-            channel.doLater(tickDuration, () -> pitches.forEach(pitch -> channel.noteOff(pitch, offVelocity)));
-
-            channel.stepIntoFuture(super.duration);
+            super.advanceDuration(channel);
         }
     }
 
     public static class Staccatissimo extends ArticulatedSound {
-        private static final int VOLUME_INCREASE = 3;
+        private static final int VOLUME_INCREASE = 8;
 
         public Staccatissimo(Chord chord, Beat duration) {
             super(chord, duration, Articulation.STACCATISSIMO);
@@ -108,25 +106,23 @@ public abstract class ArticulatedSound extends Sound {
 
         @Override
         public void play(MIDIChannel channel) {
-            super.pitches.forEach(pitch -> channel.noteOn(pitch, VOLUME_INCREASE));
+            super.notesOn(channel, 0, VOLUME_INCREASE);
 
             //Staccatissimo makes the performance short but more powerful. It is
             //given some more emphasis. It is similar to staccato but the duration
             //is going to be chopped to a half (rather than a third) and it will be
             //played with a bit more velocity.
-            long tickDuration = channel.ticksInBeat(super.duration);
-            tickDuration /= 2;
+            long tickDuration = super.getDuration(channel);
+            tickDuration /= 4;
 
-            int offVelocity = GeneralMidiConstants.MAX_VELOCITY;
+            super.notesOff(channel, tickDuration, GeneralMidiConstants.MAX_VELOCITY);
 
-            channel.doLater(tickDuration, () -> pitches.forEach(pitch -> channel.noteOff(pitch, offVelocity)));
-
-            channel.stepIntoFuture(super.duration);
+            super.advanceDuration(channel);
         }
     }
 
     public static class Marcato extends ArticulatedSound {
-        private static final int VOLUME_INCREASE = 5;
+        private static final int VOLUME_INCREASE = 12;
 
         public Marcato(Chord chord, Beat duration) {
             super(chord, duration, Articulation.MARCATO);
@@ -138,25 +134,23 @@ public abstract class ArticulatedSound extends Sound {
 
         @Override
         public void play(MIDIChannel channel) {
-            super.pitches.forEach(pitch -> channel.noteOn(pitch, VOLUME_INCREASE));
+            super.notesOn(channel, 0, VOLUME_INCREASE);
 
             //Marcato is the same a staccato but with more power. It is referred to
             //as `dhat` by jazz musicians and to preform a note with articulated with marcato
             //the note's duration will be chopped to a third, the velocity will be increased
             //and the note will be release very quickly.
-            long tickDuration = channel.ticksInBeat(super.duration);
-            tickDuration /= 3;
+            long tickDuration = super.getDuration(channel);
+            tickDuration /= 6;
 
-            int offVelocity = GeneralMidiConstants.MAX_VELOCITY;
+            super.notesOff(channel, tickDuration, GeneralMidiConstants.MAX_VELOCITY);
 
-            channel.doLater(tickDuration, () -> pitches.forEach(pitch -> channel.noteOff(pitch, offVelocity)));
-
-            channel.stepIntoFuture(super.duration);
+            super.advanceDuration(channel);
         }
     }
 
     public static class Accent extends ArticulatedSound {
-        private static final int VOLUME_INCREASE = 6;
+        private static final int VOLUME_INCREASE = 16;
         private static final int OFF_VELOCITY = 113;
 
         public Accent(Chord chord, Beat duration) {
@@ -169,15 +163,15 @@ public abstract class ArticulatedSound extends Sound {
 
         @Override
         public void play(MIDIChannel channel) {
-            super.pitches.forEach(pitch -> channel.noteOn(pitch, VOLUME_INCREASE));
+            super.notesOn(channel, 0, VOLUME_INCREASE);
 
             //An accent is played by attacking the note. This gives it a much faster velocity and
             //will also drop off a bit quicker than the average note. This is sometimes referred to
             //as `dah` by jazz musicians.
 
-            channel.stepIntoFuture(super.duration);
+            super.notesOff(channel, super.getDuration(channel), OFF_VELOCITY);
 
-            pitches.forEach(pitch -> channel.noteOff(pitch, OFF_VELOCITY));
+            super.advanceDuration(channel);
         }
     }
 
@@ -194,17 +188,17 @@ public abstract class ArticulatedSound extends Sound {
 
         @Override
         public void play(MIDIChannel channel) {
-            super.pitches.forEach(channel::noteOn);
+            super.notesOn(channel, 0, 0);
 
             //Tenuto is the equivalent of a single note slur. It is also called `doo` by jazz musicians
             //and so in order to preform a tenuto note the note will be let off as slow as possible with
             //a slightly longer duration.
-            long tickDuration = channel.ticksInBeat(super.duration);
+            long tickDuration = super.getDuration(channel);
             tickDuration += tickDuration / 8;
 
-            channel.doLater(tickDuration, () -> pitches.forEach(pitch -> channel.noteOff(pitch, OFF_VELOCITY)));
+            super.notesOff(channel, tickDuration, OFF_VELOCITY);
 
-            channel.stepIntoFuture(super.duration);
+            super.advanceDuration(channel);
         }
     }
 
@@ -236,30 +230,30 @@ public abstract class ArticulatedSound extends Sound {
             //as to not interfere with the next note. Additionally a reset message will be queued for the
             //next note to take.
 
-            long tickDuration = channel.ticksInBeat(super.duration);
+            long tickDuration = super.getDuration(channel);
             //If the sound is a chord a gliscando should be preformed as a roll.
-            if (super.pitches.size() > 1) {
+            if (super.isChord()) {
                 //The roll will play the first note in the chord right on the down beat. Each
                 //consecutive note in the chord will be delayed by the `offsetStep`.
-                long offsetStep = tickDuration / (super.pitches.size() * 4);
+                long offsetStep = tickDuration / (super.getNumNotes() * 4);
                 long offset = 0;
-                for (Pitch pitch : super.pitches) {
-                    channel.doLater(offset, () -> channel.noteOn(pitch));
+                for (int pitchIndex = 0; pitchIndex < super.getNumNotes(); pitchIndex++) {
+                    super.noteOn(channel, offset, pitchIndex, 0);
                     offset += offsetStep;
                 }
                 //otherwise preform the gliscando as a pitch bend.
             } else {
-                super.pitches.forEach(channel::noteOn);
+                super.notesOn(channel, 0, 0);
                 for (int offset = 0; offset < BEND_STEPS; offset++) {
                     int bendAmount = GeneralMidiConstants.NO_PITCH_BEND + ( offset * ( bendUp ? BEND_AMT : -BEND_AMT ) );
                     channel.doLater(tickDuration * offset / BEND_STEPS, () -> channel.setPitchBend(bendAmount));
                 }
-                channel.doLater(super.duration, channel::resetPitchBend);
+                channel.doLater(super.getDuration(channel), channel::resetPitchBend);
             }
 
-            channel.stepIntoFuture(super.duration);
+            super.notesOff(channel, super.getDuration(channel), MIDIChannel.DEFAULT_OFF_VELOCITY);
 
-            pitches.forEach(channel::noteOff);
+            super.advanceDuration(channel);
         }
     }
 }
