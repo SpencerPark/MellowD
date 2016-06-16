@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Phrase implements Playable {
+    private Sound lastAddedSound;
     protected final List<Playable> elements;
 
     public Phrase() {
@@ -15,6 +16,13 @@ public class Phrase implements Playable {
     }
 
     public void addElement(Playable playable) {
+        if (playable instanceof Sound) {
+            Sound next = (Sound) playable;
+            if (this.lastAddedSound != null) {
+                this.lastAddedSound.setNext(next);
+            }
+            this.lastAddedSound = next;
+        }
         this.elements.add(playable);
     }
 

@@ -12,8 +12,10 @@ import java.util.List;
  * the duration of the beat has passed.
  */
 public class Sound implements Playable {
+    private static final Beat SLUR_EXTENSION = Beat.EIGHTH;
     private final List<Pitch> pitches;
     private final Beat duration;
+    private Sound next;
 
     public Sound(Chord chord, Beat duration) {
         this.pitches = chord.getPitches();
@@ -33,24 +35,44 @@ public class Sound implements Playable {
         return pitches.size();
     }
 
+    public void setNext(Sound next) {
+        this.next = next;
+    }
+
     public boolean isChord() {
         return getNumNotes() > 1;
     }
 
     protected void notesOn(MIDIChannel channel, long delay, int volumeIncrease) {
-        channel.doLater(delay, () -> pitches.forEach(p -> channel.noteOn(p, volumeIncrease)));
+        channel.doLater(delay, () -> pitches.forEach(p -> {
+            if (channel.isSlurred() && channel.isNoteOn(p)) return;
+            channel.noteOn(p, volumeIncrease);
+        }));
     }
 
     protected void noteOn(MIDIChannel channel, long delay, int noteIndex, int volumeIncrease) {
-        channel.doLater(delay, () -> channel.noteOn(pitches.get(noteIndex), volumeIncrease));
+        channel.doLater(delay, () -> {
+            Pitch p = pitches.get(noteIndex);
+            if (channel.isSlurred() && channel.isNoteOn(p)) return;
+            channel.noteOn(p, volumeIncrease);
+        });
     }
 
     protected void notesOff(MIDIChannel channel, long delay, int offVolume) {
-        channel.doLater(delay, () -> pitches.forEach(p -> channel.noteOff(p, offVolume)));
+        if (channel.isSlurred()) delay += channel.ticksInBeat(SLUR_EXTENSION);
+        channel.doLater(delay, () -> pitches.forEach(p -> {
+            if (next != null && channel.isSlurred() && next.pitches.contains(p)) return;
+            channel.noteOff(p, offVolume);
+        }));
     }
 
     protected void noteOff(MIDIChannel channel, long delay, int noteIndex, int offVolume) {
-        channel.doLater(delay, () -> channel.noteOff(pitches.get(noteIndex), offVolume));
+        if (channel.isSlurred()) delay += channel.ticksInBeat(SLUR_EXTENSION);
+        channel.doLater(delay, () -> {
+            Pitch p = pitches.get(noteIndex);
+            if (next != null && channel.isSlurred() && next.pitches.contains(p)) return;
+            channel.noteOff(p, offVolume);
+        });
     }
 
     protected long getDuration(MIDIChannel channel) {
@@ -63,8 +85,8 @@ public class Sound implements Playable {
 
     @Override
     public void play(MIDIChannel channel) {
-        pitches.forEach(channel::noteOn);
-        channel.stepIntoFuture(duration);
-        pitches.forEach(channel::noteOff);
+        notesOn(channel, 0, 0);
+        notesOff(channel, getDuration(channel), MIDIChannel.DEFAULT_OFF_VELOCITY);
+        advanceDuration(channel);
     }
 }

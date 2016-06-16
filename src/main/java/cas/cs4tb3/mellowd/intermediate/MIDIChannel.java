@@ -309,69 +309,15 @@ public class MIDIChannel {
         Sound sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
         sound.play(channel);
 
-        sound = new Sound(Pitch.REST, Beat.HALF);
-        sound.play(channel);
-        sound = new ArticulatedSound.Staccato(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
-        sound.play(channel);
-        sound = new Sound(Pitch.REST, Beat.HALF);
-        sound.play(channel);
-
-        sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
-        sound.play(channel);
-        sound = new Sound(Pitch.REST, Beat.HALF);
-        sound.play(channel);
-        sound = new ArticulatedSound.Staccatissimo(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
-        sound.play(channel);
-        sound = new Sound(Pitch.REST, Beat.HALF);
-        sound.play(channel);
-
-        sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
-        sound.play(channel);
-        sound = new Sound(Pitch.REST, Beat.HALF);
-        sound.play(channel);
-        sound = new ArticulatedSound.Marcato(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
-        sound.play(channel);
-        sound = new Sound(Pitch.REST, Beat.HALF);
-        sound.play(channel);
-
-        sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
-        sound.play(channel);
-        sound = new Sound(Pitch.REST, Beat.HALF);
-        sound.play(channel);
-        sound = new ArticulatedSound.Accent(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
-        sound.play(channel);
-        sound = new Sound(Pitch.REST, Beat.HALF);
-        sound.play(channel);
-
-        sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
-        sound.play(channel);
-        sound = new Sound(Pitch.REST, Beat.HALF);
-        sound.play(channel);
-        sound = new ArticulatedSound.Tenuto(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
-        sound.play(channel);
-        sound = new Sound(Pitch.REST, Beat.HALF);
-        sound.play(channel);
-
-        sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
-        sound.play(channel);
-        sound = new Sound(Pitch.REST, Beat.HALF);
-        sound.play(channel);
-        sound = new ArticulatedSound.Gliscando(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
-        sound.play(channel);
-        sound = new Sound(Pitch.REST, Beat.HALF);
-        sound.play(channel);
-
-        sound = new Sound(Pitch.REST, Beat.HALF);
-        sound.play(channel);
-/*
         Phrase phrase = new Phrase();
 
-        for (int i = 64; i < 64 + 12; i++)
+        for (int i = 64; i < 64 + 12; i++) {
             phrase.addElement(new Sound(Pitch.getPitch(i), Beat.EIGHTH));
+        }
 
         phrase.addElement(new SlurredPhrase(phrase));
 
-        phrase.play(channel)*/;
+        phrase.play(channel);
 
         channel.finalizeEOT();
 

@@ -6,9 +6,6 @@ import cas.cs4tb3.mellowd.Pitch;
 import cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
 import cas.cs4tb3.mellowd.primitives.Chord;
 
-/**
- * Created on 2016-06-14.
- */
 public abstract class ArticulatedSound extends Sound {
     protected final Articulation articulation;
 
@@ -83,7 +80,7 @@ public abstract class ArticulatedSound extends Sound {
 
             //Staccato makes the performance short and choppy. Described in jazz
             //as `dit`. To achieve this effect the duration will be chopped to a
-            //forth of its value and the note will be ended very quickly.
+            //sixth of its value and the note will be ended very quickly.
             long tickDuration = super.getDuration(channel);
             tickDuration /= 6;
 
@@ -110,7 +107,7 @@ public abstract class ArticulatedSound extends Sound {
 
             //Staccatissimo makes the performance short but more powerful. It is
             //given some more emphasis. It is similar to staccato but the duration
-            //is going to be chopped to a half (rather than a third) and it will be
+            //is going to be chopped to a forth (rather than a sixth) and it will be
             //played with a bit more velocity.
             long tickDuration = super.getDuration(channel);
             tickDuration /= 4;
@@ -138,7 +135,7 @@ public abstract class ArticulatedSound extends Sound {
 
             //Marcato is the same a staccato but with more power. It is referred to
             //as `dhat` by jazz musicians and to preform a note with articulated with marcato
-            //the note's duration will be chopped to a third, the velocity will be increased
+            //the note's duration will be chopped to a sizth, the velocity will be increased
             //and the note will be release very quickly.
             long tickDuration = super.getDuration(channel);
             tickDuration /= 6;
