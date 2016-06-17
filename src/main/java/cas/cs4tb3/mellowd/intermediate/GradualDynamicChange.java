@@ -2,6 +2,7 @@ package cas.cs4tb3.mellowd.intermediate;
 
 import cas.cs4tb3.mellowd.Beat;
 import cas.cs4tb3.mellowd.Dynamic;
+import cas.cs4tb3.mellowd.midi.MIDIChannel;
 
 /**
  * Created on 2016-06-15.

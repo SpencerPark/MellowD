@@ -1,5 +1,7 @@
 package cas.cs4tb3.mellowd.intermediate;
 
+import cas.cs4tb3.mellowd.midi.MIDIChannel;
+
 import java.util.LinkedList;
 import java.util.List;
 

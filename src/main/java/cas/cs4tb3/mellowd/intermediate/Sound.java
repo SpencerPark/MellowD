@@ -2,6 +2,7 @@ package cas.cs4tb3.mellowd.intermediate;
 
 import cas.cs4tb3.mellowd.Beat;
 import cas.cs4tb3.mellowd.Pitch;
+import cas.cs4tb3.mellowd.midi.MIDIChannel;
 import cas.cs4tb3.mellowd.primitives.Chord;
 
 import java.util.Collections;
@@ -41,6 +42,11 @@ public class Sound implements Playable {
 
     public boolean isChord() {
         return getNumNotes() > 1;
+    }
+
+    //TODO find a better way to leak this data to gliscand
+    protected boolean isHigherInPitch(Sound other) {
+        return !this.isChord() && !other.isChord() && this.pitches.get(0).getMidiNum() >= other.pitches.get(0).getMidiNum();
     }
 
     protected void notesOn(MIDIChannel channel, long delay, int volumeIncrease) {

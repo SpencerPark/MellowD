@@ -1,18 +1,21 @@
-package cas.cs4tb3.mellowd.intermediate;
+package cas.cs4tb3.mellowd.midi;
 
-import cas.cs4tb3.mellowd.*;
+import cas.cs4tb3.mellowd.Beat;
+import cas.cs4tb3.mellowd.Dynamic;
+import cas.cs4tb3.mellowd.Pitch;
+import cas.cs4tb3.mellowd.TimingEnvironment;
 import cas.cs4tb3.mellowd.compiler.Compiler;
 import cas.cs4tb3.mellowd.compiler.SequencePlayer;
-import cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
-import cas.cs4tb3.mellowd.midi.GeneralMidiInstrument;
-import cas.cs4tb3.mellowd.midi.MidiRuntimeException;
+import cas.cs4tb3.mellowd.intermediate.Phrase;
+import cas.cs4tb3.mellowd.intermediate.Sound;
 import cas.cs4tb3.mellowd.primitives.Chord;
+import com.sun.istack.internal.NotNull;
 
 import javax.sound.midi.*;
 import java.io.IOException;
 import java.util.*;
 
-//A MIDIChannel wraps a javax.sound.midi.Track to provide state information.
+//A MIDIChannel wraps a javax.sound.midi.Track to provide virtual state information.
 public class MIDIChannel {
     private static class ScheduledAction {
         Runnable action;
@@ -69,6 +72,7 @@ public class MIDIChannel {
     private int velocity = Dynamic.mf.getVelocity(); //The velocity is mf by default
     private long stateTime = 0L;
     private int pitchBend = GeneralMidiConstants.NO_PITCH_BEND;
+    private final Map<MIDIControl<?>, Object> controllers;
 
     //This is a counter keeping track of the times that the slurred flag has been set
     //so that 2 calls to slurred require another 2 calls to un-slur.
@@ -81,14 +85,23 @@ public class MIDIChannel {
         this.timingEnvironment = timingEnvironment;
         this.notesOn = new BitSet(128);
         this.scheduledActions = new TreeSet<>(ScheduledAction::compare);
+        this.controllers = new HashMap<>();
     }
 
     public boolean isPercussion() {
         return isPercussion;
     }
 
-    public int getChannelNum() {
+    protected int getChannelNum() {
         return channelNum;
+    }
+
+    protected Track getMidiTrack() {
+        return midiTrack;
+    }
+
+    public long getStateTime() {
+        return stateTime;
     }
 
     public TimingEnvironment getTimingEnvironment() {
@@ -111,11 +124,7 @@ public class MIDIChannel {
         this.velocity = dynamic.getVelocity();
     }
 
-    public long getStateTime() {
-        return stateTime;
-    }
-
-    public final long stepIntoFuture(long stateTimeMod) {
+    public synchronized final long stepIntoFuture(long stateTimeMod) {
         long newTime = this.stateTime + stateTimeMod;
 
         //Preform all of the scheduled actions up until the new current time
@@ -139,7 +148,7 @@ public class MIDIChannel {
         return this.stateTime = newTime;
     }
 
-    public final long stepIntoFuture(Beat beat) {
+    public synchronized final long stepIntoFuture(Beat beat) {
         return stepIntoFuture(this.timingEnvironment.ticksInBeat(beat));
     }
 
@@ -159,20 +168,16 @@ public class MIDIChannel {
         return this.slurred > 0;
     }
 
-    private void turnSustainPedalOn() {
-        try {
-            this.midiTrack.add(new MidiEvent(new ShortMessage(ShortMessage.CONTROL_CHANGE, channelNum, GeneralMidiConstants.SUSTAIN_CC, GeneralMidiConstants.SUSTAIN_CC_VAL_ON), this.stateTime));
-        } catch (InvalidMidiDataException e) {
-            throw new MidiRuntimeException("Cannot turn sustain pedal on.", e);
-        }
-    }
+    @SuppressWarnings("unchecked")
+    public <T> T getController(MIDIControl<T> controlType) {
+        T controller = (T) this.controllers.get(controlType);
 
-    private void turnSustainPedalOff() {
-        try {
-            this.midiTrack.add(new MidiEvent(new ShortMessage(ShortMessage.CONTROL_CHANGE, channelNum, GeneralMidiConstants.SUSTAIN_CC, GeneralMidiConstants.SUSTAIN_CC_VAL_OFF), this.stateTime));
-        } catch (InvalidMidiDataException e) {
-            throw new MidiRuntimeException("Cannot turn sustain pedal off.", e);
+        if (controller == null) {
+            controller = controlType.attachTo(this);
+            this.controllers.put(controlType, controller);
         }
+
+        return controller;
     }
 
     public boolean setSlurred(boolean slurred) {
@@ -305,19 +310,36 @@ public class MIDIChannel {
         Track track = sequence.createTrack();
         MIDIChannel channel = new MIDIChannel(track, false, 1, timingEnvironment);
         channel.setVelocity(Dynamic.mp);
+        channel.changeInstrument(GeneralMidiInstrument.STRING_ENSEMBLE_1);
+
+        Knob pTimeKnob = channel.getController(MIDIControl.PORTAMENTO_TIME);
+        pTimeKnob.twist(100);
+
+        Pedal pedal = channel.getController(MIDIControl.PORTAMENTO);
+
 
         Sound sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
         sound.play(channel);
-
+        pedal.press();
         Phrase phrase = new Phrase();
 
+        //volumeKnob.twist(127);
+        //pAmtKnob.twist(127);
+        //pTimeKnob.twist(0);
+        //reverb.twist(127);
+
         for (int i = 64; i < 64 + 12; i++) {
-            phrase.addElement(new Sound(Pitch.getPitch(i), Beat.EIGHTH));
+            sound = new Sound(Pitch.getPitch(i - 2*(i % 2)), Beat.QUARTER);
+            sound.play(channel);
         }
+        pedal.release();
+/*
+        pedal.press();
+        pedal.release();*/
 
-        phrase.addElement(new SlurredPhrase(phrase));
+        //phrase.addElement(new SlurredPhrase(phrase));
 
-        phrase.play(channel);
+        //phrase.play(channel);
 
         channel.finalizeEOT();
 

@@ -4,6 +4,7 @@ import cas.cs4tb3.mellowd.Articulation;
 import cas.cs4tb3.mellowd.Beat;
 import cas.cs4tb3.mellowd.Pitch;
 import cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
+import cas.cs4tb3.mellowd.midi.MIDIChannel;
 import cas.cs4tb3.mellowd.primitives.Chord;
 
 public abstract class ArticulatedSound extends Sound {
@@ -204,6 +205,8 @@ public abstract class ArticulatedSound extends Sound {
         private static final int BEND_AMT = 128;
         private static final int BEND_STEPS = 16;
 
+        //Keep a reference this sound's pitch so that we can determine if we
+        //should bend up or down depending on the next.
         private boolean bendUp = true;
 
         public Gliscando(Chord chord, Beat duration) {
@@ -212,6 +215,12 @@ public abstract class ArticulatedSound extends Sound {
 
         public Gliscando(Pitch pitch, Beat duration) {
             super(pitch, duration, Articulation.GLISCANDO);
+        }
+
+        @Override
+        public void setNext(Sound next) {
+            super.setNext(next);
+            bendUp = super.isHigherInPitch(next);
         }
 
         public void setBendUp(boolean bendUp) {
