@@ -68,6 +68,7 @@ public class GeneralMidiConstants {
     */
     public static final int PORTAMENTO_TIME_KNOB_CC = 5;
     public static final int CHANNEL_VOLUME_KNOB_CC = 7;
+    public static final int RELEASE_TIME_KNOB_CC = 72;
     public static final int ATTACK_TIME_KNOB_CC = 73;
     public static final int REVERB_KNOB_CC = 91;
     public static final int TREMELO_KNOB_CC = 92;

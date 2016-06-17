@@ -5,6 +5,7 @@ import java.util.function.BiFunction;
 public final class MIDIControl<T> {
     public static final MIDIControl<Knob>  PORTAMENTO_TIME  = new MIDIControl<>("PORTAMENTO_TIME", GeneralMidiConstants.PORTAMENTO_TIME_KNOB_CC, Knob::new);
     public static final MIDIControl<Knob>  VOLUME           = new MIDIControl<>("VOLUME", GeneralMidiConstants.CHANNEL_VOLUME_KNOB_CC, Knob::new);
+    public static final MIDIControl<Knob>  RELEASE_TIME     = new MIDIControl<>("RELEASE_TIME", GeneralMidiConstants.RELEASE_TIME_KNOB_CC, Knob::new);
     public static final MIDIControl<Knob>  ATTACK_TIME      = new MIDIControl<>("ATTACK_TIME", GeneralMidiConstants.ATTACK_TIME_KNOB_CC, Knob::new);
     public static final MIDIControl<Knob>  REVERB           = new MIDIControl<>("REVERB", GeneralMidiConstants.REVERB_KNOB_CC, Knob::new);
     public static final MIDIControl<Knob>  TREMELO          = new MIDIControl<>("TREMELO", GeneralMidiConstants.TREMELO_KNOB_CC, Knob::new);

@@ -6,6 +6,7 @@ import cas.cs4tb3.mellowd.Pitch;
 import cas.cs4tb3.mellowd.TimingEnvironment;
 import cas.cs4tb3.mellowd.compiler.Compiler;
 import cas.cs4tb3.mellowd.compiler.SequencePlayer;
+import cas.cs4tb3.mellowd.intermediate.ArticulatedSound;
 import cas.cs4tb3.mellowd.intermediate.Phrase;
 import cas.cs4tb3.mellowd.intermediate.Sound;
 import cas.cs4tb3.mellowd.primitives.Chord;
@@ -310,7 +311,9 @@ public class MIDIChannel {
         Track track = sequence.createTrack();
         MIDIChannel channel = new MIDIChannel(track, false, 1, timingEnvironment);
         channel.setVelocity(Dynamic.mp);
-        channel.changeInstrument(GeneralMidiInstrument.STRING_ENSEMBLE_1);
+        channel.changeInstrument(GeneralMidiInstrument.ACOUSTIC_GRAND_PIANO);
+        Pedal sustain = channel.getController(MIDIControl.SUSTAIN);
+        //sustain.press();
 
         Knob pTimeKnob = channel.getController(MIDIControl.PORTAMENTO_TIME);
         pTimeKnob.twist(100);
@@ -319,8 +322,9 @@ public class MIDIChannel {
 
 
         Sound sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
+        ArticulatedSound aSound;
         sound.play(channel);
-        pedal.press();
+        //pedal.press();
         Phrase phrase = new Phrase();
 
         //volumeKnob.twist(127);
@@ -328,14 +332,19 @@ public class MIDIChannel {
         //pTimeKnob.twist(0);
         //reverb.twist(127);
 
+        Knob releaseTime = channel.getController(MIDIControl.RELEASE_TIME);
+        //releaseTime.twist(128 / 2);
         for (int i = 64; i < 64 + 12; i++) {
-            sound = new Sound(Pitch.getPitch(i - 2*(i % 2)), Beat.QUARTER);
+            sound = new Sound(Pitch.getPitch(i), Beat.QUARTER);
             sound.play(channel);
+            /*sound = new Sound(Pitch.REST, Beat.QUARTER);
+            sound.play(channel);*/
+            aSound = new ArticulatedSound.Marcato(Pitch.getPitch(i/* - 2*(i % 2)*/), Beat.QUARTER);
+            aSound.play(channel);/*
+            sound = new Sound(Pitch.REST, Beat.QUARTER);
+            sound.play(channel);*/
         }
-        pedal.release();
-/*
-        pedal.press();
-        pedal.release();*/
+        //pedal.release();
 
         //phrase.addElement(new SlurredPhrase(phrase));
 
