@@ -73,8 +73,7 @@ public class ParserTest {
         //needs to be overridden with a custom one to store all error messages.
         MellowDLexer lexer = new MellowDLexer(new ANTLRInputStream(this.inputStream));
 
-        this.parser = new MellowDParser(new CommonTokenStream(lexer), new TimingEnvironment((byte) 4, (byte) 4, 120),
-                new TrackManager(GeneralMidiConstants.REGULAR_CHANNELS, GeneralMidiConstants.DRUM_CHANNELS));
+        this.parser = new MellowDParser(new CommonTokenStream(lexer));
         this.parser.setBuildParseTree(true);
         this.parser.removeErrorListeners();
         this.errorListener = new TestErrorListener();

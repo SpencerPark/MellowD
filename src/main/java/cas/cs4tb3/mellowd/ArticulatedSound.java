@@ -4,6 +4,7 @@
 package cas.cs4tb3.mellowd;
 
 import cas.cs4tb3.mellowd.midi.MidiNoteMessageSource;
+import cas.cs4tb3.mellowd.primitives.Articulation;
 
 //An articulated sound is any [note source](../midi/MidiNoteMessageSource.html) tweaked with
 //an [articulation](Articulation.html).

@@ -3,6 +3,8 @@
 
 package cas.cs4tb3.mellowd;
 
+import cas.cs4tb3.mellowd.primitives.Beat;
+
 import javax.sound.midi.*;
 
 //The `TimingEnvironment` class handles timing information for a sequence. It allows for

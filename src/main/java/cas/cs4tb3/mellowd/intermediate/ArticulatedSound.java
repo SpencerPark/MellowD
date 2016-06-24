@@ -1,8 +1,8 @@
 package cas.cs4tb3.mellowd.intermediate;
 
-import cas.cs4tb3.mellowd.Articulation;
-import cas.cs4tb3.mellowd.Beat;
-import cas.cs4tb3.mellowd.Pitch;
+import cas.cs4tb3.mellowd.primitives.Articulation;
+import cas.cs4tb3.mellowd.primitives.Beat;
+import cas.cs4tb3.mellowd.primitives.Pitch;
 import cas.cs4tb3.mellowd.midi.*;
 import cas.cs4tb3.mellowd.primitives.Chord;
 
@@ -22,9 +22,6 @@ public abstract class ArticulatedSound extends Sound {
     public Articulation getArticulation() {
         return articulation;
     }
-
-    /*@Override
-    public abstract void play(MIDIChannel channel);*/
 
     public static ArticulatedSound newSound(Chord chord, Beat beat, Articulation articulation) {
         switch (articulation) {

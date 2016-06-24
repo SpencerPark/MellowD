@@ -1,11 +1,9 @@
 package cas.cs4tb3.mellowd.intermediate;
 
-import cas.cs4tb3.mellowd.Dynamic;
+import cas.cs4tb3.mellowd.TimingEnvironment;
+import cas.cs4tb3.mellowd.primitives.Dynamic;
 import cas.cs4tb3.mellowd.midi.MIDIChannel;
 
-/**
- * Created on 2016-06-15.
- */
 public class DynamicChange implements Playable {
     private final Dynamic dynamic;
 
@@ -19,6 +17,11 @@ public class DynamicChange implements Playable {
 
     @Override
     public void play(MIDIChannel channel) {
-        channel.setVelocity(dynamic);
+        channel.setDynamic(dynamic);
+    }
+
+    @Override
+    public long calculateDuration(TimingEnvironment env) {
+        return 0;
     }
 }

@@ -3,7 +3,7 @@
 
 package cas.cs4tb3.mellowd.primitives;
 
-import cas.cs4tb3.mellowd.Pitch;
+import cas.cs4tb3.mellowd.intermediate.functions.operations.Transposable;
 import cas.cs4tb3.mellowd.midi.MidiNoteMessageSource;
 
 import javax.sound.midi.InvalidMidiDataException;
@@ -17,17 +17,17 @@ import java.util.regex.Pattern;
 //are defined between `(` and `)` tokens. The `,` separated pitches make up the chord.
 //
 //This class contains a variety of standard chords frequently used in compositions.
-public class Chord implements MidiNoteMessageSource {
+public class Chord implements MidiNoteMessageSource, Transposable<Chord>, ChordElement, Articulatable {
     //The `CHORD_NAME_PATTERN` is a regular expression for matching chord names. There are a common
     //collection of chord patterns that are frequently used and the compiler should treat them as
     //all defined as variables. This is of course not possible so they are virtually defined and if
     //a chord identifier is expected the compiler will try to match it to this pattern before throwing
     //an undefined reference exception.
 
-    //The pattern is `[A-G] ( 's' | 'b' )? ( 'u' | 'd' [0-9]+ )? ( [a-z0-9]+ )?`
+    //The pattern is `[A-G] ( '#' | '$' )? ( '+' | '-' [0-9]+ )? ( [a-z0-9]+ )?`
     //with named capturing groups to pull the data from the matcher.
     private static final Pattern CHORD_NAME_PATTERN = Pattern.compile(
-            "^(?<note>[A-G])((?<sharp>s)|(?<flat>b))?(?<octaveShift>((?<shiftUp>u)|(?<shiftDown>d))(?<shiftAmt>[0-9]+))?(?<name>[a-z0-9]+)?$"
+            "^(?<note>[A-G])((?<sharp>#)|(?<flat>\\$))?(?<octaveShift>((?<shiftUp>\\+)|(?<shiftDown>-))(?<shiftAmt>[0-9]+))?(?<name>[a-z0-9]+)?$"
     );
 
     //At its core, a chord is simply a collection of pitches. These are those pitches.
@@ -40,13 +40,23 @@ public class Chord implements MidiNoteMessageSource {
 
     //The list constructor is designed for use by the compiler where the notes are collected
     //programmatically.
-    public Chord(List<Pitch> pitches) {
-        this.pitches = pitches.toArray(new Pitch[pitches.size()]);
+    public Chord(List<ChordElement> params) {
+        int totalSize = 0;
+        for (ChordElement elem : params)
+            totalSize += elem.size();
+
+        this.pitches = new Pitch[totalSize];
+
+        int index = 0;
+        for (ChordElement elem : params)
+            for (int i = 0; i < elem.size(); i++)
+                this.pitches[index++] = elem.getPitchAt(i);
     }
 
     //This method provides access to the internal array of pitches. It is used for accessing
     //specific notes via the mellow d syntax `chordName:index`.
-    public Pitch getPitch(int index) {
+    @Override
+    public Pitch getPitchAt(int index) {
         return pitches[index];
     }
 
@@ -58,10 +68,26 @@ public class Chord implements MidiNoteMessageSource {
     }
 
     //It is important to know the size of the chord to stop an array out of bounds exception
-    //when calling `getPitch`. An index greater than 0 and less than `size` will return a pitch
+    //when calling `getPitchAt`. An index greater than 0 and less than `size` will return a pitch
     //without ever throwing an array out of bounds exception.
+    @Override
     public int size() {
         return pitches.length;
+    }
+
+    @Override
+    public Articulated articulate(Articulation articulation) {
+        return new ArticulatedChord(this, articulation);
+    }
+
+    @Override
+    public Chord transpose(int numSemiTones) {
+        Pitch[] pitches = new Pitch[this.pitches.length];
+
+        for (int i = 0; i < pitches.length; i++)
+            pitches[i] = this.pitches[i].transpose(numSemiTones);
+
+        return new Chord(pitches);
     }
 
     //Chords defined as variables need to be reevaluated in the current octave
@@ -97,29 +123,30 @@ public class Chord implements MidiNoteMessageSource {
 
     //The `resolve` method is the method that provides the lookup by name support described above with
     //the `CHORD_NAME_PATTERN`.
-    public static Chord resolve(String identifier, int octave) {
+    public static Chord resolve(String identifier) {
         //If the identifier doesn't match the pattern we can just get out of the method
         //immediately returning null to specify that the identifier cannot be resolved.
         Matcher m = CHORD_NAME_PATTERN.matcher(identifier);
-        if (!m.matches())
+        if (!m.matches()) {
             return null;
+        }
 
         //First resolve the pitch. This is the root of the chord.
         Pitch pitch = Pitch.C;
         switch (m.group("note")) {
-            case "A": pitch = Pitch.A.inOctave(octave);
+            case "A": pitch = Pitch.A;
                 break;
-            case "B": pitch = Pitch.B.inOctave(octave);
+            case "B": pitch = Pitch.B;
                 break;
-            case "C": pitch = Pitch.C.inOctave(octave);
+            case "C": pitch = Pitch.C;
                 break;
-            case "D": pitch = Pitch.D.inOctave(octave);
+            case "D": pitch = Pitch.D;
                 break;
-            case "E": pitch = Pitch.E.inOctave(octave);
+            case "E": pitch = Pitch.E;
                 break;
-            case "F": pitch = Pitch.F.inOctave(octave);
+            case "F": pitch = Pitch.F;
                 break;
-            case "G": pitch = Pitch.G.inOctave(octave);
+            case "G": pitch = Pitch.G;
                 break;
         }
         if (m.group("sharp") != null)
@@ -187,6 +214,7 @@ public class Chord implements MidiNoteMessageSource {
             sb.append(p.toString()).append(", ");
         }
         sb.setLength(sb.length()-2);
+        sb.append(")");
         return sb.toString();
     }
 

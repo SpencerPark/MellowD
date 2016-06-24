@@ -3,9 +3,8 @@
 
 package cas.cs4tb3.mellowd.primitives;
 
-import cas.cs4tb3.mellowd.ArticulatedSound;
-
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 //A melody is a sequence of pitches played one after the other. Melodies are
@@ -20,34 +19,43 @@ import java.util.List;
 //The Melody class is simply a list wrapper. The order of the sounds is important.
 public class Melody {
     //This is the data that supports the melody.
-    private List<ArticulatedSound> notes;
+    private List<Articulated> sounds;
 
-    public Melody(List<ArticulatedSound> notes) {
-        this.notes = notes;
+    public Melody() {
+        this.sounds = new ArrayList<>();
     }
 
-    public List<ArticulatedSound> getNotes() {
-        return notes;
+    public Melody(List<Articulated> sounds) {
+        this.sounds = sounds;
     }
 
     //`add` is overloaded to support single or multiple concatenation. When
     //concatenated with another melody the ordering of the additions remains
     //the same, just appended to the end of the melody.
     public void add(Melody melody) {
-        this.notes.addAll(melody.notes);
+        this.sounds.addAll(melody.sounds);
     }
 
-    public void add(ArticulatedSound note) {
-        this.notes.add(note);
+    public void add(Articulated sound) {
+        this.sounds.add(sound);
     }
 
     //Melodies defined as variables need to be reevaluated in the current octave
     //for them to have any use.
     public Melody shiftOctave(int octaveShift) {
-        List<ArticulatedSound> sounds = new ArrayList<>(notes.size());
-        for (ArticulatedSound sound : this.notes) {
-            sounds.add(new ArticulatedSound(sound.getSound().shiftOctave(octaveShift), sound.getArticulation()));
+        if (octaveShift == 0) return this;
+        List<Articulated> sounds = new ArrayList<>(this.sounds.size());
+        for (Articulated s : this.sounds) {
+            sounds.add(s.shiftOctave(octaveShift));
         }
         return new Melody(sounds);
+    }
+
+    public int size() {
+        return this.sounds.size();
+    }
+
+    public Articulated getAt(int i) {
+        return this.sounds.get(i);
     }
 }

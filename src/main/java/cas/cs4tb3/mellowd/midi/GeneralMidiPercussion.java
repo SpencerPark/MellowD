@@ -3,7 +3,7 @@
 
 package cas.cs4tb3.mellowd.midi;
 
-import cas.cs4tb3.mellowd.Pitch;
+import cas.cs4tb3.mellowd.primitives.Pitch;
 
 import java.util.HashMap;
 import java.util.Map;

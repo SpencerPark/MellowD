@@ -1,10 +1,13 @@
 package cas.cs4tb3.mellowd.intermediate;
 
-import cas.cs4tb3.mellowd.Beat;
-import cas.cs4tb3.mellowd.Pitch;
+import cas.cs4tb3.mellowd.TimingEnvironment;
+import cas.cs4tb3.mellowd.primitives.Articulation;
+import cas.cs4tb3.mellowd.primitives.Beat;
+import cas.cs4tb3.mellowd.primitives.Pitch;
 import cas.cs4tb3.mellowd.midi.MIDIChannel;
 import cas.cs4tb3.mellowd.primitives.Chord;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,10 +16,48 @@ import java.util.List;
  * the duration of the beat has passed.
  */
 public class Sound implements Playable {
+    public static Sound newSound(Chord chord, Beat beat, Articulation articulation) {
+        switch (articulation) {
+            default:
+                return new Sound(chord, beat);
+            case STACCATO:
+                return new ArticulatedSound.Staccato(chord, beat);
+            case STACCATISSIMO:
+                return new ArticulatedSound.Staccatissimo(chord, beat);
+            case MARCATO:
+                return new ArticulatedSound.Marcato(chord, beat);
+            case ACCENT:
+                return new ArticulatedSound.Accent(chord, beat);
+            case TENUTO:
+                return new ArticulatedSound.Tenuto(chord, beat);
+            case GLISCANDO:
+                return new ArticulatedSound.Gliscando(chord, beat);
+        }
+    }
+
+    public static Sound newSound(Pitch pitch, Beat beat, Articulation articulation) {
+        switch (articulation) {
+            default:
+                return new Sound(pitch, beat);
+            case STACCATO:
+                return new ArticulatedSound.Staccato(pitch, beat);
+            case STACCATISSIMO:
+                return new ArticulatedSound.Staccatissimo(pitch, beat);
+            case MARCATO:
+                return new ArticulatedSound.Marcato(pitch, beat);
+            case ACCENT:
+                return new ArticulatedSound.Accent(pitch, beat);
+            case TENUTO:
+                return new ArticulatedSound.Tenuto(pitch, beat);
+            case GLISCANDO:
+                return new ArticulatedSound.Gliscando(pitch, beat);
+        }
+    }
+
     private static final Beat SLUR_EXTENSION = Beat.EIGHTH;
     private final List<Pitch> pitches;
     private final Beat duration;
-    private Sound next;
+    private transient Sound next;
 
     public Sound(Chord chord, Beat duration) {
         this.pitches = chord.getPitches();
@@ -26,6 +67,20 @@ public class Sound implements Playable {
     public Sound(Pitch pitch, Beat duration) {
         this.pitches = Collections.singletonList(pitch);
         this.duration = duration;
+    }
+
+    private Sound(List<Pitch> pitches, Beat duration) {
+        this.pitches = pitches;
+        this.duration = duration;
+    }
+
+    public Sound shiftOctave(int octaveShift) {
+        if (octaveShift == 0) return this;
+        List<Pitch> pitches = new ArrayList<>(this.pitches.size());
+        for (Pitch p : this.pitches) {
+            pitches.add(p.shiftOctave(octaveShift));
+        }
+        return new Sound(pitches, this.duration);
     }
 
     public Beat getDuration() {
@@ -94,5 +149,10 @@ public class Sound implements Playable {
         notesOn(channel, 0, 0);
         notesOff(channel, getDuration(channel), MIDIChannel.DEFAULT_OFF_VELOCITY);
         advanceDuration(channel);
+    }
+
+    @Override
+    public long calculateDuration(TimingEnvironment env) {
+        return env.ticksInBeat(this.duration);
     }
 }

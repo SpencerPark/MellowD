@@ -3,10 +3,9 @@
 
 package cas.cs4tb3.mellowd;
 
-import cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
-import cas.cs4tb3.mellowd.parser.*;
 import cas.cs4tb3.mellowd.parser.MellowDLexer;
 import cas.cs4tb3.mellowd.parser.MellowDParser;
+import cas.cs4tb3.mellowd.parser.ParseException;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -31,16 +30,14 @@ public class ErrorResponseTest {
         ANTLRFileStream inStream = new ANTLRFileStream(input.getAbsolutePath());
         MellowDLexer lexer = new MellowDLexer(inStream);
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-        return new MellowDParser(tokenStream, new TimingEnvironment((byte) 4, (byte) 4, 120),
-                new TrackManager(GeneralMidiConstants.REGULAR_CHANNELS, GeneralMidiConstants.DRUM_CHANNELS));
+        return new MellowDParser(tokenStream);
     }
 
     private static MellowDParser parserFor(String input) {
         ANTLRInputStream inStream = new ANTLRInputStream(input);
         MellowDLexer lexer = new MellowDLexer(inStream);
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-        return new MellowDParser(tokenStream, new TimingEnvironment((byte) 4, (byte) 4, 120),
-                new TrackManager(GeneralMidiConstants.REGULAR_CHANNELS, GeneralMidiConstants.DRUM_CHANNELS));
+        return new MellowDParser(tokenStream);
     }
 
     //Verification of parse exceptions is a common task as well. For a parse exception to be expected

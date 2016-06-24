@@ -61,6 +61,29 @@ T : 't';
 W : 'w';
 
 NUMBER : [0-9]+;
+CHORD_IDENTIFIER
+    :   [A-G]
+        ( '#' | '$' )?
+        ( 'm'   ( 'aj'
+                    ( '7'
+                        ( 's'
+                        | 'b'
+                        ) '5'?
+                    )?
+                | 'in'
+                    ( '7'
+                    | 'maj7'
+                    )?
+                )?
+        | 'aug' '7'?
+        | 'dim' '7'?
+        | 'dom7'
+        | '7'
+        )?
+        (
+            ( '+' | '-' ) [0-9]+
+        )?
+    ;
 IDENTIFIER
     :   ( [i-lnoruvx-zA-Z]
         |   ( [a-hqstw]

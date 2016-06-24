@@ -5,10 +5,7 @@ package cas.cs4tb3.mellowd.compiler;
 
 import cas.cs4tb3.mellowd.TimingEnvironment;
 import cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
-import cas.cs4tb3.mellowd.parser.MellowDLexer;
-import cas.cs4tb3.mellowd.parser.MellowDParser;
-import cas.cs4tb3.mellowd.parser.ParseException;
-import cas.cs4tb3.mellowd.parser.TrackManager;
+import cas.cs4tb3.mellowd.parser.*;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.*;
@@ -128,9 +125,6 @@ public class Compiler {
         //Now we can begin compiling
         Sequence compilationResult = null;
         try {
-            //We want to track the compilation duration so mark the start time
-            long startTime = System.nanoTime();
-
             //Compile the input file with the given timing arguments.
             compilationResult = compile(toCompile,
                     tempo.get(0).byteValue(),
@@ -138,10 +132,6 @@ public class Compiler {
                     arguments.getInt("tempo"),
                     true);
 
-            //Calculate the compilation time and display it in seconds to 6 decimal places.
-            long compileTime = System.nanoTime() - startTime;
-            System.out.printf("Compilation took %.4f s\n",
-                    compileTime / 1E9d);
             //Display the duration of the compiled song in seconds.
             System.out.printf("Song length: %d s\n",
                     TimeUnit.MICROSECONDS.toSeconds(compilationResult.getMicrosecondLength()));
@@ -153,20 +143,19 @@ public class Compiler {
             System.exit(1);
             //If a ParseException occurs then there was a problem with the data in the input
             //file. The input is well formed but the semantics are wrong. Display the error and exit.
-        } catch (ParseException e) {
-            System.out.printf("Exception encountered while compiling. %s\n", e.getLocalizedMessage());
+        } catch (CompilationException e) {
+            Throwable cause = e.getCause();
+            System.out.printf("Compilation exception on line %d@%d-%d:'%s'. Problem: %s\n",
+                    e.getLine(),
+                    e.getStartPosInLine(),
+                    e.getStartPosInLine() + (e.getStop() - e.getStart()),
+                    e.getText(),
+                    cause.getMessage());
             System.exit(1);
-            //A ParseCancellationException is different from a ParseException. It is thrown by ANTLR
-            //when using the BailErrorStrategy. This is the result of a syntax error. Display the
-            //error and exit.
-        } catch (ParseCancellationException e) {
-            RecognitionException ex = (RecognitionException) e.getCause();
-            System.out.printf("Parse exception in rule %s. Offending token: line %d@%d:'%s'. Expected: %s\n",
-                    ex.getCtx().toString(ex.getRecognizer()),
-                    ex.getOffendingToken().getLine(),
-                    ex.getOffendingToken().getCharPositionInLine(),
-                    ex.getOffendingToken().getText(),
-                    ex.getExpectedTokens().toString(ex.getRecognizer().getVocabulary()));
+        } catch (ParseException e) {
+            for (SyntaxErrorReport errorReport : e.getProblems()) {
+                System.out.println(errorReport.getErrorType().toString()+": "+errorReport.getMessage());
+            }
             System.exit(1);
         }
 
@@ -317,17 +306,37 @@ public class Compiler {
         //The parser takes the tokens from the lexer as well as the timing environment constructed
         //from the input arguments and a track manager.
         TokenStream tokens = new CommonTokenStream(lexer);
-        MellowDParser parser = new MellowDParser(tokens, new TimingEnvironment(numerator, denominator, tempo),
-                new TrackManager(GeneralMidiConstants.REGULAR_CHANNELS, GeneralMidiConstants.DRUM_CHANNELS));
+        MellowDParser parser = new MellowDParser(tokens);
 
-        //We will use the BailErrorStrategy because our compiler is one pass and as soon as a syntax
-        //error occurs the parser may be able to recover but the compilation most likely will not.
-        parser.setErrorHandler(new BailErrorStrategy());
+        ParseErrorListener errorListener = new ParseErrorListener();
+        parser.removeErrorListeners();
+        parser.addErrorListener(errorListener);
+
+        TimingEnvironment timingEnvironment = new TimingEnvironment(numerator, denominator, tempo);
 
         //Parse the input!
-        parser.song();
+        long parseStart = System.nanoTime();
+        MellowDParser.SongContext parseTree = parser.song();
+        if (errorListener.encounteredError())
+            throw new ParseException(errorListener.getErrors());
+
+        if (verbose) {
+            long parseTime = System.nanoTime() - parseStart;
+            System.out.printf("Parsing took %.4f s\n",
+                    parseTime / 1E9d);
+        }
+
+        long compileStart = System.nanoTime();
+        MellowD compilationResult = new MellowD(timingEnvironment);
+        MellowDParseTreeWalker walker = new MellowDParseTreeWalker(compilationResult);
+        walker.visitSong(parseTree);
+        if (verbose) {
+            long compileTime = System.nanoTime() - compileStart;
+            System.out.printf("Compilation took %.4f s\n",
+                    compileTime / 1E9d);
+        }
 
         //Return the sequence generated while parsing.
-        return parser.getSequence();
+        return compilationResult.record();
     }
 }

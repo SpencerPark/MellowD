@@ -4,7 +4,10 @@
 package cas.cs4tb3.mellowd;
 
 import cas.cs4tb3.mellowd.midi.MidiNoteMessageSource;
+import cas.cs4tb3.mellowd.primitives.Articulation;
+import cas.cs4tb3.mellowd.primitives.Beat;
 import cas.cs4tb3.mellowd.primitives.Chord;
+import cas.cs4tb3.mellowd.primitives.Dynamic;
 
 //A `PlayableSound` contains all of the information needed to preform a sound. It knows
 //the pitches to play and how to play them from the [articulated sound](ArticulatedSound.html).

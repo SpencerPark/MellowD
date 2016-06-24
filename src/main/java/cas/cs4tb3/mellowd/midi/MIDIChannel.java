@@ -1,16 +1,14 @@
 package cas.cs4tb3.mellowd.midi;
 
-import cas.cs4tb3.mellowd.Beat;
-import cas.cs4tb3.mellowd.Dynamic;
-import cas.cs4tb3.mellowd.Pitch;
+import cas.cs4tb3.mellowd.intermediate.*;
+import cas.cs4tb3.mellowd.intermediate.functions.IllegalArgumentException;
+import cas.cs4tb3.mellowd.primitives.Beat;
+import cas.cs4tb3.mellowd.primitives.Dynamic;
+import cas.cs4tb3.mellowd.primitives.Pitch;
 import cas.cs4tb3.mellowd.TimingEnvironment;
 import cas.cs4tb3.mellowd.compiler.Compiler;
 import cas.cs4tb3.mellowd.compiler.SequencePlayer;
-import cas.cs4tb3.mellowd.intermediate.ArticulatedSound;
-import cas.cs4tb3.mellowd.intermediate.Phrase;
-import cas.cs4tb3.mellowd.intermediate.Sound;
 import cas.cs4tb3.mellowd.primitives.Chord;
-import com.sun.istack.internal.NotNull;
 
 import javax.sound.midi.*;
 import java.io.IOException;
@@ -70,10 +68,11 @@ public class MIDIChannel {
 
     private int instrument = GeneralMidiInstrument.ACOUSTIC_GRAND_PIANO.midiNum();
     private int soundBank = GeneralMidiConstants.DEFAULT_SOUND_BANK;
-    private int velocity = Dynamic.mf.getVelocity(); //The velocity is mf by default
+    private Dynamic dynamic = Dynamic.mf; //The dynamic is mf by default
     private long stateTime = 0L;
     private int pitchBend = GeneralMidiConstants.NO_PITCH_BEND;
     private final Map<MIDIControl<?>, Object> controllers;
+    private int octaveShift = 0;
 
     //This is a counter keeping track of the times that the slurred flag has been set
     //so that 2 calls to slurred require another 2 calls to un-slur.
@@ -113,16 +112,24 @@ public class MIDIChannel {
         return this.timingEnvironment.ticksInBeat(beat);
     }
 
-    public int getVelocity() {
-        return velocity;
+    public Dynamic getDynamic() {
+        return dynamic;
     }
 
-    public int modifyVelocity(int velocityMod) {
-        return this.velocity += velocityMod;
+    public Dynamic changeDynamic(int velocityMod) {
+        return this.dynamic.louder(velocityMod);
     }
 
-    public void setVelocity(Dynamic dynamic) {
-        this.velocity = dynamic.getVelocity();
+    public void setDynamic(Dynamic dynamic) {
+        this.dynamic = dynamic;
+    }
+
+    public int getOctaveShift() {
+        return this.octaveShift;
+    }
+
+    public void setOctaveShift(int octaveShift) {
+        this.octaveShift = octaveShift;
     }
 
     public synchronized final long stepIntoFuture(long stateTimeMod) {
@@ -265,14 +272,21 @@ public class MIDIChannel {
         setInstrument(instrument);
     }
 
+    private Pitch adjustToChannelSettings(Pitch toPlay) {
+        if (toPlay == Pitch.REST) return toPlay;
+        return toPlay.shiftOctave(this.getOctaveShift());
+    }
+
     public final void noteOn(Pitch pitch, int velocityMod) {
+        pitch = adjustToChannelSettings(pitch);
+
         if (pitch == Pitch.REST) return;
 
         ShortMessage message;
         try {
-            message = new ShortMessage(ShortMessage.NOTE_ON, channelNum, pitch.getMidiNum(), Dynamic.clip(velocity + velocityMod));
+            message = new ShortMessage(ShortMessage.NOTE_ON, channelNum, pitch.getMidiNum(), this.dynamic.louder(velocityMod).getVelocity());
         } catch (InvalidMidiDataException e) {
-            throw new MidiRuntimeException("Cannot turn note on ("+pitch.getMidiNum()+") with velocity of "+Dynamic.clip(velocity + velocityMod)+".", e);
+            throw new MidiRuntimeException("Cannot turn note on ("+pitch.getMidiNum()+") with dynamic of "+this.dynamic.louder(velocityMod).getVelocity()+".", e);
         }
         this.midiTrack.add(new MidiEvent(message, this.stateTime));
 
@@ -281,13 +295,15 @@ public class MIDIChannel {
     }
 
     public final void noteOff(Pitch pitch, int offVelocity) {
+        pitch = adjustToChannelSettings(pitch);
+
         if (pitch == Pitch.REST) return;
 
         ShortMessage message;
         try {
             message = new ShortMessage(ShortMessage.NOTE_OFF, channelNum, pitch.getMidiNum(), offVelocity);
         } catch (InvalidMidiDataException e) {
-            throw new MidiRuntimeException("Cannot turn note off ("+pitch.getMidiNum()+") with velocity of "+offVelocity+".", e);
+            throw new MidiRuntimeException("Cannot turn note off ("+pitch.getMidiNum()+") with dynamic of "+offVelocity+".", e);
         }
 
         this.midiTrack.add(new MidiEvent(message, this.stateTime));
@@ -310,7 +326,7 @@ public class MIDIChannel {
         Sequence sequence = timingEnvironment.createSequence();
         Track track = sequence.createTrack();
         MIDIChannel channel = new MIDIChannel(track, false, 1, timingEnvironment);
-        channel.setVelocity(Dynamic.mp);
+        channel.setDynamic(Dynamic.mp);
         channel.changeInstrument(GeneralMidiInstrument.ACOUSTIC_GRAND_PIANO);
         Pedal sustain = channel.getController(MIDIControl.SUSTAIN);
         //sustain.press();
@@ -325,7 +341,6 @@ public class MIDIChannel {
         ArticulatedSound aSound;
         sound.play(channel);
         //pedal.press();
-        Phrase phrase = new Phrase();
 
         //volumeKnob.twist(127);
         //pAmtKnob.twist(127);

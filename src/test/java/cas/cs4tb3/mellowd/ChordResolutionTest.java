@@ -4,6 +4,7 @@
 package cas.cs4tb3.mellowd;
 
 import cas.cs4tb3.mellowd.primitives.Chord;
+import cas.cs4tb3.mellowd.primitives.Pitch;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
