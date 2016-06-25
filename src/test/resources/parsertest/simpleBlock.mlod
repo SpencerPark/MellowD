@@ -1,4 +1,4 @@
-def sample
+def block sample
 sample {
     instrument[acousticguitar]
     octave[3]

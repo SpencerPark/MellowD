@@ -1,5 +1,5 @@
-def percussion rhythmTest
-def percussion rhythmTestMetronome
+def percussion block rhythmTest
+def percussion block rhythmTestMetronome
 rhythmVar -> <w, h, q, e, s>
 otherRhythmVar -> <w., h.., q..., w...., s.....>
 

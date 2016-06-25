@@ -45,12 +45,12 @@ Now that you have a jar place it somewhere it will be comfortable and create a c
 jar. On windows go to a directory that is inside your PATH and execute
 
 ```bat
-echo java -jar "path\to\the\MellowD-1.0.jar" %* > mellowd.bat
+echo java -jar "path\to\the\MellowD-2.0.0.jar" %* > mellowd.bat
 ```
 
 Similarity on a *nix system you can create an alias with the command
 ```bash
-alias mellowd='java -jar "path/to/the/MellowD-1.0.jar"'
+alias mellowd='java -jar "path/to/the/MellowD-2.0.0.jar"'
 ```
 
 Now you should be able to execute the `mellowd` command from you terminal. Run `mellowd -h`

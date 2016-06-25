@@ -60,8 +60,8 @@ public class ErrorResponseTest {
     @Test
     public void noTargetCrescendo() throws Exception {
         MellowDParser parser = parserFor("" +
-                "def block\n" +
-                "block{" +
+                "def block myblock\n" +
+                "myblock{" +
                 "    pp << [a, b, c]*<q> " +
                 "}"
         );
@@ -80,10 +80,10 @@ public class ErrorResponseTest {
     @Test
     public void crescendoTargetNextFragment() throws Exception {
         MellowDParser parser = parserFor("" +
-                "def block\n" +
-                "block{" +
+                "def block myblock\n" +
+                "myblock{" +
                 "    pp << [a, b, c]*<q> " +
-                "}block{" +
+                "}myblock{" +
                 "    ff" +
                 "}");
         try {
@@ -96,8 +96,8 @@ public class ErrorResponseTest {
     @Test
     public void crescendoToLowerDynamic() throws Exception {
         MellowDParser parser = parserFor("" +
-                "def block\n" +
-                "block{" +
+                "def block myblock\n" +
+                "myblock{" +
                 "    f << [a]*<q> pp" +
                 "}");
 
@@ -137,9 +137,9 @@ public class ErrorResponseTest {
     @Test
     public void indexAMelody() throws Exception {
         MellowDParser parser = parserFor("" +
-                "def block\n" +
+                "def block myblock\n" +
                 "myChord -> [a, b, c]" +
-                "block{" +
+                "myblock{" +
                 "    [myChord:0]*<q>" +
                 "}");
 
@@ -159,9 +159,9 @@ public class ErrorResponseTest {
     @Test
     public void rhythmCrossRhythm() throws Exception {
         MellowDParser parser = parserFor("" +
-                "def block\n" +
+                "def block myblock\n" +
                 "myChord -> <q, q, q>" +
-                "block{" +
+                "myblock{" +
                 "    myChord*<q>" +
                 "}");
 
@@ -179,9 +179,9 @@ public class ErrorResponseTest {
     @Test
     public void chordMelodyConcatenation() throws Exception {
         MellowDParser parser = parserFor("" +
-                "def block\n" +
+                "def block myblock\n" +
                 "myChord -> [a, b, c]" +
-                "block{" +
+                "myblock{" +
                 "    (myChord, a)*<q>" +
                 "}");
 
@@ -199,10 +199,10 @@ public class ErrorResponseTest {
     @Test
     public void secondIdentIncorrect() throws Exception {
         MellowDParser parser = parserFor("" +
-                "def block\n" +
+                "def block myblock\n" +
                 "myMel -> [a, b, c]" +
                 "myChord -> (c, e, g)" +
-                "block{" +
+                "myblock{" +
                 "    (myChord, myMel, a)*<q>" +
                 "}");
 
@@ -220,10 +220,10 @@ public class ErrorResponseTest {
     @Test
     public void baseOverridePercussion() throws Exception {
         MellowDParser parser = parserFor("" +
-                "def percussion block\n" +
+                "def percussion block myblock\n" +
                 "hHat -> <q>" +
                 "sample ->* [hHat, tri, lBongo]*<q>" +
-                "block { sample }");
+                "myblock { sample }");
 
         try {
             parseAndCompileSong(parser);

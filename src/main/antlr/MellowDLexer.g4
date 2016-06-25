@@ -5,6 +5,7 @@ lexer grammar MellowDLexer;
 
 KEYWORD_PERCUSSION : 'percussion' ;
 KEYWORD_DEF : 'def' ;
+KEYWORD_BLOCK : 'block' ;
 
 //**Dynamics**: Volume control.
 //The following rules are volume modifiers that when encountered change

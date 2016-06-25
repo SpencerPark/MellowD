@@ -1,4 +1,4 @@
-def chordTest
+def block chordTest
 chordTest {
     [Cmaj, Cmin, Caug, Cdim]*<q, q, q, q> [Cmaj7, Cmin7, Caug7, Cdim7]*<q, q, q, q>
     Cmaj7b5*<q> Cminmaj7*<q> Cdom7*<q> Cmaj7s5*<q>

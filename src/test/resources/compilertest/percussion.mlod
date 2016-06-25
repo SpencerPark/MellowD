@@ -1,4 +1,4 @@
-def percussion percussionBlock
+def percussion block percussionBlock
 
 percussionVar ->* [clap, clap]
 percussionChord ->* (snare, bass)

@@ -219,7 +219,7 @@ phrase
     ;
 
 blockDeclaration
-    :   KEYWORD_DEF KEYWORD_PERCUSSION? IDENTIFIER
+    :   KEYWORD_DEF KEYWORD_PERCUSSION? KEYWORD_BLOCK IDENTIFIER
     ;
 
 blockContents

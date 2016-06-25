@@ -1,8 +1,8 @@
-def block
+def block myblock
 
 chordVar -> (c, e, g, c+1)
 
-block {
+myblock {
     (a, b, c)*<q>
     chordVar*<q>
     [chordVar:0., chordVar:1!, chordVar:2~]*<q>
