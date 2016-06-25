@@ -29,7 +29,6 @@ configurations {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'com.google.code.gson', name: 'gson', version: '2.6.2'
-    compile 'org.codehaus.groovy:groovy:2.0.+:indy'
     antlr group: 'org.antlr', name: 'antlr4', version: '4.5.2-1'
     shade group: 'net.sourceforge.argparse4j', name: 'argparse4j', version: '0.7.0'
 }

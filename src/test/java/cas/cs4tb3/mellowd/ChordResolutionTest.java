@@ -28,8 +28,8 @@ public class ChordResolutionTest {
                 {"Caug7", Chord.augmentedSeventh(Pitch.C)}, {"Cdim7", Chord.diminished7th(Pitch.C)},
                 {"Cmaj7b5", Chord.majorSeventhFlatFive(Pitch.C)}, {"Cminmaj7", Chord.minorMajorSeventh(Pitch.C)},
                 {"Cdom7", Chord.dominantSeventh(Pitch.C)}, {"Cmaj7s5", Chord.majorSeventhSharpFive(Pitch.C)},
-                {"As", Chord.major(Pitch.A.sharp())}, {"Bb", Chord.major(Pitch.B.flat())},
-                {"Du1", Chord.major(Pitch.D.shiftOctaveUp(1))}, {"Ed1", Chord.major(Pitch.E.shiftOctaveDown(1))}
+                {"A#", Chord.major(Pitch.A.sharp())}, {"B$", Chord.major(Pitch.B.flat())},
+                {"D+1", Chord.major(Pitch.D.shiftOctaveUp(1))}, {"E-1", Chord.major(Pitch.E.shiftOctaveDown(1))}
         });
     }
 
@@ -41,7 +41,7 @@ public class ChordResolutionTest {
 
     @Test
     public void resolve() throws Exception {
-        Chord chord = Chord.resolve(chordDesc, 0);
+        Chord chord = Chord.resolve(chordDesc);
         assertEquals("Expected "+this.chord+" but resolved "+chordDesc+" to "+chord, this.chord, chord);
     }
 }

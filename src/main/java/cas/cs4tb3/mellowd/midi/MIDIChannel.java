@@ -1,17 +1,15 @@
 package cas.cs4tb3.mellowd.midi;
 
-import cas.cs4tb3.mellowd.intermediate.*;
-import cas.cs4tb3.mellowd.intermediate.functions.IllegalArgumentException;
+import cas.cs4tb3.mellowd.TimingEnvironment;
+import cas.cs4tb3.mellowd.compiler.Compiler;
 import cas.cs4tb3.mellowd.primitives.Beat;
 import cas.cs4tb3.mellowd.primitives.Dynamic;
 import cas.cs4tb3.mellowd.primitives.Pitch;
-import cas.cs4tb3.mellowd.TimingEnvironment;
-import cas.cs4tb3.mellowd.compiler.Compiler;
-import cas.cs4tb3.mellowd.compiler.SequencePlayer;
-import cas.cs4tb3.mellowd.primitives.Chord;
 
-import javax.sound.midi.*;
-import java.io.IOException;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiEvent;
+import javax.sound.midi.ShortMessage;
+import javax.sound.midi.Track;
 import java.util.*;
 
 //A MIDIChannel wraps a javax.sound.midi.Track to provide virtual state information.
@@ -318,59 +316,5 @@ public class MIDIChannel {
 
     public final void noteOff(Pitch pitch) {
         noteOff(pitch, DEFAULT_OFF_VELOCITY);
-    }
-
-    //TODO temp for running trivial tests
-    public static void main(String[] args) throws MidiUnavailableException, InvalidMidiDataException, IOException {
-        TimingEnvironment timingEnvironment = new TimingEnvironment((byte) 4, (byte) 4, 120);
-        Sequence sequence = timingEnvironment.createSequence();
-        Track track = sequence.createTrack();
-        MIDIChannel channel = new MIDIChannel(track, false, 1, timingEnvironment);
-        channel.setDynamic(Dynamic.mp);
-        channel.changeInstrument(GeneralMidiInstrument.ACOUSTIC_GRAND_PIANO);
-        Pedal sustain = channel.getController(MIDIControl.SUSTAIN);
-        //sustain.press();
-
-        Knob pTimeKnob = channel.getController(MIDIControl.PORTAMENTO_TIME);
-        pTimeKnob.twist(100);
-
-        Pedal pedal = channel.getController(MIDIControl.PORTAMENTO);
-
-
-        Sound sound = new Sound(Chord.major(Pitch.B).shiftOctave(5), Beat.QUARTER);
-        ArticulatedSound aSound;
-        sound.play(channel);
-        //pedal.press();
-
-        //volumeKnob.twist(127);
-        //pAmtKnob.twist(127);
-        //pTimeKnob.twist(0);
-        //reverb.twist(127);
-
-        Knob releaseTime = channel.getController(MIDIControl.RELEASE_TIME);
-        //releaseTime.twist(128 / 2);
-        for (int i = 64; i < 64 + 12; i++) {
-            sound = new Sound(Pitch.getPitch(i), Beat.QUARTER);
-            sound.play(channel);
-            /*sound = new Sound(Pitch.REST, Beat.QUARTER);
-            sound.play(channel);*/
-            aSound = new ArticulatedSound.Marcato(Pitch.getPitch(i/* - 2*(i % 2)*/), Beat.QUARTER);
-            aSound.play(channel);/*
-            sound = new Sound(Pitch.REST, Beat.QUARTER);
-            sound.play(channel);*/
-        }
-        //pedal.release();
-
-        //phrase.addElement(new SlurredPhrase(phrase));
-
-        //phrase.play(channel);
-
-        channel.finalizeEOT();
-
-        SequencePlayer player = new SequencePlayer(MidiSystem.getSequencer(), sequence);
-        player.playSync();
-        System.out.println("Complete!");
-
-        player.close();
     }
 }

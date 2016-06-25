@@ -138,14 +138,14 @@ public class Compiler {
             //If an IOException occurs then we had a problem with the input file. We will
             //display the error and exit.
         } catch (IOException e) {
-            System.out.printf("Error reading input file (%s). Reason: %s\n",
+            System.err.printf("Error reading input file (%s). Reason: %s\n",
                     toCompile.getAbsolutePath(), e.getLocalizedMessage());
             System.exit(1);
             //If a ParseException occurs then there was a problem with the data in the input
             //file. The input is well formed but the semantics are wrong. Display the error and exit.
         } catch (CompilationException e) {
             Throwable cause = e.getCause();
-            System.out.printf("Compilation exception on line %d@%d-%d:'%s'. Problem: %s\n",
+            System.err.printf("Compilation exception on line %d@%d-%d:'%s'. Problem: %s\n",
                     e.getLine(),
                     e.getStartPosInLine(),
                     e.getStartPosInLine() + (e.getStop() - e.getStart()),
@@ -154,7 +154,7 @@ public class Compiler {
             System.exit(1);
         } catch (ParseException e) {
             for (SyntaxErrorReport errorReport : e.getProblems()) {
-                System.out.println(errorReport.getErrorType().toString()+": "+errorReport.getMessage());
+                System.err.println(errorReport.getErrorType().toString()+": "+errorReport.getMessage());
             }
             System.exit(1);
         }
@@ -216,18 +216,18 @@ public class Compiler {
                             outFile.getPath());
                     //If an IOException occurred let the user know the issue and exit.
                 } catch (IOException e) {
-                    System.out.printf("Error writing compilation result. Reason: %s.\n", e.getLocalizedMessage());
+                    System.err.printf("Error writing compilation result. Reason: %s.\n", e.getLocalizedMessage());
                     System.exit(1);
                 }
             }
             //If a MidiUnavailableException occurs let the user know the error and exit.
         } catch (MidiUnavailableException e) {
-            System.out.printf("Midi system not available. %s.\n", e.getLocalizedMessage());
+            System.err.printf("Midi system not available. %s.\n", e.getLocalizedMessage());
             System.exit(1);
             //If an InvalidMidiDataException occurs it is most likely our fault. This error
             //should be reported so ask the user to report it.
         } catch (InvalidMidiDataException e) {
-            System.out.printf("Midi compilation error. Something went wrong, please submit your source to" +
+            System.err.printf("Midi compilation error. Something went wrong, please submit your source to" +
                     " the bug tracker. Error: %s\n", e.getLocalizedMessage());
             System.exit(1);
         }
@@ -243,13 +243,13 @@ public class Compiler {
                 //If `mkdirs` returns false the the directory doesn't exist because we are
                 //only at this point if it didn't exists in the first place.
                 if (!created) {
-                    System.out.printf("Could not create outdir %s\n", outDir.getAbsolutePath());
+                    System.err.printf("Could not create outdir %s\n", outDir.getAbsolutePath());
                     System.exit(1);
                 }
                 //If a SecurityException occurs let the user know that there is nothing we can do
                 //to create the directory for them and close the program.
             } catch (SecurityException e) {
-                System.out.printf("Could not create outdir (%s). Stopped by the security manager: %s",
+                System.err.printf("Could not create outdir (%s). Stopped by the security manager: %s",
                         outDir.getAbsolutePath(), e.getLocalizedMessage());
                 System.exit(1);
             }
@@ -259,7 +259,7 @@ public class Compiler {
         //If the path exists but is not a directory then we can't put the compilation result
         //anywhere. Let the user know they gave us a path to an existing file and close the program.
         } else if (!outDir.isDirectory()) {
-            System.out.printf("outdir (%s) is not a directory\n", outDir.getAbsolutePath());
+            System.err.printf("outdir (%s) is not a directory\n", outDir.getAbsolutePath());
             System.exit(1);
         }
 
@@ -272,7 +272,7 @@ public class Compiler {
         //If the file doesn't exist then there is nothing to read. Tell the user the
         //problem and exit.
         if (!inFile.exists()) {
-            System.out.printf("Cannot find input file %s.\n", inFile.getAbsolutePath());
+            System.err.printf("Cannot find input file %s.\n", inFile.getAbsolutePath());
             System.exit(1);
         }
 
@@ -280,7 +280,7 @@ public class Compiler {
         //the user most likely gave the wrong file. Let them know the file they gave
         //and tell them we can't use it.
         if (!inFile.getName().endsWith(FILE_EXTENSION)) {
-            System.out.printf("In file (%s) is not a Mellow D source file (.mlod).\n",
+            System.err.printf("In file (%s) is not a Mellow D source file (.mlod).\n",
                     inFile.getAbsolutePath());
             System.exit(1);
         }

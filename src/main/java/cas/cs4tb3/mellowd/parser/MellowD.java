@@ -1,8 +1,10 @@
 package cas.cs4tb3.mellowd.parser;
 
 import cas.cs4tb3.mellowd.TimingEnvironment;
+import cas.cs4tb3.mellowd.intermediate.variables.AlreadyDefinedException;
 import cas.cs4tb3.mellowd.intermediate.variables.Memory;
 import cas.cs4tb3.mellowd.intermediate.variables.SymbolTable;
+import cas.cs4tb3.mellowd.intermediate.variables.UndefinedReferenceException;
 import cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
 import cas.cs4tb3.mellowd.midi.MIDIChannel;
 
@@ -24,13 +26,18 @@ public class MellowD {
         this.timingEnvironment = timingEnvironment;
     }
 
-    public MellowDBlock getBlock(String name) {
+    public void defineBlock(String name, boolean percussion) {
         MellowDBlock block = this.blocks.get(name);
         if (block == null) {
-            block = new MellowDBlock(this.globalMemory, name);
+            block = new MellowDBlock(this.globalMemory, name, percussion);
             this.blocks.put(name, block);
+        } else {
+            throw new AlreadyDefinedException("A block with the name "+name+" is already defined.");
         }
-        return block;
+    }
+
+    public MellowDBlock getBlock(String name) {
+        return this.blocks.get(name);
     }
 
     public Memory getGlobalMemory() {
@@ -42,7 +49,6 @@ public class MellowD {
     }
 
     public Sequence record() {
-        //TODO better channel selection and creation
         Queue<Integer> availableChannels = new LinkedList<>();
         availableChannels.addAll(GeneralMidiConstants.REGULAR_CHANNELS);
         int drumChannel = GeneralMidiConstants.DRUM_CHANNELS.iterator().next();
@@ -51,12 +57,9 @@ public class MellowD {
 
         for (MellowDBlock block : this.blocks.values()) {
             Track track = sequence.createTrack();
-            int channelNum = availableChannels.remove();
-            Boolean percussion = block.getLocalMemory().get("percussion", Boolean.class);
-            if (percussion == null) percussion = false;
             MIDIChannel channel = new MIDIChannel(track,
-                    percussion,
-                    percussion ? drumChannel : channelNum,
+                    block.isPercussion(),
+                    block.isPercussion() ? drumChannel : availableChannels.remove(),
                     this.timingEnvironment);
             block.play(channel);
         }

@@ -29,9 +29,6 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
         return currentBlock != null ? currentBlock.getLocalMemory() : mellowD.getGlobalMemory();
     }
 
-    //TODO adjust melodies and chords that haven't been resolved in the right memory
-    //EX: chord declared in global scope will be wrong
-
     private static Pitch adjust(Pitch pitch, Memory memory) {
         int octave = OCTAVE_SHIFT.dereference(memory);
         return pitch.shiftOctave(octave - pitch.getOctave());
@@ -337,9 +334,9 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
 
     @Override
     public DynamicChange visitDynamicDeclaration(MellowDParser.DynamicDeclarationContext ctx) {
-        if (ctx.DYNAMIC_CRES() != null)
+        if (ctx.ARROWS_LEFT() != null)
             return new GradualDynamicChange(ctx.dynamic, true);
-        else if (ctx.DYNAMIC_DECRES() != null)
+        else if (ctx.ARROWS_LEFT() != null)
             return new GradualDynamicChange(ctx.dynamic, false);
         else
             return new DynamicChange(ctx.dynamic);
@@ -389,9 +386,25 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
     }
 
     @Override
+    public Void visitBlockDeclaration(MellowDParser.BlockDeclarationContext ctx) {
+        try {
+            this.mellowD.defineBlock(ctx.IDENTIFIER().getText(), ctx.KEYWORD_PERCUSSION() != null);
+        } catch (AlreadyDefinedException e) {
+            throw new CompilationException(ctx.IDENTIFIER(), e);
+        }
+        return null;
+    }
+
+    @Override
     public Void visitBlock(MellowDParser.BlockContext ctx) {
         List<MellowDBlock> blocksReferenced = new LinkedList<>();
-        ctx.IDENTIFIER().forEach(id -> blocksReferenced.add(mellowD.getBlock(id.getText())));
+        ctx.IDENTIFIER().forEach(id -> {
+            MellowDBlock block = mellowD.getBlock(id.getText());
+            if (block == null) {
+                throw new CompilationException(id, new UndefinedReferenceException(id.getText()));
+            }
+            blocksReferenced.add(block);
+        });
 
         //Sync them up
         if (blocksReferenced.size() > 1) {

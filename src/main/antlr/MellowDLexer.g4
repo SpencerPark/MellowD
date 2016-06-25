@@ -3,6 +3,9 @@
 
 lexer grammar MellowDLexer;
 
+KEYWORD_PERCUSSION : 'percussion' ;
+KEYWORD_DEF : 'def' ;
+
 //**Dynamics**: Volume control.
 //The following rules are volume modifiers that when encountered change
 //the loudness of the sound. This transition can become more gradual with
@@ -19,10 +22,10 @@ FFF  : 'fff';
 FFFF : 'ffff';
 
 //**Cresendo**: Gradually increase hte volume until at the volume of the next dynamic
-DYNAMIC_CRES   : '<<';
+ARROWS_LEFT   : '<<';
 
 //**Decresendo**: Gradually decrease the volume until at the volume of the next dynamic
-DYNAMIC_DECRES : '>>';
+ARROWS_RIGHT : '>>';
 
 //**Accents**: These characters apply *feel* or *style* to a note.
 //`DOT` also has another meaning in a rhythm context which is to extend a

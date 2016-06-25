@@ -196,8 +196,8 @@ locals [Dynamic dynamic]
         |   FFF   { $dynamic = Dynamic.fff;  }
         |   FFFF  { $dynamic = Dynamic.ffff; }
         )
-        ( DYNAMIC_CRES
-        | DYNAMIC_DECRES
+        ( ARROWS_LEFT
+        | ARROWS_RIGHT
         )?
     ;
 
@@ -216,6 +216,10 @@ phrase
             |   rhythmRef = reference
             )
         )
+    ;
+
+blockDeclaration
+    :   KEYWORD_DEF KEYWORD_PERCUSSION? IDENTIFIER
     ;
 
 //A block is a collection of phrases and dynamic declarations.
@@ -239,7 +243,8 @@ functionCall
 //variable declarations or blocks can be defined. A song consists of any number of these
 //declarations.
 song
-    :   ( varDeclaration
+    :   blockDeclaration*
+        ( varDeclaration
         | block
         )*
         EOF

@@ -16,14 +16,16 @@ import java.util.List;
 public class MellowDBlock implements Playable {
     private final Memory localMemory;
     private final String name;
+    private final boolean percussion;
     private List<Playable> elements;
 
     private Beat durationSinceGradualStart = null;
     private GradualDynamicChange gradualStart = null;
 
-    public MellowDBlock(Memory globalMemory, String name) {
+    public MellowDBlock(Memory globalMemory, String name, boolean percussion) {
         this.localMemory = new SymbolTable(globalMemory);
         this.name = name;
+        this.percussion = percussion;
         this.elements = new LinkedList<>();
     }
 
@@ -33,6 +35,10 @@ public class MellowDBlock implements Playable {
 
     public String getName() {
         return name;
+    }
+
+    public boolean isPercussion() {
+        return percussion;
     }
 
     public void add(DynamicChange dynamicChange) {
