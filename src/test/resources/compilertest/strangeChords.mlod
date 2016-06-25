@@ -1,3 +1,5 @@
+def block
+
 chordVar -> (c, e, g, c+1)
 
 block {
@@ -9,5 +11,5 @@ block {
     chordVar^*<q>
     (a, b$+1, c#+2)~*<q>
     (Cmaj7, c+2)*<q>
-    (Asd1minmaj7:1, a-1)*<q>
+    (A#minmaj7-1:1, a-1)*<q>
 }

@@ -48,6 +48,10 @@ public class MellowD {
         return timingEnvironment;
     }
 
+    public void onSongParseComplete() {
+        this.blocks.values().forEach(MellowDBlock::onSongParseComplete);
+    }
+
     public Sequence record() {
         Queue<Integer> availableChannels = new LinkedList<>();
         availableChannels.addAll(GeneralMidiConstants.REGULAR_CHANNELS);

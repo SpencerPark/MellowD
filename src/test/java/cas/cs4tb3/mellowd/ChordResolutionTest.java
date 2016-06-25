@@ -16,7 +16,6 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-
 public class ChordResolutionTest {
 
     @Parameterized.Parameters(name = "{index}: {0}")

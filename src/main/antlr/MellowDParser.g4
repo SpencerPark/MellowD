@@ -222,15 +222,22 @@ blockDeclaration
     :   KEYWORD_DEF KEYWORD_PERCUSSION? IDENTIFIER
     ;
 
+blockContents
+locals [List<ParseTree> contents = new LinkedList<>()]
+    :   (   dynamicDeclaration  { $contents.add($dynamicDeclaration.ctx); }
+        |   phrase              { $contents.add($phrase.ctx); }
+        |   reference           { $contents.add($reference.ctx); }
+        |   varDeclaration      { $contents.add($varDeclaration.ctx); }
+        |   functionCall        { $contents.add($functionCall.ctx); }
+        )+
+    ;
 //A block is a collection of phrases and dynamic declarations.
 block
-locals [List<ParseTree> blockContents = new LinkedList<>()]
+locals [List<BlockContentsContext> contents = new LinkedList<>()]
     :   IDENTIFIER ( COMMA IDENTIFIER )* BRACE_OPEN
-        (   dynamicDeclaration  { $blockContents.add($dynamicDeclaration.ctx); }
-        |   phrase              { $blockContents.add($phrase.ctx); }
-        |   reference           { $blockContents.add($reference.ctx); }
-        |   varDeclaration      { $blockContents.add($varDeclaration.ctx); }
-        |   functionCall        { $blockContents.add($functionCall.ctx); }
+        (   blockContents { $contents.add($blockContents.ctx); }
+        |   NUMBER STAR BRACE_OPEN blockContents BRACE_CLOSE
+            { for (int i = 0; i < $NUMBER.int; i++) $contents.add($blockContents.ctx); }
         )*
         BRACE_CLOSE
     ;

@@ -1,4 +1,11 @@
+def block
+
 phrase -> [a, b, c]*<q, q, q>
 rhythm -> <w, h, q, e, s>
 chord -> (a$-1, b#+1, c)
 melody -> [a, b, c, d, e, f, g]
+
+block {
+    //The variable values are not even attempted to be resolved until they are invoked
+    phrase melody*rhythm chord*rhythm
+}

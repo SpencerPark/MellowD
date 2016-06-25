@@ -1,3 +1,6 @@
-sample[instrument -> acousticguitar, octave -> 3] {
+def sample
+sample {
+    instrument[acousticguitar]
+    octave[3]
     (c, e, g)*<w> [a, b, c, d, e, f, g]*<q>
 }

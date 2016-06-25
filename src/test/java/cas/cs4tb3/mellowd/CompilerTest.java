@@ -4,7 +4,9 @@
 package cas.cs4tb3.mellowd;
 
 import cas.cs4tb3.mellowd.compiler.Compiler;
+import cas.cs4tb3.mellowd.parser.CompilationException;
 import cas.cs4tb3.mellowd.parser.ParseException;
+import cas.cs4tb3.mellowd.parser.SyntaxErrorReport;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.antlr.v4.runtime.RecognitionException;
@@ -100,18 +102,21 @@ public class CompilerTest {
             writeOut(compilationResult);
             System.out.println();
         } catch (IOException e) {
-            e.printStackTrace();
-            fail("IOException encountered while compiling. "+e.getLocalizedMessage());
-        } catch (ParseCancellationException e) {
-            RecognitionException ex = (RecognitionException) e.getCause();
-            fail(String.format("Parse exception in rule %s. Offending token: line %d@%d:'%s'. Expected: %s\n",
-                    ex.getCtx().toString(ex.getRecognizer()),
-                    ex.getOffendingToken().getLine(),
-                    ex.getOffendingToken().getCharPositionInLine(),
-                    ex.getOffendingToken().getText(),
-                    ex.getExpectedTokens().toString(ex.getRecognizer().getVocabulary())));
+            fail(String.format("Error reading input file (%s). Reason: %s\n",
+                    toCompile.getAbsolutePath(), e.getLocalizedMessage()));
+        } catch (CompilationException e) {
+            Throwable cause = e.getCause();
+            fail(String.format("Compilation exception on line %d@%d-%d:'%s'. Problem: %s\n",
+                    e.getLine(),
+                    e.getStartPosInLine(),
+                    e.getStartPosInLine() + (e.getStop() - e.getStart()),
+                    e.getText(),
+                    cause.getMessage()));
         } catch (ParseException e) {
-            fail(String.format("Compilation exception. %s", e.getMessage()));
+            for (SyntaxErrorReport errorReport : e.getProblems()) {
+                System.out.println(errorReport.getErrorType().toString()+": "+errorReport.getMessage());
+            }
+            fail("Exception while parsing.");
         }
     }
 

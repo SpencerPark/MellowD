@@ -356,7 +356,7 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
                 lhs = visitChord((MellowDParser.ChordContext) lhsCtx);
                 break;
             case MellowDParser.RULE_reference:
-                lhs = checkTypeOrThrow(lhsCtx, visitReference((MellowDParser.ReferenceContext) lhsCtx), Chord.class, Melody.class);
+                lhs = checkDefined(lhsCtx, checkTypeOrThrow(lhsCtx, visitReference((MellowDParser.ReferenceContext) lhsCtx), Chord.class, Melody.class));
                 break;
             default:
                 throw new Error("Another branch was added to the MellowDParser without updating the visitPhrase() method.");
@@ -396,6 +396,27 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
     }
 
     @Override
+    public Void visitBlockContents(MellowDParser.BlockContentsContext ctx) {
+        ctx.contents.forEach(contentCtx -> {
+            if (contentCtx instanceof MellowDParser.ReferenceContext) {
+                this.currentBlock.add(checkDefined(contentCtx, visitReference((MellowDParser.ReferenceContext) contentCtx, Phrase.class)));
+                return;
+            }
+
+            Object content = visit(contentCtx);
+            if (content instanceof Playable) {
+                try {
+                    this.currentBlock.add((Playable) content);
+                } catch (Exception e) {
+                    throw new CompilationException(contentCtx, e);
+                }
+            }
+        });
+
+        return null;
+    }
+
+    @Override
     public Void visitBlock(MellowDParser.BlockContext ctx) {
         List<MellowDBlock> blocksReferenced = new LinkedList<>();
         ctx.IDENTIFIER().forEach(id -> {
@@ -430,17 +451,7 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
         blocksReferenced.forEach(currentBlock -> {
             this.currentBlock = currentBlock;
 
-            ctx.blockContents.forEach(contentCtx -> {
-                if (contentCtx instanceof MellowDParser.ReferenceContext) {
-                    this.currentBlock.add(checkDefined(contentCtx, visitReference((MellowDParser.ReferenceContext) contentCtx, Phrase.class)));
-                    return;
-                }
-
-                Object content = visit(contentCtx);
-                if (content instanceof Playable) {
-                    this.currentBlock.add((Playable) content);
-                }
-            });
+            ctx.contents.forEach(this::visitBlockContents);
         });
 
         this.currentBlock = null;
@@ -489,6 +500,19 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
         }
 
         //TODO declared saved functions
+        return null;
+    }
+
+    @Override
+    public Void visitSong(MellowDParser.SongContext ctx) {
+        ctx.blockDeclaration().forEach(this::visitBlockDeclaration);
+        ctx.varDeclaration().forEach(this::visitVarDeclaration);
+        ctx.block().forEach(this::visitBlock);
+        try {
+            this.mellowD.onSongParseComplete();
+        } catch (Exception e) {
+            throw new CompilationException(ctx.EOF(), e);
+        }
         return null;
     }
 }

@@ -1,3 +1,4 @@
+def block
 melVar -> [c, d, e, f, g, a, b, c+1]
 myChord -> Cmaj
 melWithRestPhrase -> [a, *, b^, *]*<q>

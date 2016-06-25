@@ -24,6 +24,7 @@ public class MellowDBlock implements Playable {
 
     public MellowDBlock(Memory globalMemory, String name, boolean percussion) {
         this.localMemory = new SymbolTable(globalMemory);
+        MellowDParseTreeWalker.PERCUSSION.redefine(localMemory, percussion);
         this.name = name;
         this.percussion = percussion;
         this.elements = new LinkedList<>();
@@ -77,6 +78,13 @@ public class MellowDBlock implements Playable {
             add(((DynamicChange) playable));
         else
             this.elements.add(playable);
+    }
+
+    public void onSongParseComplete() {
+        if (this.gradualStart != null)
+            throw new IllegalStateException("A "
+                    + ( this.gradualStart.isCrescendo() ? "crescendo" : "decrescendo" )
+                    + " was specified but a target was never given.");
     }
 
     @Override

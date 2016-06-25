@@ -8,10 +8,8 @@ package cas.cs4tb3.mellowd;
 //will also need some antlr v4 runtime classes for passing the test data into
 //the lexer and parser. We also need to import the test classes to run the test
 //via junit.
-import cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
 import cas.cs4tb3.mellowd.parser.MellowDLexer;
 import cas.cs4tb3.mellowd.parser.MellowDParser;
-import cas.cs4tb3.mellowd.parser.TrackManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.antlr.v4.runtime.ANTLRInputStream;

@@ -70,4 +70,9 @@ public class CompilationException extends RuntimeException {
     public String getText() {
         return text;
     }
+
+    @Override
+    public String getMessage() {
+        return getCause() != null ? getCause().getMessage() : "null";
+    }
 }

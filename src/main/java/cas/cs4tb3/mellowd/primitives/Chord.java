@@ -3,6 +3,7 @@
 
 package cas.cs4tb3.mellowd.primitives;
 
+import cas.cs4tb3.mellowd.intermediate.functions.operations.Indexable;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Transposable;
 import cas.cs4tb3.mellowd.midi.MidiNoteMessageSource;
 
@@ -17,7 +18,7 @@ import java.util.regex.Pattern;
 //are defined between `(` and `)` tokens. The `,` separated pitches make up the chord.
 //
 //This class contains a variety of standard chords frequently used in compositions.
-public class Chord implements MidiNoteMessageSource, Transposable<Chord>, ChordElement, Articulatable {
+public class Chord implements MidiNoteMessageSource, Transposable<Chord>, ChordElement, Articulatable, Indexable<Pitch> {
     //The `CHORD_NAME_PATTERN` is a regular expression for matching chord names. There are a common
     //collection of chord patterns that are frequently used and the compiler should treat them as
     //all defined as variables. This is of course not possible so they are virtually defined and if
@@ -27,7 +28,7 @@ public class Chord implements MidiNoteMessageSource, Transposable<Chord>, ChordE
     //The pattern is `[A-G] ( '#' | '$' )? ( '+' | '-' [0-9]+ )? ( [a-z0-9]+ )?`
     //with named capturing groups to pull the data from the matcher.
     private static final Pattern CHORD_NAME_PATTERN = Pattern.compile(
-            "^(?<note>[A-G])((?<sharp>#)|(?<flat>\\$))?(?<octaveShift>((?<shiftUp>\\+)|(?<shiftDown>-))(?<shiftAmt>[0-9]+))?(?<name>[a-z0-9]+)?$"
+            "^(?<note>[A-G])((?<sharp>#)|(?<flat>\\$))?(?<name>[a-z0-9]+)?(?<octaveShift>((?<shiftUp>\\+)|(?<shiftDown>\\-))(?<shiftAmt>[0-9]+))?$"
     );
 
     //At its core, a chord is simply a collection of pitches. These are those pitches.
@@ -58,6 +59,11 @@ public class Chord implements MidiNoteMessageSource, Transposable<Chord>, ChordE
     @Override
     public Pitch getPitchAt(int index) {
         return pitches[index];
+    }
+
+    @Override
+    public Pitch getAt(int index) {
+        return getPitchAt(index);
     }
 
     //`getPitches` leaks a copy of the pitches that make up this chord.
