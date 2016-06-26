@@ -113,6 +113,7 @@ SHARP : '#';
 FLAT : '$';
 //`ASSIGNMENT` maps an identifier to a musical descriptor
 ASSIGNMENT : '->';
+INTO : '=>' ;
 
 //**Definition Boundaries**: The following definitions are for tokens that mark the
 //beginning and end of various definitions. They each have their respective match.
@@ -128,8 +129,8 @@ BRACE_CLOSE : '}';
 //Skip comments. Line comments comment out all input untin the first matched
 //newline. Mellow D also supports multi-line comments like java comments. `/*`
 //opens the comment and `*/` closes the comment.
-LINE_COMMENT : '//' ~[\r\n]* '\r'? '\n' -> skip;
-MULTI_LINE_COMMENT : '/*' (.)*? '*/' -> skip;
+LINE_COMMENT : '//' ~[\r\n]* '\r'? '\n' -> channel(HIDDEN) ;
+MULTI_LINE_COMMENT : '/*' (.)*? '*/' -> channel(HIDDEN) ;
 
 //Ignore whitespace and pipes (|) as they can be used by the developer to format
 //their source however they like.

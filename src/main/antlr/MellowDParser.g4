@@ -223,27 +223,34 @@ blockDeclaration
     ;
 
 blockContents
-locals [List<ParseTree> contents = new LinkedList<>()]
+returns [List<ParseTree> contents = new LinkedList<>()]
     :   (   dynamicDeclaration  { $contents.add($dynamicDeclaration.ctx); }
         |   phrase              { $contents.add($phrase.ctx); }
         |   reference           { $contents.add($reference.ctx); }
         |   varDeclaration      { $contents.add($varDeclaration.ctx); }
         |   functionCall        { $contents.add($functionCall.ctx); }
-        )+
+        |   NUMBER STAR BRACE_OPEN repeated = blockContents BRACE_CLOSE
+                { for (int i = 0; i < $NUMBER.int; i++) $contents.addAll($repeated.contents); }
+        )*
     ;
+
 //A block is a collection of phrases and dynamic declarations.
 block
-locals [List<BlockContentsContext> contents = new LinkedList<>()]
     :   IDENTIFIER ( COMMA IDENTIFIER )* BRACE_OPEN
-        (   blockContents { $contents.add($blockContents.ctx); }
-        |   NUMBER STAR BRACE_OPEN blockContents BRACE_CLOSE
-            { for (int i = 0; i < $NUMBER.int; i++) $contents.add($blockContents.ctx); }
-        )*
+        blockContents
         BRACE_CLOSE
     ;
 
 functionCall
-    :   IDENTIFIER BRACKET_OPEN value ( COMMA value )* BRACKET_CLOSE
+locals [List<ValueContext> args = new LinkedList<>()]
+    :   BRACE_OPEN (    ( value { $args.add($value.ctx); }
+                        |       { $args.add(null); }
+                        )
+                        ( COMMA ( value { $args.add($value.ctx); }
+                                |       { $args.add(null); }
+                                )
+                        )*
+                   ) BRACE_CLOSE INTO IDENTIFIER
     ;
 
 //A song is the top level rule, the entry point for the parser. At the top level only

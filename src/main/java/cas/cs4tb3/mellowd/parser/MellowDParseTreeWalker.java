@@ -451,7 +451,7 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
         blocksReferenced.forEach(currentBlock -> {
             this.currentBlock = currentBlock;
 
-            ctx.contents.forEach(this::visitBlockContents);
+            visitBlockContents(ctx.blockContents());
         });
 
         this.currentBlock = null;
@@ -459,11 +459,14 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
         return null;
     }
 
-    //TODO non-pure functions, need a way to deal with invocations outside of a block. Where does it play?
     @Override
     public Object visitFunctionCall(MellowDParser.FunctionCallContext ctx) {
-        List<Object> args = new ArrayList<>(ctx.value().size());
+        List<Object> args = new ArrayList<>(ctx.args.size());
         ctx.value().forEach(value -> {
+            if (value == null) {
+                args.add(null);
+                return;
+            }
             Object val = visitValue(value);
             if (val == null) args.add(value.getText());
             else             args.add(val);
