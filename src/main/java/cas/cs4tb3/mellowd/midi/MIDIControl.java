@@ -5,6 +5,8 @@ import java.util.function.BiFunction;
 public final class MIDIControl<T> {
     public static final MIDIControl<Knob>  PORTAMENTO_TIME  = new MIDIControl<>("PORTAMENTO_TIME", GeneralMidiConstants.PORTAMENTO_TIME_KNOB_CC, Knob::new);
     public static final MIDIControl<Knob>  VOLUME           = new MIDIControl<>("VOLUME", GeneralMidiConstants.CHANNEL_VOLUME_KNOB_CC, Knob::new);
+    public static final MIDIControl<Knob>  SOUND_VARIATION  = new MIDIControl<>("SOUND_VARIATION", GeneralMidiConstants.SOUND_VARIATION_KNOB_CC, Knob::new);
+    public static final MIDIControl<Knob>  RESONANCE        = new MIDIControl<>("RESONANCE", GeneralMidiConstants.RESONANCE_KNOB_CC, Knob::new);
     public static final MIDIControl<Knob>  RELEASE_TIME     = new MIDIControl<>("RELEASE_TIME", GeneralMidiConstants.RELEASE_TIME_KNOB_CC, Knob::new);
     public static final MIDIControl<Knob>  ATTACK_TIME      = new MIDIControl<>("ATTACK_TIME", GeneralMidiConstants.ATTACK_TIME_KNOB_CC, Knob::new);
     public static final MIDIControl<Knob>  REVERB           = new MIDIControl<>("REVERB", GeneralMidiConstants.REVERB_KNOB_CC, Knob::new);
@@ -15,8 +17,10 @@ public final class MIDIControl<T> {
 
     public static final MIDIControl<Pedal> SUSTAIN          = new MIDIControl<>("SUSTAIN", GeneralMidiConstants.SUSTAIN_SWITCH_CC, Pedal::new);
     public static final MIDIControl<Pedal> PORTAMENTO       = new MIDIControl<>("PORTAMENTO", GeneralMidiConstants.PORTAMENTO_SWITCH_CC, Pedal::new);
-    public static final MIDIControl<Pedal> SOSTENUTO        = new MIDIControl<>("SOSTENUTO", GeneralMidiConstants.SOSTENUTO_SWTICH_CC, Pedal::new);
+    public static final MIDIControl<Pedal> SOSTENUTO        = new MIDIControl<>("SOSTENUTO", GeneralMidiConstants.SOSTENUTO_SWITCH_CC, Pedal::new);
+    public static final MIDIControl<Pedal> SOFT             = new MIDIControl<>("SOFT", GeneralMidiConstants.SOFT_SWITCH_CC, Pedal::new);
     public static final MIDIControl<Pedal> LEGATO           = new MIDIControl<>("LEGATO", GeneralMidiConstants.LEGATO_SWITCH_CC, Pedal::new);
+    public static final MIDIControl<Pedal> HOLD             = new MIDIControl<>("HOLD", GeneralMidiConstants.HOLD_SWITCH_CC, Pedal::new);
 
     private final String name;
     private final int controlNumber;

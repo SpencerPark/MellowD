@@ -38,7 +38,6 @@ public class Phrase implements Playable {
         if (numBeats == 0 || numNotes == 0) return;
 
         boolean lastSlurred = false;
-        Sound lastSound = null;
 
         Pedal sustainPedal = channel.getController(MIDIControl.SUSTAIN);
         for (int i = 0; i < numElements; i++) {
@@ -55,10 +54,7 @@ public class Phrase implements Playable {
             }
 
             Sound sound = melody.getAt(i % numNotes).createSound(rhythm.getBeat(i % numBeats));
-            if (lastSound != null)
-                sound.setNext(lastSound);
             sound.play(channel);
-            lastSound = sound;
 
             //Update the tracker
             lastSlurred = slurred;

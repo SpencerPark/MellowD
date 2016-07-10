@@ -54,10 +54,8 @@ public class Sound implements Playable {
         }
     }
 
-    private static final Beat SLUR_EXTENSION = Beat.EIGHTH;
-    private final List<Pitch> pitches;
-    private final Beat duration;
-    private transient Sound next;
+    protected final List<Pitch> pitches;
+    protected final Beat duration;
 
     public Sound(Chord chord, Beat duration) {
         this.pitches = chord.getPitches();
@@ -91,68 +89,30 @@ public class Sound implements Playable {
         return pitches.size();
     }
 
-    public void setNext(Sound next) {
-        this.next = next;
-    }
-
     public boolean isChord() {
         return getNumNotes() > 1;
-    }
-
-    //TODO find a better way to leak this data to gliscand
-    protected boolean isHigherInPitch(Sound other) {
-        return !this.isChord() && !other.isChord() && this.pitches.get(0).getMidiNum() >= other.pitches.get(0).getMidiNum();
-    }
-
-    protected void notesOn(MIDIChannel channel, long delay, int volumeIncrease) {
-        channel.doLater(delay, () -> pitches.forEach(p -> {
-            if (channel.isSlurred() && channel.isNoteOn(p)) return;
-            channel.noteOn(p, volumeIncrease);
-        }));
-    }
-
-    protected void noteOn(MIDIChannel channel, long delay, int noteIndex, int volumeIncrease) {
-        channel.doLater(delay, () -> {
-            Pitch p = pitches.get(noteIndex);
-            if (channel.isSlurred() && channel.isNoteOn(p)) return;
-            channel.noteOn(p, volumeIncrease);
-        });
-    }
-
-    protected void notesOff(MIDIChannel channel, long delay, int offVolume) {
-        if (channel.isSlurred()) delay += channel.ticksInBeat(SLUR_EXTENSION);
-        channel.doLater(delay, () -> pitches.forEach(p -> {
-            if (next != null && channel.isSlurred() && next.pitches.contains(p)) return;
-            channel.noteOff(p, offVolume);
-        }));
-    }
-
-    protected void noteOff(MIDIChannel channel, long delay, int noteIndex, int offVolume) {
-        if (channel.isSlurred()) delay += channel.ticksInBeat(SLUR_EXTENSION);
-        channel.doLater(delay, () -> {
-            Pitch p = pitches.get(noteIndex);
-            if (next != null && channel.isSlurred() && next.pitches.contains(p)) return;
-            channel.noteOff(p, offVolume);
-        });
     }
 
     protected long getDuration(MIDIChannel channel) {
         return channel.ticksInBeat(this.duration);
     }
 
-    protected void advanceDuration(MIDIChannel channel) {
-        channel.stepIntoFuture(this.duration);
-    }
-
     @Override
     public void play(MIDIChannel channel) {
-        notesOn(channel, 0, 0);
-        notesOff(channel, getDuration(channel), MIDIChannel.DEFAULT_OFF_VELOCITY);
-        advanceDuration(channel);
+        channel.playNotes(pitches, 0, duration, MIDIChannel.DEFAULT_OFF_VELOCITY);
+        channel.stepIntoFuture(this.duration);
     }
 
     @Override
     public long calculateDuration(TimingEnvironment env) {
         return env.ticksInBeat(this.duration);
+    }
+
+    @Override
+    public String toString() {
+        return "Sound{" +
+                "pitches=" + pitches +
+                ", duration=" + duration +
+                '}';
     }
 }

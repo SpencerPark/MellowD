@@ -75,7 +75,6 @@ public abstract class ArticulatedSound extends Sound {
         public void play(MIDIChannel channel) {
             Knob releaseTime = channel.getController(MIDIControl.RELEASE_TIME);
             releaseTime.twist(128 / 4);
-            super.notesOn(channel, 0, 0);
 
             //Staccato makes the performance short and choppy. Described in jazz
             //as `dit`. To achieve this effect the duration will be chopped to a
@@ -83,9 +82,8 @@ public abstract class ArticulatedSound extends Sound {
             long tickDuration = super.getDuration(channel);
             tickDuration /= 4;
 
-            super.notesOff(channel, tickDuration, GeneralMidiConstants.MAX_VELOCITY);
-
-            super.advanceDuration(channel);
+            channel.playNotes(pitches, 0, tickDuration, GeneralMidiConstants.MAX_VELOCITY);
+            channel.stepIntoFuture(duration);
 
             releaseTime.twist(128 / 2);
         }
@@ -107,8 +105,6 @@ public abstract class ArticulatedSound extends Sound {
             Knob releaseTime = channel.getController(MIDIControl.RELEASE_TIME);
             releaseTime.twist(0);
 
-            super.notesOn(channel, 0, VOLUME_INCREASE);
-
             //Staccatissimo makes the performance short but more powerful. It is
             //given some more emphasis. It is similar to staccato but the duration
             //is going to be chopped to a third (rather than a forth) and it will be
@@ -116,9 +112,8 @@ public abstract class ArticulatedSound extends Sound {
             long tickDuration = super.getDuration(channel);
             tickDuration /= 3;
 
-            super.notesOff(channel, tickDuration, GeneralMidiConstants.MAX_VELOCITY);
-
-            super.advanceDuration(channel);
+            channel.playNotes(pitches, VOLUME_INCREASE, tickDuration, GeneralMidiConstants.MAX_VELOCITY);
+            channel.stepIntoFuture(duration);
 
             releaseTime.twist(128 / 2);
         }
@@ -142,8 +137,6 @@ public abstract class ArticulatedSound extends Sound {
             attackTime.twist(10);
             releaseTime.twist(60);
 
-            super.notesOn(channel, 0, VOLUME_INCREASE);
-
             //Marcato is the same a staccato but with more power. It is referred to
             //as `dhat` by jazz musicians and to preform a note with articulated with marcato
             //the note's duration will be chopped to a third, the velocity will be increased
@@ -151,9 +144,8 @@ public abstract class ArticulatedSound extends Sound {
             long tickDuration = super.getDuration(channel);
             tickDuration /= 3;
 
-            super.notesOff(channel, tickDuration, GeneralMidiConstants.MAX_VELOCITY);
-
-            super.advanceDuration(channel);
+            channel.playNotes(pitches, VOLUME_INCREASE, tickDuration, GeneralMidiConstants.MAX_VELOCITY);
+            channel.stepIntoFuture(duration);
 
             attackTime.twist(0);
             releaseTime.twist(128 / 2);
@@ -174,15 +166,12 @@ public abstract class ArticulatedSound extends Sound {
 
         @Override
         public void play(MIDIChannel channel) {
-            super.notesOn(channel, 0, VOLUME_INCREASE);
-
             //An accent is played by attacking the note. This gives it a much faster velocity and
             //will also drop off a bit quicker than the average note. This is sometimes referred to
             //as `dah` by jazz musicians.
 
-            super.notesOff(channel, super.getDuration(channel), OFF_VELOCITY);
-
-            super.advanceDuration(channel);
+            channel.playNotes(pitches, VOLUME_INCREASE, duration, OFF_VELOCITY);
+            channel.stepIntoFuture(duration);
         }
     }
 
@@ -199,17 +188,14 @@ public abstract class ArticulatedSound extends Sound {
 
         @Override
         public void play(MIDIChannel channel) {
-            super.notesOn(channel, 0, 0);
-
             //Tenuto is the equivalent of a single note slur. It is also called `doo` by jazz musicians
             //and so in order to preform a tenuto note the note will be let off as slow as possible with
             //a slightly longer duration.
             long tickDuration = super.getDuration(channel);
             tickDuration += tickDuration / 8;
 
-            super.notesOff(channel, tickDuration, OFF_VELOCITY);
-
-            super.advanceDuration(channel);
+            channel.playNotes(pitches, 0, tickDuration, OFF_VELOCITY);
+            channel.stepIntoFuture(duration);
         }
     }
 
@@ -230,19 +216,12 @@ public abstract class ArticulatedSound extends Sound {
             super(pitch, duration, Articulation.GLISCANDO);
         }
 
-        @Override
-        public void setNext(Sound next) {
-            super.setNext(next);
-            bendUp = super.isHigherInPitch(next);
-        }
-
         public void setBendUp(boolean bendUp) {
             this.bendUp = bendUp;
         }
 
         @Override
         public void play(MIDIChannel channel) {
-
             //Gliscando is a glide. It can be preformed as a pitch bend. To preform a gliscando a total of
             //16 pitch bend changes will give the effect that the note is falling or climbing (depending
             //on the direction of bend). These changes will be equally spaced over the duration of the note
@@ -256,13 +235,15 @@ public abstract class ArticulatedSound extends Sound {
                 //consecutive note in the chord will be delayed by the `offsetStep`.
                 long offsetStep = tickDuration / (super.getNumNotes() * 4);
                 long offset = 0;
-                for (int pitchIndex = 0; pitchIndex < super.getNumNotes(); pitchIndex++) {
-                    super.noteOn(channel, offset, pitchIndex, 0);
+                for (Pitch p : super.pitches) {
+                    long duration = tickDuration - offset;
+                    channel.doLater(offset, () ->
+                            channel.playNote(p, 0, duration, MIDIChannel.DEFAULT_OFF_VELOCITY));
                     offset += offsetStep;
                 }
                 //otherwise preform the gliscando as a pitch bend.
             } else {
-                super.notesOn(channel, 0, 0);
+                channel.playNotes(pitches, 0, duration, MIDIChannel.DEFAULT_OFF_VELOCITY);
                 for (int offset = 0; offset < BEND_STEPS; offset++) {
                     int bendAmount = GeneralMidiConstants.NO_PITCH_BEND + ( offset * ( bendUp ? BEND_AMT : -BEND_AMT ) );
                     channel.doLater(tickDuration * offset / BEND_STEPS, () -> channel.setPitchBend(bendAmount));
@@ -270,9 +251,7 @@ public abstract class ArticulatedSound extends Sound {
                 channel.doLater(super.getDuration(channel), channel::resetPitchBend);
             }
 
-            super.notesOff(channel, super.getDuration(channel), MIDIChannel.DEFAULT_OFF_VELOCITY);
-
-            super.advanceDuration(channel);
+            channel.stepIntoFuture(duration);
         }
     }
 }

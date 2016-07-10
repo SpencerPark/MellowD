@@ -57,8 +57,10 @@ public class GeneralMidiConstants {
 
     public static final int SUSTAIN_SWITCH_CC = 64;
     public static final int PORTAMENTO_SWITCH_CC = 65;
-    public static final int SOSTENUTO_SWTICH_CC = 66;
+    public static final int SOSTENUTO_SWITCH_CC = 66;
+    public static final int SOFT_SWITCH_CC = 67;
     public static final int LEGATO_SWITCH_CC = 68;
+    public static final int HOLD_SWITCH_CC = 69;
 
     public static final int CONTROLLER_VAL_ON = 127;
     public static final int CONTROLLER_VAL_OFF = 0;
@@ -68,6 +70,8 @@ public class GeneralMidiConstants {
     */
     public static final int PORTAMENTO_TIME_KNOB_CC = 5;
     public static final int CHANNEL_VOLUME_KNOB_CC = 7;
+    public static final int SOUND_VARIATION_KNOB_CC = 70;
+    public static final int RESONANCE_KNOB_CC = 71;
     public static final int RELEASE_TIME_KNOB_CC = 72;
     public static final int ATTACK_TIME_KNOB_CC = 73;
     public static final int REVERB_KNOB_CC = 91;
