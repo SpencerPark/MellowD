@@ -167,6 +167,8 @@ value
     |   phrase
     |   ( PLUS | MINUS )? NUMBER
     |   STRING
+    |   KEYWORD_TRUE
+    |   KEYWORD_FALSE
     ;
 
 //A variable declaration maps an identifier to a primitive. These primitives include [Chord](../primitives/Chord.html)
@@ -218,8 +220,22 @@ phrase
         )
     ;
 
+blockConfiguration
+locals [Object configVal]
+    :   IDENTIFIER COLON
+        (   ( PLUS | MINUS )? NUMBER         { $configVal = $MINUS != null ? -$NUMBER.int : $NUMBER.int;  }
+        |   STRING                          { $configVal = $STRING.text.substring(1, $STRING.text.length()-1); }
+        |   KEYWORD_TRUE                    { $configVal = true; }
+        |   KEYWORD_FALSE                   { $configVal = false; }
+        )
+    ;
+
 blockDeclaration
     :   KEYWORD_DEF KEYWORD_PERCUSSION? KEYWORD_BLOCK IDENTIFIER ( COMMA IDENTIFIER )*
+        (   BRACE_OPEN
+            blockConfiguration*
+            BRACE_CLOSE
+        )?
     ;
 
 statement

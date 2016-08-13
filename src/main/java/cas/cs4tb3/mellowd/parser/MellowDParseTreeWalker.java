@@ -1,15 +1,17 @@
 package cas.cs4tb3.mellowd.parser;
 
-import cas.cs4tb3.mellowd.intermediate.DynamicChange;
-import cas.cs4tb3.mellowd.intermediate.GradualDynamicChange;
-import cas.cs4tb3.mellowd.intermediate.Phrase;
-import cas.cs4tb3.mellowd.intermediate.SyncLink;
+import cas.cs4tb3.mellowd.intermediate.*;
 import cas.cs4tb3.mellowd.intermediate.executable.SourceLink;
 import cas.cs4tb3.mellowd.intermediate.executable.expressions.*;
 import cas.cs4tb3.mellowd.intermediate.executable.statements.*;
 import cas.cs4tb3.mellowd.intermediate.functions.*;
+import cas.cs4tb3.mellowd.intermediate.functions.defaults.InstrumentChangeFunction;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Indexable;
 import cas.cs4tb3.mellowd.intermediate.variables.*;
+import cas.cs4tb3.mellowd.midi.GeneralMidiInstrument;
+import cas.cs4tb3.mellowd.midi.Knob;
+import cas.cs4tb3.mellowd.midi.MIDIControl;
+import cas.cs4tb3.mellowd.midi.Pedal;
 import cas.cs4tb3.mellowd.primitives.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -42,18 +44,6 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
         TerminalNode idToken = ctx.IDENTIFIER();
         if (idToken != null) {
             String id = idToken.getText();
-            //Do a quick keyword check
-            switch (id.toLowerCase()) {
-                case "true":
-                case "yes":
-                case "on":
-                    return new RuntimeTypeCheck<>(desiredType, TRUE, idToken);
-                case "false":
-                case "no":
-                case "off":
-                    return new RuntimeTypeCheck<>(desiredType, FALSE, idToken);
-            }
-
             return new RuntimeTypeCheck<>(desiredType, new ReferenceResolution(id), idToken);
         } else {
             Constant<Chord> chordConstant = new Constant<>(Chord.resolve(ctx.CHORD_IDENTIFIER().getText()));
@@ -275,6 +265,10 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
             String raw = ctx.getText();
             //Trim the surrounding quotes
             return new Constant<>(raw.substring(1, raw.length()-1));
+        } else if (ctx.KEYWORD_TRUE() != null) {
+            return TRUE;
+        } else if (ctx.KEYWORD_FALSE() != null) {
+            return FALSE;
         }
 
         ParserRuleContext valueCtx = (ParserRuleContext) ctx.getChild(0);
@@ -355,10 +349,67 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
     }
 
     @Override
+    public Statement visitBlockConfiguration(MellowDParser.BlockConfigurationContext ctx) {
+        Playable playable;
+        switch (ctx.IDENTIFIER().getText()) {
+            case "instrument":
+                if (ctx.configVal instanceof Number)
+                    playable = new InstrumentChange(((Number) ctx.configVal).intValue(), 0);
+                else if (ctx.configVal instanceof String) {
+                    GeneralMidiInstrument instrument = GeneralMidiInstrument.lookup((String) ctx.configVal);
+                    if (instrument == null) throw new CompilationException(ctx, new UndefinedReferenceException((String) ctx.configVal));
+                    playable = new InstrumentChange(instrument);
+                } else
+                    throw new CompilationException(ctx, new IllegalArgumentException("Cannot set an instrument to be "+ctx.configVal));
+                break;
+            case "octave":
+                if (ctx.configVal instanceof Number)
+                    playable = new OctaveShift(((Number) ctx.configVal).intValue());
+                else
+                    throw new CompilationException(ctx, new IllegalArgumentException("Cannot shift the octave by "+ctx.configVal));
+                break;
+            case "soundbank":
+                if (ctx.configVal instanceof Number)
+                    playable = new SoundbankChange(((Number) ctx.configVal).intValue());
+                else
+                    throw new CompilationException(ctx, new IllegalArgumentException("Cannot set sound bank to  "+ctx.configVal));
+                break;
+            default:
+                MIDIControl<?> controller = MIDIControl.getController(ctx.IDENTIFIER().getText());
+                if (controller.getControllerType().equals(Knob.class)) {
+                    if (ctx.configVal instanceof Number)
+                        playable = new MIDIKnobChange((MIDIControl<Knob>) controller, ((Number) ctx.configVal).intValue());
+                    else
+                        throw new CompilationException(ctx, new IllegalArgumentException("Cannot twist the " + controller.getName() + " knob to " + ctx.configVal));
+                    break;
+                } else if (controller.getControllerType().equals(Pedal.class)) {
+                    if (ctx.configVal instanceof Boolean)
+                        playable = new MIDIPedalChange((MIDIControl<Pedal>) controller, (Boolean) ctx.configVal);
+                    else
+                        throw new CompilationException(ctx, new IllegalArgumentException("Cannot set the " + controller.getName() + " pedal to " + ctx.configVal));
+                    break;
+                } else {
+                    throw new Error("New controller type. visitBlockConfiguration() in the parser needs an update.");
+                }
+        }
+
+        return new ContextFreeStatement(ctx, playable);
+    }
+
+    @Override
     public Void visitBlockDeclaration(MellowDParser.BlockDeclarationContext ctx) {
+        CodeBlock config = null;
+        if (ctx.BRACE_OPEN() != null) {
+            config = new CodeBlock();
+            for (MellowDParser.BlockConfigurationContext configCtx : ctx.blockConfiguration()) {
+                config.add(visitBlockConfiguration(configCtx));
+            }
+        }
+
         for (TerminalNode id : ctx.IDENTIFIER()) {
             try {
-                this.mellowD.defineBlock(id.getText(), ctx.KEYWORD_PERCUSSION() != null);
+                MellowDBlock block = this.mellowD.defineBlock(id.getText(), ctx.KEYWORD_PERCUSSION() != null);
+                if (config != null) block.addFragment(config);
             } catch (AlreadyDefinedException e) {
                 throw new CompilationException(id, e);
             }

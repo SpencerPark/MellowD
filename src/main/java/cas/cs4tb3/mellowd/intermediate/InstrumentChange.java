@@ -4,24 +4,21 @@ import cas.cs4tb3.mellowd.TimingEnvironment;
 import cas.cs4tb3.mellowd.midi.GeneralMidiInstrument;
 import cas.cs4tb3.mellowd.midi.MIDIChannel;
 
-/**
- * Created on 2016-06-21.
- */
-public class InsrtumentChange implements Playable {
+public class InstrumentChange implements Playable {
     private final int instrument;
     private final int soundbank;
 
-    public InsrtumentChange(int instrument, int soundbank) {
+    public InstrumentChange(int instrument, int soundbank) {
         this.instrument = instrument;
         this.soundbank = soundbank;
     }
 
-    public InsrtumentChange(int instrument) {
+    public InstrumentChange(int instrument) {
         this.instrument = instrument;
         this.soundbank = 0;
     }
 
-    public InsrtumentChange(GeneralMidiInstrument instrument) {
+    public InstrumentChange(GeneralMidiInstrument instrument) {
         this.instrument = instrument.midiNum();
         this.soundbank = 0;
     }

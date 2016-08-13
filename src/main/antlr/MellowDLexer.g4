@@ -12,7 +12,8 @@ KEYWORD_CHORD : 'chord' ;
 KEYWORD_RHYTHM : 'rhythm' ;
 KEYWORD_MELODY : 'melody' ;
 KEYWORD_PHRASE : 'phrase' ;
-
+KEYWORD_TRUE : 'true' | 'on' ;
+KEYWORD_FALSE : 'false' | 'off' ;
 
 //**Dynamics**: Volume control.
 //The following rules are volume modifiers that when encountered change

@@ -1,6 +1,6 @@
 package cas.cs4tb3.mellowd.intermediate.functions.defaults;
 
-import cas.cs4tb3.mellowd.intermediate.InsrtumentChange;
+import cas.cs4tb3.mellowd.intermediate.InstrumentChange;
 import cas.cs4tb3.mellowd.intermediate.functions.Function;
 import cas.cs4tb3.mellowd.intermediate.functions.FunctionSignature;
 import cas.cs4tb3.mellowd.intermediate.functions.Parameter;
@@ -42,7 +42,7 @@ public class InstrumentChangeFunction extends Function {
             int soundbank = 0;
             if (soundbankArg != null) soundbank = soundbankArg.intValue();
 
-            out.put(new InsrtumentChange(instrument, soundbank));
+            out.put(new InstrumentChange(instrument, soundbank));
         });
     }
 }

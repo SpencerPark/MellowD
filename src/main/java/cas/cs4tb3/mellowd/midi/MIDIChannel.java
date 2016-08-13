@@ -240,7 +240,7 @@ public class MIDIChannel {
         setPitchBend(GeneralMidiConstants.NO_PITCH_BEND);
     }
 
-    private void setSoundBank(int soundBank) {
+    public void setSoundBank(int soundBank) {
         if (this.soundBank == soundBank) return;
 
         //Preform the sound bank change sequence described in the
@@ -254,7 +254,7 @@ public class MIDIChannel {
         }
     }
 
-    private void setInstrument(int instrument) {
+    public void setInstrument(int instrument) {
         if (this.instrument == instrument) return;
 
         //Add the program change message
