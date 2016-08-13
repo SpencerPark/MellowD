@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 //are defined between `(` and `)` tokens. The `,` separated pitches make up the chord.
 //
 //This class contains a variety of standard chords frequently used in compositions.
-public class Chord implements MidiNoteMessageSource, Transposable<Chord>, ChordElement, Articulatable, Indexable<Pitch> {
+public class Chord implements MidiNoteMessageSource, ConcatableComponent.TypeChord, ConcatableComponent.TypeMelody, Transposable<Chord>, Articulatable, Indexable<Pitch> {
     //The `CHORD_NAME_PATTERN` is a regular expression for matching chord names. There are a common
     //collection of chord patterns that are frequently used and the compiler should treat them as
     //all defined as variables. This is of course not possible so they are virtually defined and if
@@ -39,24 +39,8 @@ public class Chord implements MidiNoteMessageSource, Transposable<Chord>, ChordE
         this.pitches = pitches;
     }
 
-    //The list constructor is designed for use by the compiler where the notes are collected
-    //programmatically.
-    public Chord(List<ChordElement> params) {
-        int totalSize = 0;
-        for (ChordElement elem : params)
-            totalSize += elem.size();
-
-        this.pitches = new Pitch[totalSize];
-
-        int index = 0;
-        for (ChordElement elem : params)
-            for (int i = 0; i < elem.size(); i++)
-                this.pitches[index++] = elem.getPitchAt(i);
-    }
-
     //This method provides access to the internal array of pitches. It is used for accessing
     //specific notes via the mellow d syntax `chordName:index`.
-    @Override
     public Pitch getPitchAt(int index) {
         return pitches[index];
     }
@@ -76,7 +60,6 @@ public class Chord implements MidiNoteMessageSource, Transposable<Chord>, ChordE
     //It is important to know the size of the chord to stop an array out of bounds exception
     //when calling `getPitchAt`. An index greater than 0 and less than `size` will return a pitch
     //without ever throwing an array out of bounds exception.
-    @Override
     public int size() {
         return pitches.length;
     }
@@ -105,6 +88,36 @@ public class Chord implements MidiNoteMessageSource, Transposable<Chord>, ChordE
             pitches[i] = this.pitches[i].shiftOctave(octaveShift);
         }
         return new Chord(pitches);
+    }
+
+    @Override
+    public void appendTo(Chord root) {
+        int i = root.size();
+        root.pitches = Arrays.copyOf(root.pitches, root.size() + this.size());
+        for (Pitch p : this.pitches) {
+            root.pitches[i++] = p;
+        }
+    }
+
+    @Override
+    public void appendTo(Melody root) {
+        root.add(new ArticulatedChord(this));
+    }
+
+    @Override
+    public void appendTo(Object root) {
+        if (root instanceof Melody) {
+            appendTo(((Melody) root));
+        } else if (root instanceof Chord) {
+            appendTo(((Chord) root));
+        } else {
+            throw new IllegalArgumentException("Cannot append a chord to a " + root.getClass().getName());
+        }
+    }
+
+    public void append(Pitch p) {
+        this.pitches = Arrays.copyOf(this.pitches, this.pitches.length + 1);
+        this.pitches[this.pitches.length - 1] = p;
     }
 
     //`noteOn` and `noteOff` are the methods doing the actual compiling. They collect the compilation

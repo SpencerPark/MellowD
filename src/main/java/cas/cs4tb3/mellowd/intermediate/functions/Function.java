@@ -1,18 +1,33 @@
 package cas.cs4tb3.mellowd.intermediate.functions;
 
-public abstract class Function<R> {
-    private final String name;
-    private final Parameters parameters;
+import cas.cs4tb3.mellowd.intermediate.Output;
+import cas.cs4tb3.mellowd.intermediate.executable.statements.Statement;
+import cas.cs4tb3.mellowd.intermediate.variables.Memory;
+import cas.cs4tb3.mellowd.parser.ExecutionEnvironment;
 
-    public Function(String name, Parameters parameters) {
-        this.name = name;
-        this.parameters = parameters;
+public class Function {
+    private final FunctionSignature signature;
+    private final boolean percussion;
+    private final Statement body;
+
+    public Function(FunctionSignature signature, boolean percussion, Statement body) {
+        this.signature = signature;
+        this.percussion = percussion;
+        this.body = body;
     }
 
-    public Function(String name, Parameter... parameters) {
-        this.name = name;
-        this.parameters = new Parameters(parameters);
+    public boolean isPercussion() {
+        return percussion;
     }
 
-    public abstract R evaluate(Arguments arguments);
+    public void evaluate(ExecutionEnvironment environment, Output output, boolean shouldReturn, Argument<?>... args) {
+        Memory argument = signature.getParameters().prepareCall(environment, args);
+        FunctionExecutionEnvironment functionEnv = new FunctionExecutionEnvironment(environment, argument, shouldReturn, percussion);
+
+        body.execute(functionEnv, output);
+    }
+
+    public FunctionSignature getSignature() {
+        return signature;
+    }
 }

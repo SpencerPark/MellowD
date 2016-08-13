@@ -15,10 +15,6 @@ public interface Memory {
 
     Object get(String identifier);
 
-    //`getOrThrow` is similar in function to `get` but instead
-    //of returning null, the appropriate exception will be thrown.
-    <T> T getOrThrow(String identifier, Class<T> type);
-
     //`getType` is a utility method that will return the type of the data. This
     //will return null if the identifier is not defined.
     Class<?> getType(String identifier);
@@ -27,14 +23,6 @@ public interface Memory {
     //will return true if the identifier is defined and points to an object
     //that can safely be cast to `type`
     boolean identifierTypeIs(String identifier, Class<?> type);
-
-    //`checkType` is the equivalent of `identifierTypeIs` throwing an exception
-    //if the type is defined and incorrect (not able to be cast to `type`).
-    void checkType(String identifier, Class<?> type);
-
-    //`checkExists` is a utility method that throws an exception if the identifier that
-    //the `token` points to is not defined.
-    void checkExists(String identifier);
 
     int countReferences();
 

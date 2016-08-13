@@ -359,11 +359,6 @@ public class MIDIChannel {
             Sound.newSound(Chord.major(Pitch.C), Beat.HALF, Articulation.NONE).play(channel);
         }*/
         Rhythm r = new Rhythm();
-        r.append(Beat.HALF, true);
-        r.append(Beat.HALF, true);
-        r.append(Beat.HALF, true);
-        r.append(Beat.HALF, false);
-        r.append(Beat.HALF, false);
         Melody m = new Melody();
         m.add(new ArticulatedChord(Chord.major(Pitch.C)));
 

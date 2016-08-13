@@ -37,4 +37,39 @@ public class Reference<T> {
         T value = scope.get(identifier, type);
         return value == null ? defaultValue : value;
     }
+
+    public void putDefault(Memory scope) {
+        scope.set(identifier, defaultValue);
+    }
+
+    public boolean isDynamicallyTyped() {
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(identifier);
+        if (!isDynamicallyTyped()) sb.append(':').append(type.getSimpleName());
+        if (defaultValue != null) sb.append('=').append(defaultValue.toString());
+        return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Reference<?> reference = (Reference<?>) o;
+
+        if (!identifier.equals(reference.identifier)) return false;
+        return type.equals(reference.type);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = identifier.hashCode();
+        result = 31 * result + type.hashCode();
+        return result;
+    }
 }

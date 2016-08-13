@@ -2,10 +2,7 @@ package cas.cs4tb3.mellowd.primitives;
 
 import cas.cs4tb3.mellowd.intermediate.Sound;
 
-/**
- * Created on 2016-06-21.
- */
-public interface Articulated {
+public interface Articulated extends ConcatableComponent.TypeMelody {
 
     Articulated shiftOctave(int octaveShift);
 
@@ -14,4 +11,9 @@ public interface Articulated {
     Articulation getArticulation();
 
     void setArticulation(Articulation articulation);
+
+    @Override
+    default void appendTo(Melody root) {
+        root.add(this);
+    }
 }

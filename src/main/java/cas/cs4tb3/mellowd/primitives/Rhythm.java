@@ -13,7 +13,7 @@ import java.util.List;
 //a comma separated list of beats wrapped in `<` and `>`. Each beat is referred to by the first
 //letter in it's name. Additionally beats can be slurred together. This results in the durations
 //overlapping and the notes connecting more smoothly.
-public class Rhythm {
+public class Rhythm implements ConcatableComponent.TypeRhythm {
     private final List<Beat> beats;
     private final BitSet slurred;
 
@@ -46,11 +46,7 @@ public class Rhythm {
     //as the added beat will not be slurred.
     public void append(Beat beat) {
         this.beats.add(beat);
-    }
-
-    public void append(Beat beat, boolean slurred) {
-        this.beats.add(beat);
-        this.slurred.set(this.beats.size()-1, slurred);
+        this.slurred.set(this.beats.size()-1, beat.isSlurred());
     }
 
     public void append(Rhythm other) {
@@ -61,16 +57,13 @@ public class Rhythm {
         }
     }
 
-    public void append(Rhythm other, boolean slurred) {
-        int startingIndex = this.beats.size();
-        this.beats.addAll(other.beats);
-        for (int i = 0; i < other.size(); i++) {
-            this.slurred.set(startingIndex + i, other.isSlurred(i) ^ slurred);
-        }
-    }
-
     public void setSlurred(int index, boolean slurred) {
         this.slurred.set(index, slurred);
+    }
+
+    @Override
+    public void setSlurred(boolean slur) {
+        slurAll();
     }
 
     public void slurAll() {
@@ -88,6 +81,11 @@ public class Rhythm {
             numQuarters += beat.getNumQuarters();
 
         return new Beat(numQuarters);
+    }
+
+    @Override
+    public void appendTo(Rhythm root) {
+        root.append(this);
     }
 
     @Override

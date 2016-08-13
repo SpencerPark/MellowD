@@ -71,7 +71,6 @@ public class SymbolTable implements Memory {
 
     //`getOrThrow` is similar in function to `get` but instead
     //of returning null, the appropriate exception will be thrown.
-    @Override
     public <T> T getOrThrow(String identifier, Class<T> type) {
         Object value = get(identifier);
 
@@ -108,7 +107,6 @@ public class SymbolTable implements Memory {
 
     //`checkType` is the equivalent of `identifierTypeIs` throwing an exception
     //if the type is defined and incorrect (not able to be cast to `type`).
-    @Override
     public void checkType(String identifier, Class<?> type) {
         Object value = get(identifier);
         if (value != null && !type.isAssignableFrom(value.getClass()))
@@ -117,7 +115,6 @@ public class SymbolTable implements Memory {
 
     //`checkExists` is a utility method that throws an exception if the identifier that
     //the `token` points to is not defined.
-    @Override
     public void checkExists(String identifier) {
         Object value = get(identifier);
         if (value == null)

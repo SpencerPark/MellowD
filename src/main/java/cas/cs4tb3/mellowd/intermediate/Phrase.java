@@ -74,4 +74,12 @@ public class Phrase implements Playable {
 
         return ticks;
     }
+
+    @Override
+    public String toString() {
+        return "Phrase{" +
+                "melody=" + melody +
+                ", rhythm=" + rhythm +
+                '}';
+    }
 }

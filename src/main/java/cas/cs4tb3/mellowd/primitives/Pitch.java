@@ -14,7 +14,7 @@ import java.util.Collections;
 //Pitch is a key building block in the Mellow D compiler. It specifies the value of the played
 //note. MIDI restricts the note value to 7 bits, hence we have 0-127 to work with. 0 corresponds
 //to the musical note c with each consecutive number adding a semi-tone to the note value.
-public final class Pitch implements MidiNoteMessageSource, Transposable<Pitch>, ChordElement, Articulatable {
+public final class Pitch implements MidiNoteMessageSource, Transposable<Pitch>, ConcatableComponent.TypeChord, ConcatableComponent.TypeMelody, Articulatable {
     //The `NOTE_NAMES` array maps a midi num in the lowest octave to a note name. Here
     //it is clear to see the mapping from number to note for a total of 12 semi-tones in
     //an octave.
@@ -57,19 +57,6 @@ public final class Pitch implements MidiNoteMessageSource, Transposable<Pitch>, 
 
     private Pitch(int midiNum) {
         this.midiNum = midiNum;
-    }
-
-    @Override
-    public int size() {
-        return 1;
-    }
-
-    @Override
-    public Pitch getPitchAt(int index) {
-        if (index != 0)
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: 1");
-
-        return this;
     }
 
     @Override
@@ -213,5 +200,26 @@ public final class Pitch implements MidiNoteMessageSource, Transposable<Pitch>, 
     public Pitch transpose(int numSemiTones) {
         if (this == REST) return REST;
         return Pitch.getPitch(this.midiNum + numSemiTones);
+    }
+
+    @Override
+    public void appendTo(Chord root) {
+        root.append(this);
+    }
+
+    @Override
+    public void appendTo(Object root) {
+        if (root instanceof Melody) {
+            appendTo(((Melody) root));
+        } else if (root instanceof Chord) {
+            appendTo(((Chord) root));
+        } else {
+            throw new IllegalArgumentException("Cannot append a pitch to a " + root.getClass().getName());
+        }
+    }
+
+    @Override
+    public void appendTo(Melody root) {
+        root.add(new ArticulatedPitch(this));
     }
 }

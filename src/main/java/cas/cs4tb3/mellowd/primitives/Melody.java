@@ -4,7 +4,7 @@
 package cas.cs4tb3.mellowd.primitives;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
 //A melody is a sequence of pitches played one after the other. Melodies are
@@ -17,12 +17,17 @@ import java.util.List;
 //may function more like a trill but never the less, this class will function the same.
 //
 //The Melody class is simply a list wrapper. The order of the sounds is important.
-public class Melody {
+public class Melody implements ConcatableComponent.TypeMelody {
     //This is the data that supports the melody.
     private List<Articulated> sounds;
 
     public Melody() {
         this.sounds = new ArrayList<>();
+    }
+
+    public Melody(Articulated... comps) {
+        this.sounds = new ArrayList<>();
+        Collections.addAll(this.sounds, comps);
     }
 
     public Melody(List<Articulated> sounds) {
@@ -42,7 +47,7 @@ public class Melody {
 
     //Melodies defined as variables need to be reevaluated in the current octave
     //for them to have any use.
-    public Melody shiftOctave(int octaveShift) {
+    public TypeMelody shiftOctave(int octaveShift) {
         if (octaveShift == 0) return this;
         List<Articulated> sounds = new ArrayList<>(this.sounds.size());
         for (Articulated s : this.sounds) {
@@ -57,5 +62,10 @@ public class Melody {
 
     public Articulated getAt(int i) {
         return this.sounds.get(i);
+    }
+
+    @Override
+    public void appendTo(Melody root) {
+        root.add(this);
     }
 }

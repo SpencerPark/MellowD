@@ -21,6 +21,7 @@ import javax.sound.midi.Sequence;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -117,6 +118,9 @@ public class CompilerTest {
                 System.out.println(errorReport.getErrorType().toString()+": "+errorReport.getMessage());
             }
             fail("Exception while parsing.");
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            fail("Exception thrown while executing. "+e.getMessage());
         }
     }
 

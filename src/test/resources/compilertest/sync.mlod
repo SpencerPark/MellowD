@@ -1,0 +1,13 @@
+def block blockA, blockB
+
+blockA {
+    [a, b, c]*<q>
+}
+
+blockB {
+    { 3 } => octave
+}
+
+blockA, blockB {
+    [d, e, f]*<q>
+}

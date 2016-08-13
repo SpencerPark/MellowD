@@ -3,17 +3,17 @@ package cas.cs4tb3.mellowd.intermediate.functions;
 /**
  * Created on 2016-06-19.
  */
-public class IllegalArgumentException extends FunctionInvocationException {
+public class ArgumentException extends FunctionInvocationException {
     private final Parameter badParameter;
     private final String reason;
 
-    public IllegalArgumentException(Parameter badParameter, String reason) {
+    public ArgumentException(Parameter badParameter, String reason) {
         super(buildMessage(badParameter, reason));
         this.badParameter = badParameter;
         this.reason = reason;
     }
 
-    public IllegalArgumentException(Parameter badParameter, String reason, Throwable cause) {
+    public ArgumentException(Parameter badParameter, String reason, Throwable cause) {
         super(buildMessage(badParameter, reason), cause);
         this.badParameter = badParameter;
         this.reason = reason;

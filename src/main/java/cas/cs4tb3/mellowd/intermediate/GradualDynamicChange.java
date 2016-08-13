@@ -20,7 +20,7 @@ public class GradualDynamicChange extends DynamicChange {
     public GradualDynamicChange(Dynamic start, boolean crescendo) {
         super(start);
         this.end = start; //Flat line by default until it is set later
-        this.changeDuration = Beat.EIGHTH;
+        this.changeDuration = Beat.EIGHTH();
         this.isCrescendo = crescendo;
     }
 

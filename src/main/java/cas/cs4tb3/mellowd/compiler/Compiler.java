@@ -144,13 +144,7 @@ public class Compiler {
             //If a ParseException occurs then there was a problem with the data in the input
             //file. The input is well formed but the semantics are wrong. Display the error and exit.
         } catch (CompilationException e) {
-            Throwable cause = e.getCause();
-            System.err.printf("Compilation exception on line %d@%d-%d:'%s'. Problem: %s\n",
-                    e.getLine(),
-                    e.getStartPosInLine(),
-                    e.getStartPosInLine() + (e.getStop() - e.getStart()),
-                    e.getText(),
-                    cause.getMessage());
+            e.print(System.err);
             System.exit(1);
         } catch (ParseException e) {
             for (SyntaxErrorReport errorReport : e.getProblems()) {
@@ -290,7 +284,7 @@ public class Compiler {
     }
 
     //`compile` is the method that actually runs the compiler.
-    public static Sequence compile(File src, byte numerator, byte denominator, int tempo, boolean verbose) throws IOException {
+    public static Sequence compile(File src, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {
         //First we will display the inputs being used so they can double check everything
         //is as expected.
         if (verbose) {
@@ -336,7 +330,15 @@ public class Compiler {
                     compileTime / 1E9d);
         }
 
+        long executionStart = System.nanoTime();
+        Sequence result = compilationResult.execute();
+        if (verbose) {
+            long executionTime = System.nanoTime() - executionStart;
+            System.out.printf("Execution took %.4f s\n",
+                    executionTime / 1E9d);
+        }
+
         //Return the sequence generated while parsing.
-        return compilationResult.record();
+        return result;
     }
 }

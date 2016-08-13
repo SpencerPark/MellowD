@@ -7,21 +7,28 @@ package cas.cs4tb3.mellowd.primitives;
 //Each beat has the number of quarter notes it is equivalent to (possibly a fraction),
 //for converting from `PPQN` (ticks per quarter note) to a duration in ticks that the
 //beat should be held for.
-public class Beat {
+public class Beat implements ConcatableComponent.TypeRhythm {
     //All beats must start out as one of the following durations which can then
     //later on be manipulated via dots to extend the duration or wrapping inside a tuplet.
-    public static final Beat WHOLE          = new Beat(4d);
-    public static final Beat HALF           = new Beat(2d);
-    public static final Beat QUARTER        = new Beat(1d);
-    public static final Beat EIGHTH         = new Beat(1/2d);
-    public static final Beat SIXTEENTH      = new Beat(1/4d);
-    public static final Beat THIRTYSECOND   = new Beat(1/8d);
-    public static final Beat ZERO           = new Beat(0d);
+    public static Beat WHOLE()          { return new Beat(4d);   }
+    public static Beat HALF()           { return new Beat(2d);   }
+    public static Beat QUARTER()        { return new Beat(1d);   }
+    public static Beat EIGHTH()         { return new Beat(1/2d); }
+    public static Beat SIXTEENTH()      { return new Beat(1/4d); }
+    public static Beat THIRTYSECOND()   { return new Beat(1/8d); }
+    
+    public static Beat ZERO = new Beat(0d);
 
     private final double numQuarters;
+    private boolean slurred;
 
     public Beat(double numQuarters) {
         this.numQuarters = numQuarters;
+    }
+
+    public Beat(double numQuarters, boolean slurred) {
+        this.numQuarters = numQuarters;
+        this.slurred = slurred;
     }
 
     //Each dot following a beat extends the duration by the original duration
@@ -78,6 +85,15 @@ public class Beat {
         return this.numQuarters;
     }
 
+    public boolean isSlurred() {
+        return slurred;
+    }
+
+    @Override
+    public void setSlurred(boolean slurred) {
+        this.slurred = slurred;
+    }
+
     @Override
     public String toString() {
         if (this.numQuarters == 4d) {
@@ -95,5 +111,10 @@ public class Beat {
         } else {
             return String.format("r{%.2f}", this.numQuarters);
         }
+    }
+
+    @Override
+    public void appendTo(Rhythm root) {
+        root.append(this);
     }
 }

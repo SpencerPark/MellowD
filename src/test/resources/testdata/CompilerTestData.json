@@ -39,5 +39,11 @@
     "timeNumerator": 4,
     "timeDenominator": 4,
     "tempo": 120
+  },
+  {
+    "compFileName": "sync.mlod",
+    "timeNumerator": 4,
+    "timeDenominator": 4,
+    "tempo": 120
   }
 ]

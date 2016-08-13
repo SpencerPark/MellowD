@@ -6,6 +6,13 @@ lexer grammar MellowDLexer;
 KEYWORD_PERCUSSION : 'percussion' ;
 KEYWORD_DEF : 'def' ;
 KEYWORD_BLOCK : 'block' ;
+KEYWORD_FUNCTION : 'function' ;
+KEYWORD_RETURN : 'return' ;
+KEYWORD_CHORD : 'chord' ;
+KEYWORD_RHYTHM : 'rhythm' ;
+KEYWORD_MELODY : 'melody' ;
+KEYWORD_PHRASE : 'phrase' ;
+
 
 //**Dynamics**: Volume control.
 //The following rules are volume modifiers that when encountered change
@@ -114,6 +121,7 @@ FLAT : '$';
 //`ASSIGNMENT` maps an identifier to a musical descriptor
 ASSIGNMENT : '->';
 INTO : '=>' ;
+OPTIONAL : '?' ;
 
 //**Definition Boundaries**: The following definitions are for tokens that mark the
 //beginning and end of various definitions. They each have their respective match.
@@ -125,6 +133,8 @@ P_BRACKET_OPEN : '<';
 P_BRACKET_CLOSE : '>';
 BRACE_OPEN : '{';
 BRACE_CLOSE : '}';
+
+STRING : '"' ~('\r' | '\n' | '"')* '"' ;
 
 //Skip comments. Line comments comment out all input untin the first matched
 //newline. Mellow D also supports multi-line comments like java comments. `/*`

@@ -1,39 +1,77 @@
 package cas.cs4tb3.mellowd.parser;
 
 import cas.cs4tb3.mellowd.TimingEnvironment;
+import cas.cs4tb3.mellowd.intermediate.executable.CodeExecutor;
+import cas.cs4tb3.mellowd.intermediate.executable.statements.PercussionToggledEnvironment;
+import cas.cs4tb3.mellowd.intermediate.functions.FunctionBank;
+import cas.cs4tb3.mellowd.intermediate.functions.defaults.InstrumentChangeFunction;
+import cas.cs4tb3.mellowd.intermediate.functions.defaults.OctaveShiftFunction;
 import cas.cs4tb3.mellowd.intermediate.variables.AlreadyDefinedException;
 import cas.cs4tb3.mellowd.intermediate.variables.Memory;
 import cas.cs4tb3.mellowd.intermediate.variables.SymbolTable;
-import cas.cs4tb3.mellowd.intermediate.variables.UndefinedReferenceException;
 import cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
 import cas.cs4tb3.mellowd.midi.MIDIChannel;
 
 import javax.sound.midi.Sequence;
-import javax.sound.midi.Track;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
-public class MellowD {
+public class MellowD implements ExecutionEnvironment {
     private final Memory globalMemory;
     private final Map<String, MellowDBlock> blocks;
     private final TimingEnvironment timingEnvironment;
+    private final FunctionBank functions;
+
+    private final Sequence master;
+    private final Queue<Integer> channelsAvailable;
+    private final Queue<Integer> drumChannelsAvailable;
+
+    public final ExecutionEnvironment PERCUSSION_TOGGLED_WRAPPER = new PercussionToggledEnvironment(this);
 
     public MellowD(TimingEnvironment timingEnvironment) {
         this.globalMemory = new SymbolTable();
         this.blocks = new HashMap<>();
         this.timingEnvironment = timingEnvironment;
+        this.functions = new FunctionBank();
+        addDefaultFunctionsToBank();
+
+        this.master = timingEnvironment.createSequence();
+        this.channelsAvailable = new LinkedList<>();
+        this.channelsAvailable.addAll(GeneralMidiConstants.REGULAR_CHANNELS);
+        this.drumChannelsAvailable = new LinkedList<>();
+        this.drumChannelsAvailable.addAll(GeneralMidiConstants.DRUM_CHANNELS);
     }
 
-    public void defineBlock(String name, boolean percussion) {
+    private void addDefaultFunctionsToBank() {
+        this.functions.addFunction(InstrumentChangeFunction.getInstance(true));
+        this.functions.addFunction(InstrumentChangeFunction.getInstance(false));
+
+        this.functions.addFunction(OctaveShiftFunction.getInstance(true));
+        this.functions.addFunction(OctaveShiftFunction.getInstance(false));
+    }
+
+    public MellowDBlock defineBlock(String name, boolean percussion) {
         MellowDBlock block = this.blocks.get(name);
         if (block == null) {
-            block = new MellowDBlock(this.globalMemory, name, percussion);
+            Integer channelNum;
+            if (percussion) {
+                channelNum = drumChannelsAvailable.poll();
+                if (channelNum == null)
+                    throw new Error("No drum channels available.");
+                drumChannelsAvailable.offer(channelNum); //We want to cycle the drum channels
+            } else {
+                channelNum = channelsAvailable.poll();
+                if (channelNum == null)
+                    throw new IllegalStateException("Block definition "+name+" requires a channel but there are none left. Too many channels used.");
+            }
+
+            MIDIChannel channel = new MIDIChannel(this.master.createTrack(), percussion, channelNum, timingEnvironment);
+            block = new MellowDBlock(this.globalMemory, name, channel);
             this.blocks.put(name, block);
         } else {
             throw new AlreadyDefinedException("A block with the name "+name+" is already defined.");
         }
+
+        return block;
     }
 
     public MellowDBlock getBlock(String name) {
@@ -44,30 +82,42 @@ public class MellowD {
         return globalMemory;
     }
 
+    @Override
+    public boolean isPercussion() {
+        return false;
+    }
+
+    @Override
+    public Memory getMemory(String... qualifier) {
+        //TODO let the qualifier reference external sources
+        return globalMemory;
+    }
+
     public TimingEnvironment getTimingEnvironment() {
         return timingEnvironment;
     }
 
-    public void onSongParseComplete() {
-        this.blocks.values().forEach(MellowDBlock::onSongParseComplete);
+    public FunctionBank getFunctionBank(String... qualifier) {
+        //TODO let the qualifier reference external sources
+        return this.functions;
     }
 
-    public Sequence record() {
-        Queue<Integer> availableChannels = new LinkedList<>();
-        availableChannels.addAll(GeneralMidiConstants.REGULAR_CHANNELS);
-        int drumChannel = GeneralMidiConstants.DRUM_CHANNELS.iterator().next();
-
-        Sequence sequence = this.timingEnvironment.createSequence();
-
+    public synchronized Sequence execute() throws Exception {
+        Queue<CodeExecutor> executors = new LinkedList<>();
         for (MellowDBlock block : this.blocks.values()) {
-            Track track = sequence.createTrack();
-            MIDIChannel channel = new MIDIChannel(track,
-                    block.isPercussion(),
-                    block.isPercussion() ? drumChannel : availableChannels.remove(),
-                    this.timingEnvironment);
-            block.play(channel);
+            CodeExecutor executor = block.createExecutor();
+            executors.add(executor);
+            executor.start();
         }
 
-        return sequence;
+        while (!executors.isEmpty()) {
+            CodeExecutor executor = executors.poll();
+            executor.join(3000L); //Wait for the thread to finish
+            if (executor.errorWhileExecuting()) {
+                throw executor.getExecutionError();
+            }
+        }
+
+        return master;
     }
 }

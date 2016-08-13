@@ -43,4 +43,35 @@ public class Parameter<T> {
     public boolean isCollection() {
         return isCollection;
     }
+
+    public boolean isDynamicallyTyped() {
+        return reference.isDynamicallyTyped();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(getReference().toString());
+        if (isCollection) sb.append("[]");
+        if (isOptional) sb.append('?');
+        return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Parameter<?> parameter = (Parameter<?>) o;
+
+        if (isOptional != parameter.isOptional) return false;
+        return reference.equals(parameter.reference);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = reference.hashCode();
+        result = 31 * result + (isOptional ? 1 : 0);
+        return result;
+    }
 }

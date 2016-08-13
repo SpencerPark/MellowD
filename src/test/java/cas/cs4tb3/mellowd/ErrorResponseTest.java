@@ -66,8 +66,8 @@ public class ErrorResponseTest {
                 "}"
         );
         try {
-            parseAndCompileSong(parser);
-        } catch (CompilationException e) {
+            parseAndCompileSong(parser).execute();
+        } catch (IllegalStateException e) {
             printExpectedError(e);
             return;
         }
@@ -87,7 +87,7 @@ public class ErrorResponseTest {
                 "    ff" +
                 "}");
         try {
-            parseAndCompileSong(parser);
+            parseAndCompileSong(parser).execute();
         } catch (CompilationException e) {
             fail("Compiler threw an exception even though the crescendo was closed in the following block.");
         }
@@ -102,7 +102,7 @@ public class ErrorResponseTest {
                 "}");
 
         try {
-            parseAndCompileSong(parser);
+            parseAndCompileSong(parser).execute();
         } catch (CompilationException e) {
             printExpectedError(e);
             return;
@@ -121,10 +121,10 @@ public class ErrorResponseTest {
                 .getResource("errortest/largeInput.mlod").toURI().getPath()));
 
         try {
-            parseAndCompileSong(parser).record();
+            parseAndCompileSong(parser).execute();
             fail("Expected largeInput.mlod to throw a NoSuchElementException about too many channels but" +
                     "it didn't.");
-        } catch (NoSuchElementException e) {
+        } catch (IllegalStateException e) {
             printExpectedError(e);
         }
 
@@ -144,7 +144,7 @@ public class ErrorResponseTest {
                 "}");
 
         try {
-            parseAndCompileSong(parser);
+            parseAndCompileSong(parser).execute();
         } catch (CompilationException e) {
             printExpectedError(e);
             return;
@@ -166,7 +166,7 @@ public class ErrorResponseTest {
                 "}");
 
         try {
-            parseAndCompileSong(parser);
+            parseAndCompileSong(parser).execute();
         } catch (CompilationException e) {
             printExpectedError(e);
             return;
@@ -186,7 +186,7 @@ public class ErrorResponseTest {
                 "}");
 
         try {
-            parseAndCompileSong(parser);
+            parseAndCompileSong(parser).execute();
         } catch (CompilationException e) {
             printExpectedError(e);
             return;
@@ -207,7 +207,7 @@ public class ErrorResponseTest {
                 "}");
 
         try {
-            parseAndCompileSong(parser);
+            parseAndCompileSong(parser).execute();
         } catch (CompilationException e) {
             printExpectedError(e);
             return;
@@ -226,7 +226,7 @@ public class ErrorResponseTest {
                 "myblock { sample }");
 
         try {
-            parseAndCompileSong(parser);
+            parseAndCompileSong(parser).execute();
         } catch (CompilationException e) {
             printExpectedError(e);
             return;

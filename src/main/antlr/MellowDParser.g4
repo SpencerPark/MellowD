@@ -105,12 +105,12 @@ melodyParam
 //thirty-second notes.
 rhythmChar
 returns [Beat beat]
-    : W {$beat = Beat.WHOLE;        }
-    | H {$beat = Beat.HALF;         }
-    | Q {$beat = Beat.QUARTER;      }
-    | E {$beat = Beat.EIGHTH;       }
-    | S {$beat = Beat.SIXTEENTH;    }
-    | T {$beat = Beat.THIRTYSECOND; }
+    : W {$beat = Beat.WHOLE();        }
+    | H {$beat = Beat.HALF();         }
+    | Q {$beat = Beat.QUARTER();      }
+    | E {$beat = Beat.EIGHTH();       }
+    | S {$beat = Beat.SIXTEENTH();    }
+    | T {$beat = Beat.THIRTYSECOND(); }
     ;
 
 //A rhythmDef is the building block of a rhythm. It is a rhythm char followed by 0 or more `.`. Each
@@ -165,8 +165,8 @@ value
     |   melody
     |   rhythm[0]
     |   phrase
-    |   functionCall
     |   ( PLUS | MINUS )? NUMBER
+    |   STRING
     ;
 
 //A variable declaration maps an identifier to a primitive. These primitives include [Chord](../primitives/Chord.html)
@@ -219,38 +219,59 @@ phrase
     ;
 
 blockDeclaration
-    :   KEYWORD_DEF KEYWORD_PERCUSSION? KEYWORD_BLOCK IDENTIFIER
+    :   KEYWORD_DEF KEYWORD_PERCUSSION? KEYWORD_BLOCK IDENTIFIER ( COMMA IDENTIFIER )*
     ;
 
-blockContents
-returns [List<ParseTree> contents = new LinkedList<>()]
-    :   (   dynamicDeclaration  { $contents.add($dynamicDeclaration.ctx); }
-        |   phrase              { $contents.add($phrase.ctx); }
-        |   reference           { $contents.add($reference.ctx); }
-        |   varDeclaration      { $contents.add($varDeclaration.ctx); }
-        |   functionCall        { $contents.add($functionCall.ctx); }
-        |   NUMBER STAR BRACE_OPEN repeated = blockContents BRACE_CLOSE
-                { for (int i = 0; i < $NUMBER.int; i++) $contents.addAll($repeated.contents); }
-        )*
+statement
+    :   dynamicDeclaration
+    |   phrase
+    |   reference
+    |   varDeclaration
+    |   functionCall
+    |   NUMBER STAR codeBlock
     ;
 
 //A block is a collection of phrases and dynamic declarations.
 block
-    :   IDENTIFIER ( COMMA IDENTIFIER )* BRACE_OPEN
-        blockContents
+    :   IDENTIFIER ( COMMA IDENTIFIER )* codeBlock
+    ;
+
+codeBlock
+    :   BRACE_OPEN
+        statement*
         BRACE_CLOSE
     ;
 
+argument
+    :   ( IDENTIFIER COLON )? value?
+    ;
+
 functionCall
-locals [List<ValueContext> args = new LinkedList<>()]
-    :   BRACE_OPEN (    ( value { $args.add($value.ctx); }
-                        |       { $args.add(null); }
-                        )
-                        ( COMMA ( value { $args.add($value.ctx); }
-                                |       { $args.add(null); }
-                                )
-                        )*
-                   ) BRACE_CLOSE INTO IDENTIFIER
+    :   KEYWORD_RETURN?
+        BRACE_OPEN
+        argument ( COMMA argument )*
+        BRACE_CLOSE INTO IDENTIFIER
+    ;
+
+parameter [boolean percussion]
+returns [Primitives type]
+    :   ( KEYWORD_CHORD     { $type = Primitives.CHORD; }
+        | KEYWORD_RHYTHM    { $type = Primitives.RHYTHM; }
+        | KEYWORD_MELODY    { $type = Primitives.MELODY; }
+        | KEYWORD_PHRASE    { $type = Primitives.PHRASE; }
+        )?
+        IDENTIFIER
+        ( OPTIONAL
+            ( ASSIGNMENT value )?
+        )?
+    ;
+
+parameters [boolean percussion]
+    :   parameter[$percussion] ( COMMA parameter[$percussion] )*
+    ;
+
+functionDefinition
+    :   KEYWORD_DEF KEYWORD_PERCUSSION? KEYWORD_FUNCTION IDENTIFIER INTO parameters[$KEYWORD_PERCUSSION != null]? codeBlock
     ;
 
 //A song is the top level rule, the entry point for the parser. At the top level only
@@ -260,6 +281,7 @@ song
     :   blockDeclaration*
         ( varDeclaration
         | block
+        | functionDefinition
         )*
         EOF
     ;
