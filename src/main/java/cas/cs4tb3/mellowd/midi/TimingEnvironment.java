@@ -1,7 +1,7 @@
 //Time Signature
 //==============
 
-package cas.cs4tb3.mellowd;
+package cas.cs4tb3.mellowd.midi;
 
 import cas.cs4tb3.mellowd.primitives.Beat;
 
@@ -41,10 +41,10 @@ public class TimingEnvironment {
     //Store all of the timing information. The time signature is
     //<sup>timeSigNum</sup>&frasl;<sub>timeSigDen</sub>. Our pluses per quarter note
     //and our tempo.
-    private byte timeSigNum;
-    private byte timeSigDen;
-    private int ppqn;
-    private int bpm;
+    private final byte timeSigNum;
+    private final byte timeSigDen;
+    private final int ppqn;
+    private final int bpm;
 
     //The numerator and denominator for the time signature gives the synthesiser some hints
     //on what are the down and up beats. The bpm is the tempo.

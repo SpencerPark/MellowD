@@ -1,6 +1,6 @@
 package cas.cs4tb3.mellowd.intermediate;
 
-import cas.cs4tb3.mellowd.TimingEnvironment;
+import cas.cs4tb3.mellowd.midi.TimingEnvironment;
 import cas.cs4tb3.mellowd.midi.Knob;
 import cas.cs4tb3.mellowd.midi.MIDIChannel;
 import cas.cs4tb3.mellowd.midi.MIDIControl;

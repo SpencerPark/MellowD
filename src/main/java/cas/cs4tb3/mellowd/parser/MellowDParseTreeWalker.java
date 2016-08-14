@@ -5,7 +5,6 @@ import cas.cs4tb3.mellowd.intermediate.executable.SourceLink;
 import cas.cs4tb3.mellowd.intermediate.executable.expressions.*;
 import cas.cs4tb3.mellowd.intermediate.executable.statements.*;
 import cas.cs4tb3.mellowd.intermediate.functions.*;
-import cas.cs4tb3.mellowd.intermediate.functions.defaults.InstrumentChangeFunction;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Indexable;
 import cas.cs4tb3.mellowd.intermediate.variables.*;
 import cas.cs4tb3.mellowd.midi.GeneralMidiInstrument;

@@ -5,7 +5,7 @@ public class SyntaxErrorReport {
         NO_VIABLE_ALTERNATIVE,
         INPUT_MISMATCH,
         FAILED_PREDICATE,
-        OTHER;
+        OTHER
     }
 
     private final ErrorType errorType;

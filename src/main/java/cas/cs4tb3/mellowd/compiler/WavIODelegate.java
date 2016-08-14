@@ -14,11 +14,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created on 2016-04-20.
- */
 public class WavIODelegate implements SequenceIODelegate {
-    private static WavIODelegate instance = new WavIODelegate();
+    private static final WavIODelegate instance = new WavIODelegate();
 
     public static WavIODelegate getInstance() {
         return instance;

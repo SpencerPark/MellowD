@@ -10,7 +10,7 @@ import java.io.IOException;
  * Created on 2016-04-20.
  */
 public class MIDIIODelegate implements SequenceIODelegate {
-    private static MIDIIODelegate instance = new MIDIIODelegate();
+    private static final MIDIIODelegate instance = new MIDIIODelegate();
 
     public static MIDIIODelegate getInstance() {
         return instance;

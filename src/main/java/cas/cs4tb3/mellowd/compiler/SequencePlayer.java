@@ -3,11 +3,15 @@
 
 package cas.cs4tb3.mellowd.compiler;
 
-import cas.cs4tb3.mellowd.ArticulatedSound;
-
-import javax.sound.midi.*;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Sequence;
+import javax.sound.midi.Sequencer;
 import java.io.Closeable;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 //This class is a simple playback manager that provides some concurrency features

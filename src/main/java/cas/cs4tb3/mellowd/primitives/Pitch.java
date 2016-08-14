@@ -18,14 +18,14 @@ public final class Pitch implements MidiNoteMessageSource, Transposable<Pitch>, 
     //The `NOTE_NAMES` array maps a midi num in the lowest octave to a note name. Here
     //it is clear to see the mapping from number to note for a total of 12 semi-tones in
     //an octave.
-    private static String[] NOTE_NAMES = new String[] {
+    private static final String[] NOTE_NAMES = new String[] {
             "c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"
     };
 
     //A pitch is just a MIDI number (a int) wrapped with a bunch of utility methods. We can
     //represent every possible MIDI pitch with 128 instances. Most songs would easily hit this number of
     //pitch instantiations so we can create them all at once and share them.
-    private static Pitch[] ALL_PITCHES = new Pitch[128];
+    private static final Pitch[] ALL_PITCHES = new Pitch[128];
     static {
         for (int i = 0; i < 128; i++) ALL_PITCHES[i] = new Pitch(i);
     }
@@ -53,7 +53,7 @@ public final class Pitch implements MidiNoteMessageSource, Transposable<Pitch>, 
         return ALL_PITCHES[Math.max(0, Math.min(midiNum, 127))];
     }
 
-    private int midiNum;
+    private final int midiNum;
 
     private Pitch(int midiNum) {
         this.midiNum = midiNum;

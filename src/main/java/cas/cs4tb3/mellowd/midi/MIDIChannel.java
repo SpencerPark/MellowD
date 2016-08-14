@@ -1,10 +1,8 @@
 package cas.cs4tb3.mellowd.midi;
 
-import cas.cs4tb3.mellowd.TimingEnvironment;
 import cas.cs4tb3.mellowd.compiler.Compiler;
 import cas.cs4tb3.mellowd.compiler.SequencePlayer;
 import cas.cs4tb3.mellowd.intermediate.Phrase;
-import cas.cs4tb3.mellowd.intermediate.Sound;
 import cas.cs4tb3.mellowd.primitives.*;
 
 import javax.sound.midi.*;

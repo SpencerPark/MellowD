@@ -16,6 +16,6 @@ public class DynamicallyTypedReference extends Reference<Object> {
 
     @Override
     public boolean isDynamicallyTyped() {
-        return false;
+        return true;
     }
 }

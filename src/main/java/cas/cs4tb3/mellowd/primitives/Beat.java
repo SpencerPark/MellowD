@@ -17,7 +17,7 @@ public class Beat implements ConcatableComponent.TypeRhythm {
     public static Beat SIXTEENTH()      { return new Beat(1/4d); }
     public static Beat THIRTYSECOND()   { return new Beat(1/8d); }
     
-    public static Beat ZERO = new Beat(0d);
+    public static final Beat ZERO = new Beat(0d);
 
     private final double numQuarters;
     private boolean slurred;

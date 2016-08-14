@@ -3,6 +3,7 @@
 
 package cas.cs4tb3.mellowd;
 
+import cas.cs4tb3.mellowd.midi.TimingEnvironment;
 import cas.cs4tb3.mellowd.parser.*;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -14,7 +15,6 @@ import org.junit.runners.JUnit4;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.NoSuchElementException;
 
 import static org.junit.Assert.fail;
 

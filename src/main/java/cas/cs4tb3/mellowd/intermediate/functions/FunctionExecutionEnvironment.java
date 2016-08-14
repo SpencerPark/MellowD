@@ -1,6 +1,6 @@
 package cas.cs4tb3.mellowd.intermediate.functions;
 
-import cas.cs4tb3.mellowd.TimingEnvironment;
+import cas.cs4tb3.mellowd.midi.TimingEnvironment;
 import cas.cs4tb3.mellowd.intermediate.variables.Memory;
 import cas.cs4tb3.mellowd.intermediate.variables.NullMemory;
 import cas.cs4tb3.mellowd.parser.ExecutionEnvironment;

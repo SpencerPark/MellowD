@@ -19,7 +19,7 @@ import java.util.List;
 //The Melody class is simply a list wrapper. The order of the sounds is important.
 public class Melody implements ConcatableComponent.TypeMelody {
     //This is the data that supports the melody.
-    private List<Articulated> sounds;
+    private final List<Articulated> sounds;
 
     public Melody() {
         this.sounds = new ArrayList<>();

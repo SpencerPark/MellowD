@@ -1,6 +1,6 @@
 package cas.cs4tb3.mellowd.intermediate;
 
-import cas.cs4tb3.mellowd.TimingEnvironment;
+import cas.cs4tb3.mellowd.midi.TimingEnvironment;
 import cas.cs4tb3.mellowd.primitives.Articulation;
 import cas.cs4tb3.mellowd.primitives.Beat;
 import cas.cs4tb3.mellowd.primitives.Pitch;

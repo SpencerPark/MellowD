@@ -3,11 +3,7 @@
 
 package cas.cs4tb3.mellowd.primitives;
 
-import cas.cs4tb3.mellowd.PlayableSound;
-import cas.cs4tb3.mellowd.TimingEnvironment;
 import cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
-
-import java.util.List;
 
 //The `Dynamic` changes the volume. In MIDI this translates to the velocity with which the
 //note is played. It works out very nicely because to play a piano sound louder the player
@@ -33,7 +29,7 @@ public final class Dynamic {
     public static final Dynamic fff  = getDynamic(112);
     public static final Dynamic ffff = getDynamic(127);
 
-    private int velocity;
+    private final int velocity;
 
     private Dynamic(int velocity) {
         this.velocity = velocity;

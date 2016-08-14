@@ -5,7 +5,6 @@ import cas.cs4tb3.mellowd.intermediate.variables.Memory;
 import cas.cs4tb3.mellowd.midi.GeneralMidiPercussion;
 import cas.cs4tb3.mellowd.parser.ExecutionEnvironment;
 
-import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class ReferenceResolution implements Expression<Object> {

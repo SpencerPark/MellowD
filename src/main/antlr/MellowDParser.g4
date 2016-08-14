@@ -223,7 +223,7 @@ phrase
 blockConfiguration
 locals [Object configVal]
     :   IDENTIFIER COLON
-        (   ( PLUS | MINUS )? NUMBER         { $configVal = $MINUS != null ? -$NUMBER.int : $NUMBER.int;  }
+        (   ( PLUS | MINUS )? NUMBER        { $configVal = $MINUS != null ? -$NUMBER.int : $NUMBER.int;  }
         |   STRING                          { $configVal = $STRING.text.substring(1, $STRING.text.length()-1); }
         |   KEYWORD_TRUE                    { $configVal = true; }
         |   KEYWORD_FALSE                   { $configVal = false; }

@@ -172,7 +172,7 @@ public enum GeneralMidiInstrument {
     //The only data that the percussion instrument needs is it's midi number. The other
     //information passed into the constructor is meta data so the instance can register itself
     //in the lookup table.
-    private int midiNum;
+    private final int midiNum;
 
     GeneralMidiInstrument(int midiNum, String... lookupKeys) {
         this.midiNum = midiNum-1;

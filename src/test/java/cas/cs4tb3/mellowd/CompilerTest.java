@@ -9,8 +9,6 @@ import cas.cs4tb3.mellowd.parser.ParseException;
 import cas.cs4tb3.mellowd.parser.SyntaxErrorReport;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -21,7 +19,6 @@ import javax.sound.midi.Sequence;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -72,9 +69,9 @@ public class CompilerTest {
     //with. The `outFile` will be a file of the same name inside the `compTestOut` directory.
     private File outFile;
     private File toCompile;
-    private byte timeNumerator;
-    private byte timeDenominator;
-    private int tempo;
+    private final byte timeNumerator;
+    private final byte timeDenominator;
+    private final int tempo;
 
     public CompilerTest(String toCompName, byte timeNumerator, byte timeDenominator, int tempo) throws URISyntaxException {
         this.timeNumerator = timeNumerator;

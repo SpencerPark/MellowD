@@ -1,6 +1,6 @@
 package cas.cs4tb3.mellowd.intermediate;
 
-import cas.cs4tb3.mellowd.TimingEnvironment;
+import cas.cs4tb3.mellowd.midi.TimingEnvironment;
 import cas.cs4tb3.mellowd.primitives.Beat;
 import cas.cs4tb3.mellowd.primitives.Dynamic;
 import cas.cs4tb3.mellowd.midi.MIDIChannel;
@@ -8,7 +8,7 @@ import cas.cs4tb3.mellowd.midi.MIDIChannel;
 public class GradualDynamicChange extends DynamicChange {
     private Dynamic end;
     private Beat changeDuration;
-    private Boolean isCrescendo;
+    private final Boolean isCrescendo;
 
     public GradualDynamicChange(Dynamic start, Dynamic end, Beat changeDuration) {
         super(start);

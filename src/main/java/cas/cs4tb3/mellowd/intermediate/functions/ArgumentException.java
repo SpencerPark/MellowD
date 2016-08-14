@@ -1,8 +1,5 @@
 package cas.cs4tb3.mellowd.intermediate.functions;
 
-/**
- * Created on 2016-06-19.
- */
 public class ArgumentException extends FunctionInvocationException {
     private final Parameter badParameter;
     private final String reason;
@@ -24,5 +21,13 @@ public class ArgumentException extends FunctionInvocationException {
                 badParameter.getReference().getType().getSimpleName(),
                 badParameter.getReference().getIdentifier(),
                 reason);
+    }
+
+    public Parameter getBadParameter() {
+        return badParameter;
+    }
+
+    public String getReason() {
+        return reason;
     }
 }

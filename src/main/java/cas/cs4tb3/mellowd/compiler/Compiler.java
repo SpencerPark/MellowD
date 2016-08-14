@@ -3,18 +3,15 @@
 
 package cas.cs4tb3.mellowd.compiler;
 
-import cas.cs4tb3.mellowd.TimingEnvironment;
-import cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
+import cas.cs4tb3.mellowd.midi.TimingEnvironment;
 import cas.cs4tb3.mellowd.parser.*;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.*;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 import javax.sound.midi.*;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
