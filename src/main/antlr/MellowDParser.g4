@@ -247,6 +247,30 @@ statement
     |   NUMBER STAR codeBlock
     ;
 
+importStatement
+locals [
+    List<String> funcNames = new LinkedList<>(),
+    List<String> path = new LinkedList<>(),
+    List<String> as = new LinkedList<>()
+]
+    :   KEYWORD_IMPORT
+        (   IDENTIFIER              { $funcNames.add($IDENTIFIER.text); }
+            (   COMMA IDENTIFIER    { $funcNames.add($IDENTIFIER.text); }
+            )*
+        |   STAR
+        )
+        KEYWORD_FROM
+        IDENTIFIER          { $path.add($IDENTIFIER.text); }
+        (   DOT IDENTIFIER  { $path.add($IDENTIFIER.text); }
+        )*
+
+        (   KEYWORD_AS
+            IDENTIFIER          { $as.add($IDENTIFIER.text); }
+            (   DOT IDENTIFIER  { $as.add($IDENTIFIER.text); }
+            )*
+        )?
+    ;
+
 //A block is a collection of phrases and dynamic declarations.
 block
     :   IDENTIFIER ( COMMA IDENTIFIER )* codeBlock
@@ -266,7 +290,7 @@ functionCall
     :   KEYWORD_RETURN?
         BRACE_OPEN
         argument ( COMMA argument )*
-        BRACE_CLOSE INTO IDENTIFIER
+        BRACE_CLOSE INTO IDENTIFIER ( DOT IDENTIFIER )*
     ;
 
 parameter [boolean percussion]
@@ -294,7 +318,8 @@ functionDefinition
 //variable declarations or blocks can be defined. A song consists of any number of these
 //declarations.
 song
-    :   blockDeclaration*
+    :   importStatement*
+        blockDeclaration*
         ( varDeclaration
         | block
         | functionDefinition

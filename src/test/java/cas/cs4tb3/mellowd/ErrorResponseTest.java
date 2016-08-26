@@ -3,6 +3,7 @@
 
 package cas.cs4tb3.mellowd;
 
+import cas.cs4tb3.mellowd.compiler.SourceFinder;
 import cas.cs4tb3.mellowd.midi.TimingEnvironment;
 import cas.cs4tb3.mellowd.parser.*;
 import org.antlr.v4.runtime.ANTLRFileStream;
@@ -48,8 +49,8 @@ public class ErrorResponseTest {
     }
 
     private static MellowD parseAndCompileSong(MellowDParser parser) {
-        MellowD mellowD = new MellowD(new TimingEnvironment(4, 4, 120));
-        MellowDParseTreeWalker walker = new MellowDParseTreeWalker(mellowD);
+        MellowD mellowD = new MellowD(null, new TimingEnvironment(4, 4, 120));
+        MellowDCompiler walker = new MellowDCompiler(mellowD);
         walker.visitSong(parser.song());
         return mellowD;
     }

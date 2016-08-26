@@ -27,11 +27,16 @@ public class FunctionBank {
             }
         }
 
-        private void putFunction(Function function) {
-            if (function.isPercussion())
+        private boolean putFunction(Function function) {
+            boolean overwritten;
+            if (function.isPercussion()) {
+                overwritten = functions[PERCUSSION_INDEX] != null;
                 functions[PERCUSSION_INDEX] = function;
-            else
+            } else {
+                overwritten = functions[HARMONIC_INDEX] != null;
                 functions[HARMONIC_INDEX] = function;
+            }
+            return overwritten;
         }
     }
     private final Map<FunctionSignature, PercussionPair> functionSignatures;
@@ -40,12 +45,14 @@ public class FunctionBank {
         this.functionSignatures = new HashMap<>();
     }
 
-    public void addFunction(Function function) {
-        this.functionSignatures.compute(function.getSignature(), (sig, pair) -> {
-            if (pair == null) pair = new PercussionPair();
-            pair.putFunction(function);
-            return pair;
-        });
+    public boolean addFunction(Function function) {
+        PercussionPair pair = this.functionSignatures.get(function.getSignature());
+        if (pair == null) {
+            pair = new PercussionPair();
+            this.functionSignatures.put(function.getSignature(), pair);
+        }
+
+        return pair.putFunction(function);
     }
 
     public PercussionPair[] resolve(String name, Argument<?>... args) {

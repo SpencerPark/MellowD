@@ -12,15 +12,13 @@ import cas.cs4tb3.mellowd.midi.Knob;
 import cas.cs4tb3.mellowd.midi.MIDIControl;
 import cas.cs4tb3.mellowd.midi.Pedal;
 import cas.cs4tb3.mellowd.primitives.*;
-import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.util.*;
 
-public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
+public class MellowDCompiler extends MellowDParserBaseVisitor {
     private static final Constant<Boolean> TRUE = new Constant<>(true);
     private static final Constant<Boolean> FALSE = new Constant<>(false);
     private static final Constant<Articulated> REST = new Constant<>(new ArticulatedPitch(Pitch.REST, Articulation.NONE));
@@ -33,9 +31,9 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
     private static final Constant<Articulation> ARTICULATION_STACCATO = new Constant<>(Articulation.STACCATO);
     private static final Constant<Articulation> ARTICULATION_TENUTO = new Constant<>(Articulation.TENUTO);
 
-    private final MellowD mellowD;
+    protected final MellowD mellowD;
 
-    public MellowDParseTreeWalker(MellowD mellowD) {
+    public MellowDCompiler(MellowD mellowD) {
         this.mellowD = mellowD;
     }
 
@@ -471,12 +469,28 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
     @Override
     public Statement visitFunctionCall(MellowDParser.FunctionCallContext ctx) {
         boolean shouldReturn = ctx.KEYWORD_RETURN() != null;
-        String functionName = ctx.IDENTIFIER().getText();
+
+        List<TerminalNode> fullFunctionName = ctx.IDENTIFIER();
+        String[] bankQualifier = new String[fullFunctionName.size()-1];
+        for (int i = 0; i < bankQualifier.length; i++)
+            bankQualifier[i] = fullFunctionName.get(i).getText();
+        String functionName = fullFunctionName.get(fullFunctionName.size()-1).getText();
+
         Argument<?>[] args = ctx.argument().stream()
                 .map(this::visitArgument)
                 .toArray(Argument<?>[]::new);
-
-        FunctionBank.PercussionPair[] options = mellowD.getFunctionBank().resolve(functionName, args);
+        FunctionBank bank = mellowD.getFunctionBank(bankQualifier);
+        if (bank == null) {
+            Token start = fullFunctionName.get(0).getSymbol();
+            Token stop = fullFunctionName.get(fullFunctionName.size()-1).getSymbol();
+            throw new CompilationException(start.getStartIndex(),
+                    start.getLine(),
+                    start.getCharPositionInLine(),
+                    stop.getStopIndex(),
+                    Arrays.toString(bankQualifier),
+                    new UndefinedReferenceException(ctx.IDENTIFIER().toString()));
+        }
+        FunctionBank.PercussionPair[] options = bank.resolve(functionName, args);
 
         return new FunctionCall(new SourceLink(ctx), options, functionName, shouldReturn, args);
     }
@@ -560,13 +574,47 @@ public class MellowDParseTreeWalker extends MellowDParserBaseVisitor {
                 case MellowDParser.RULE_varDeclaration:
                     return visitVarDeclaration((MellowDParser.VarDeclarationContext) stmtContext);
                 case MellowDParser.RULE_functionCall:
-                    /*Expression<Phrase> expr = new RuntimeTypeCheck<>(Phrase.class, visitFunctionCall((MellowDParser.FunctionCallContext) stmtContext), stmtContext);
-                    expr = new RuntimeNullCheck<>(stmtContext.getText(), expr, stmtContext);
-                    return new PlayPhraseStatement(expr);*/
                     return visitFunctionCall((MellowDParser.FunctionCallContext) stmtContext);
                 default:
                     throw new Error("choice added to 'statement' in the parser without updating visitStatement()");
             }
         }
+    }
+
+    @Override
+    public Void visitImportStatement(MellowDParser.ImportStatementContext ctx) {
+        Set<String> functions;
+        if (ctx.STAR() != null) {
+            functions = Collections.EMPTY_SET;
+        } else {
+            functions = new HashSet<>();
+            functions.addAll(ctx.funcNames);
+        }
+
+        String[] path = ctx.path.toArray(new String[ctx.path.size()]);
+        String[] as = ctx.as.isEmpty() ? null : ctx.as.toArray(new String[ctx.as.size()]);
+
+        MellowDCompiler importCompiler = new MellowDSelectiveCompiler(this.mellowD, path, as, functions);
+
+        try {
+            File referencedSrc = this.mellowD.getSrcFinder().resolve(path);
+
+            ANTLRInputStream inStream = new ANTLRFileStream(referencedSrc.getAbsolutePath());
+            MellowDLexer lexer = new MellowDLexer(inStream);
+
+            //The parser takes the tokens from the lexer as well as the timing environment constructed
+            //from the input arguments and a track manager.
+            TokenStream tokens = new CommonTokenStream(lexer);
+            MellowDParser parser = new MellowDParser(tokens);
+
+            MellowDParser.SongContext parseResult = parser.song();
+
+            importCompiler.visitSong(parseResult);
+
+        } catch (Exception e) {
+            throw new CompilationException(ctx, e);
+        }
+
+        return null;
     }
 }

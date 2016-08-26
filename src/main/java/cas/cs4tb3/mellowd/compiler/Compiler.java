@@ -7,8 +7,13 @@ import cas.cs4tb3.mellowd.midi.TimingEnvironment;
 import cas.cs4tb3.mellowd.parser.*;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
-import net.sourceforge.argparse4j.inf.*;
-import org.antlr.v4.runtime.*;
+import net.sourceforge.argparse4j.inf.ArgumentParser;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
+import net.sourceforge.argparse4j.inf.Namespace;
+import org.antlr.v4.runtime.ANTLRFileStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.TokenStream;
 
 import javax.sound.midi.*;
 import java.io.File;
@@ -317,9 +322,20 @@ public class Compiler {
                     parseTime / 1E9d);
         }
 
+        MellowD compilationResult = new MellowD(new SourceFinder(src.getAbsoluteFile().getParentFile(), FILE_EXTENSION), timingEnvironment);
+        MellowDCompiler walker = new MellowDCompiler(compilationResult);
+
+        //Compile the dependencies
+        long dependencyCompStart = System.nanoTime();
+        parseTree.importStatement().forEach(walker::visitImportStatement);
+        if (verbose) {
+            long dependencyCompTime = System.nanoTime() - dependencyCompStart;
+            System.out.printf("Dependency compilation took %.4f s\n",
+                    dependencyCompTime / 1E9d);
+        }
+
+        //Compile the body
         long compileStart = System.nanoTime();
-        MellowD compilationResult = new MellowD(timingEnvironment);
-        MellowDParseTreeWalker walker = new MellowDParseTreeWalker(compilationResult);
         walker.visitSong(parseTree);
         if (verbose) {
             long compileTime = System.nanoTime() - compileStart;
@@ -327,15 +343,13 @@ public class Compiler {
                     compileTime / 1E9d);
         }
 
+        //Execute all of the compiled statements to build the output
         long executionStart = System.nanoTime();
         Sequence result = compilationResult.execute();
-        if (verbose) {
-            long executionTime = System.nanoTime() - executionStart;
-            System.out.printf("Execution took %.4f s\n",
-                    executionTime / 1E9d);
-        }
+        long executionTime = System.nanoTime() - executionStart;
+        System.out.printf("Execution took %.4f s\n",
+                executionTime / 1E9d);
 
-        //Return the sequence generated while parsing.
         return result;
     }
 }

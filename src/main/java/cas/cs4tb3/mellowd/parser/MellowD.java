@@ -1,5 +1,6 @@
 package cas.cs4tb3.mellowd.parser;
 
+import cas.cs4tb3.mellowd.compiler.SourceFinder;
 import cas.cs4tb3.mellowd.midi.TimingEnvironment;
 import cas.cs4tb3.mellowd.intermediate.executable.CodeExecutor;
 import cas.cs4tb3.mellowd.intermediate.executable.statements.PercussionToggledEnvironment;
@@ -16,10 +17,12 @@ import javax.sound.midi.Sequence;
 import java.util.*;
 
 public class MellowD implements ExecutionEnvironment {
+    private final SourceFinder srcFinder;
+
     private final Memory globalMemory;
     private final Map<String, MellowDBlock> blocks;
     private final TimingEnvironment timingEnvironment;
-    private final FunctionBank functions;
+    private final PathMap<FunctionBank> functions;
 
     private final Sequence master;
     private final Queue<Integer> channelsAvailable;
@@ -27,11 +30,13 @@ public class MellowD implements ExecutionEnvironment {
 
     public final ExecutionEnvironment PERCUSSION_TOGGLED_WRAPPER = new PercussionToggledEnvironment(this);
 
-    public MellowD(TimingEnvironment timingEnvironment) {
+    public MellowD(SourceFinder finder, TimingEnvironment timingEnvironment) {
+        this.srcFinder = finder;
+
         this.globalMemory = new SymbolTable();
         this.blocks = new HashMap<>();
         this.timingEnvironment = timingEnvironment;
-        this.functions = new FunctionBank();
+        this.functions = new PathMap<>(new FunctionBank());
         addDefaultFunctionsToBank();
 
         this.master = timingEnvironment.createSequence();
@@ -42,11 +47,12 @@ public class MellowD implements ExecutionEnvironment {
     }
 
     private void addDefaultFunctionsToBank() {
-        this.functions.addFunction(InstrumentChangeFunction.getInstance(true));
-        this.functions.addFunction(InstrumentChangeFunction.getInstance(false));
+        FunctionBank bank = this.functions.get();
+        bank.addFunction(InstrumentChangeFunction.getInstance(true));
+        bank.addFunction(InstrumentChangeFunction.getInstance(false));
 
-        this.functions.addFunction(OctaveShiftFunction.getInstance(true));
-        this.functions.addFunction(OctaveShiftFunction.getInstance(false));
+        bank.addFunction(OctaveShiftFunction.getInstance(true));
+        bank.addFunction(OctaveShiftFunction.getInstance(false));
     }
 
     public MellowDBlock defineBlock(String name, boolean percussion) {
@@ -93,13 +99,27 @@ public class MellowD implements ExecutionEnvironment {
         return globalMemory;
     }
 
+    public SourceFinder getSrcFinder() {
+        return this.srcFinder;
+    }
+
     public TimingEnvironment getTimingEnvironment() {
         return timingEnvironment;
     }
 
     public FunctionBank getFunctionBank(String... qualifier) {
-        //TODO let the qualifier reference external sources
-        return this.functions;
+        return this.functions.get(qualifier);
+    }
+
+    public FunctionBank getOrCreateFunctionBank(String[] qualifier) {
+        FunctionBank bank = this.functions.get(qualifier);
+
+        if (bank == null) {
+            bank = new FunctionBank();
+            this.functions.put(bank, qualifier);
+        }
+
+        return bank;
     }
 
     public synchronized Sequence execute() throws Exception {
