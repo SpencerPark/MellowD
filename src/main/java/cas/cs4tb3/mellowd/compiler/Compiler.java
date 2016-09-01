@@ -12,6 +12,7 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 import org.antlr.v4.runtime.ANTLRFileStream;
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 
@@ -285,18 +286,26 @@ public class Compiler {
         return inFile;
     }
 
-    //`compile` is the method that actually runs the compiler.
     public static Sequence compile(File src, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {
+        return compile(new ANTLRFileStream(src.getAbsolutePath()),
+                new SourceFinder(src.getAbsoluteFile().getParentFile(), FILE_EXTENSION),
+                numerator,
+                denominator,
+                tempo,
+                verbose);
+    }
+
+    //`compile` is the method that actually runs the compiler.
+    public static Sequence compile(CharStream inStream, SourceFinder srcFinder, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {
         //First we will display the inputs being used so they can double check everything
         //is as expected.
         if (verbose) {
             System.out.printf("Time Signature: %d / %d\n", numerator, denominator);
             System.out.printf("Tempo: %d bpm\n", tempo);
-            System.out.printf("Compiling file: %s\n", src.getPath());
+            System.out.printf("Compiling: %s\n", inStream.getSourceName());
         }
 
         //Now we can build a lexer with the `src` as the input.
-        ANTLRFileStream inStream = new ANTLRFileStream(src.getAbsolutePath());
         MellowDLexer lexer = new MellowDLexer(inStream);
 
         //The parser takes the tokens from the lexer as well as the timing environment constructed
@@ -322,16 +331,18 @@ public class Compiler {
                     parseTime / 1E9d);
         }
 
-        MellowD compilationResult = new MellowD(new SourceFinder(src.getAbsoluteFile().getParentFile(), FILE_EXTENSION), timingEnvironment);
+        MellowD compilationResult = new MellowD(srcFinder, timingEnvironment);
         MellowDCompiler walker = new MellowDCompiler(compilationResult);
 
-        //Compile the dependencies
-        long dependencyCompStart = System.nanoTime();
-        parseTree.importStatement().forEach(walker::visitImportStatement);
-        if (verbose) {
-            long dependencyCompTime = System.nanoTime() - dependencyCompStart;
-            System.out.printf("Dependency compilation took %.4f s\n",
-                    dependencyCompTime / 1E9d);
+        if (!parseTree.importStatement().isEmpty()) {
+            //Compile the dependencies
+            long dependencyCompStart = System.nanoTime();
+            parseTree.importStatement().forEach(walker::visitImportStatement);
+            if (verbose) {
+                long dependencyCompTime = System.nanoTime() - dependencyCompStart;
+                System.out.printf("Dependency compilation took %.4f s\n",
+                        dependencyCompTime / 1E9d);
+            }
         }
 
         //Compile the body
