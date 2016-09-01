@@ -11,6 +11,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +35,7 @@ public class WavIODelegate implements SequenceIODelegate {
     }
 
     @Override
-    public void save(Sequence sequence, File outFile) throws IOException {
+    public void save(Sequence sequence, OutputStream out) throws IOException {
         VirtualMIDIPlayer player = new VirtualMIDIPlayer(sequence);
 
         AudioSynthesizer synth;
@@ -63,7 +64,7 @@ public class WavIODelegate implements SequenceIODelegate {
         stream = new AudioInputStream(stream, stream.getFormat(), len);
 
         // Write WAVE file to disk.
-        AudioSystem.write(stream, AudioFileFormat.Type.WAVE, outFile);
+        AudioSystem.write(stream, AudioFileFormat.Type.WAVE, out);
 
         synth.close();
     }
