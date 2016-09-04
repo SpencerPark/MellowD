@@ -314,7 +314,9 @@ public class Compiler {
         MellowDParser parser = new MellowDParser(tokens);
 
         ParseErrorListener errorListener = new ParseErrorListener();
+        lexer.removeErrorListeners();
         parser.removeErrorListeners();
+        lexer.addErrorListener(errorListener);
         parser.addErrorListener(errorListener);
 
         TimingEnvironment timingEnvironment = new TimingEnvironment(numerator, denominator, tempo);
