@@ -147,6 +147,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
                 return new Articulate<>(chordExpr, articulation);
             case MellowDParser.RULE_reference:
                 Expression<ConcatableComponent.TypeMelody> melody = visitReference((MellowDParser.ReferenceContext) elementCtx, ConcatableComponent.TypeMelody.class);
+                melody = new RuntimeNullCheck<>(elementCtx.getText(), melody, elementCtx);
                 if (articulationCtx != null) {
                     Expression<Articulatable> comp = new RuntimeTypeCheck<>(Articulatable.class, melody, elementCtx);
                     return new Articulate<>(comp, articulation);

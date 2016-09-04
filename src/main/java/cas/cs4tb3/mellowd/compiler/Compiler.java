@@ -357,10 +357,11 @@ public class Compiler {
         //Execute all of the compiled statements to build the output
         long executionStart = System.nanoTime();
         Sequence result = compilationResult.execute();
-        long executionTime = System.nanoTime() - executionStart;
-        System.out.printf("Execution took %.4f s\n",
-                executionTime / 1E9d);
-
+        if (verbose) {
+            long executionTime = System.nanoTime() - executionStart;
+            System.out.printf("Execution took %.4f s\n",
+                    executionTime / 1E9d);
+        }
         return result;
     }
 }
