@@ -220,7 +220,9 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         ParserRuleContext paramCtx = ((ParserRuleContext) ctx.getChild(0));
         switch (paramCtx.getRuleIndex()) {
             case MellowDParser.RULE_rhythmDef:
-                return new Constant<>(visitRhythmDef((MellowDParser.RhythmDefContext) paramCtx));
+                Beat beat = visitRhythmDef((MellowDParser.RhythmDefContext) paramCtx);
+                beat.setSlurred(ctx.slurDepth % 2 == 1);
+                return new Constant<>(beat);
             case MellowDParser.RULE_reference:
                 Expression<ConcatableComponent.TypeRhythm> comp = visitReference((MellowDParser.ReferenceContext) paramCtx, ConcatableComponent.TypeRhythm.class);
                 boolean slur = ctx.slurDepth % 2 == 1;
