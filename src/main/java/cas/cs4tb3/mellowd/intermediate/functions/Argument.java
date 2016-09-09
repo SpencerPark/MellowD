@@ -42,6 +42,10 @@ public class Argument<T> {
         return this.value == null;
     }
 
+    public boolean isEmpty() {
+        return isDeclaredNull() && !isNamed();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

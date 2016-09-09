@@ -38,10 +38,14 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     }
 
     public <T> Expression<T> visitReference(MellowDParser.ReferenceContext ctx, Class<T> desiredType) {
-        TerminalNode idToken = ctx.IDENTIFIER();
-        if (idToken != null) {
-            String id = idToken.getText();
-            return new RuntimeTypeCheck<>(desiredType, new ReferenceResolution(id), idToken);
+        List<TerminalNode> fullyQualifiedID = ctx.IDENTIFIER();
+        if (!fullyQualifiedID.isEmpty()) {
+            String[] qualifier = new String[fullyQualifiedID.size()-1];
+            for (int i = 0; i < qualifier.length; i++)
+                qualifier[i] = fullyQualifiedID.get(i).getText();
+
+            String name = fullyQualifiedID.get(fullyQualifiedID.size()-1).getText();
+            return new RuntimeTypeCheck<>(desiredType, new ReferenceResolution(qualifier, name), ctx);
         } else {
             Constant<Chord> chordConstant = new Constant<>(Chord.resolve(ctx.CHORD_IDENTIFIER().getText()));
             return new RuntimeTypeCheck<>(desiredType, chordConstant, ctx.CHORD_IDENTIFIER());
@@ -281,15 +285,26 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         }
     }
 
-    @Override
-    public Statement visitVarDeclaration(MellowDParser.VarDeclarationContext ctx) {
+    public Statement visitVarDeclaration(MellowDParser.VarDeclarationContext ctx, boolean isField) {
         boolean percussionToggle = ctx.STAR() != null;
 
-        String id = ctx.IDENTIFIER().getText();
+        List<TerminalNode> fullyQualifiedID = ctx.IDENTIFIER();
+        if (ctx.KEYWORD_RETURN() != null)
+            fullyQualifiedID.add(0, ctx.KEYWORD_RETURN());
+        String[] qualifier = new String[fullyQualifiedID.size()-1];
+        for (int i = 0; i < qualifier.length; i++)
+            qualifier[i] = fullyQualifiedID.get(i).getText();
+
+        String name = fullyQualifiedID.get(fullyQualifiedID.size()-1).getText();
 
         Expression<?> valueExpr = visitValue(ctx.value());
 
-        return new AssignmentStatement(id, valueExpr, true, percussionToggle);
+        return new AssignmentStatement(qualifier, name, valueExpr, isField, percussionToggle);
+    }
+
+    @Override
+    public Statement visitVarDeclaration(MellowDParser.VarDeclarationContext ctx) {
+        return visitVarDeclaration(ctx, true);
     }
 
     @Override
@@ -548,7 +563,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     public Void visitSong(MellowDParser.SongContext ctx) {
         ctx.blockDeclaration().forEach(this::visitBlockDeclaration);
         //The output is null because in the global scope an output doesn't exist
-        ctx.varDeclaration().forEach(varCtx -> visitVarDeclaration(varCtx).execute(mellowD, null));
+        ctx.varDeclaration().forEach(varCtx -> visitVarDeclaration(varCtx, true).execute(mellowD, null));
         ctx.functionDefinition().forEach(funCtx -> this.mellowD.getFunctionBank().addFunction(visitFunctionDefinition(funCtx)));
         ctx.block().forEach(this::visitBlock);
 
@@ -573,7 +588,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
                 case MellowDParser.RULE_reference:
                     return new PlayPhraseStatement(new RuntimeNullCheck<>(stmtContext.getText(), visitReference((MellowDParser.ReferenceContext) stmtContext, Phrase.class), stmtContext));
                 case MellowDParser.RULE_varDeclaration:
-                    return visitVarDeclaration((MellowDParser.VarDeclarationContext) stmtContext);
+                    return visitVarDeclaration((MellowDParser.VarDeclarationContext) stmtContext, false);
                 case MellowDParser.RULE_functionCall:
                     return visitFunctionCall((MellowDParser.FunctionCallContext) stmtContext);
                 default:

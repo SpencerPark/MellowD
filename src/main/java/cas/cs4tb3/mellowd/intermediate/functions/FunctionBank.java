@@ -56,10 +56,51 @@ public class FunctionBank {
     }
 
     public PercussionPair[] resolve(String name, Argument<?>... args) {
-        Set<FunctionSignature> possible = new LinkedHashSet<>();
+        boolean isEmptyBraces = args.length == 0 || (args.length == 1 && args[0].isEmpty());
+
+        Collection<FunctionSignature> possible;
+        if (isEmptyBraces)
+            possible = this.resolveEmptyBracesStrategy(name);
+        else
+            possible = this.resolveNotEmptyBracesStrategy(name, args);
+
+        PercussionPair[] results = new PercussionPair[possible.size()];
+        int index = 0;
+        for (FunctionSignature signature : possible)
+            results[index++] = this.functionSignatures.get(signature);
+        return results;
+    }
+
+    //This strategy looks for all signatures with a min size of 0 and returns them
+    //If the argument is meant to be a null first argument then functions with only optional
+    //args will be caught. It will also catch functions with no arguments.
+    private Collection<FunctionSignature> resolveEmptyBracesStrategy(String name) {
+        Collection<FunctionSignature> possible = new LinkedList<>();
+        Collection<FunctionSignature> noArgPossibilities = new LinkedList<>();
         this.functionSignatures.forEach((sig, fun) -> {
             if (sig.getName().equals(name)) {
-                if (sig.getParameters().minSize() <= args.length && args.length <= sig.getParameters().size())
+                if (sig.getParameters().minSize() == 0)
+                    possible.add(sig);
+                if (sig.getParameters().size() == 0)
+                    noArgPossibilities.add(sig);
+            }
+        });
+
+        //Give preference to the no args
+        if (noArgPossibilities.isEmpty())
+            return possible;
+        return noArgPossibilities;
+    }
+
+    private Collection<FunctionSignature> resolveNotEmptyBracesStrategy(String name, Argument<?>... args) {
+        Collection<FunctionSignature> possible = new LinkedList<>();
+
+        this.functionSignatures.forEach((sig, fun) -> {
+            if (sig.getName().equals(name)) {
+                int minSize = sig.getParameters().minSize();
+                int maxSize = sig.getParameters().size();
+
+                if (minSize <= args.length && args.length <= maxSize)
                     possible.add(sig);
             }
         });
@@ -68,19 +109,19 @@ public class FunctionBank {
         for (Argument<?> arg : args) {
             Iterator<FunctionSignature> itr = possible.iterator();
             while (itr.hasNext()) {
-                FunctionSignature next = itr.next();
-                if (arg.isNamed())
-                    if (next.getParameters().getParam(arg.getName()) == null) itr.remove();
-                else
-                    if (next.getParameters().getParam(position) == null) itr.remove();
+                Parameters next = itr.next().getParameters();
+
+                if (arg.isNamed()) {
+                    if (next.getParam(arg.getName()) == null)
+                        itr.remove();
+                } else {
+                    if (next.getParam(position) == null)
+                        itr.remove();
+                }
             }
             position++;
         }
 
-        PercussionPair[] results = new PercussionPair[possible.size()];
-        int index = 0;
-        for (FunctionSignature signature : possible)
-            results[index++] = this.functionSignatures.get(signature);
-        return results;
+        return possible;
     }
 }

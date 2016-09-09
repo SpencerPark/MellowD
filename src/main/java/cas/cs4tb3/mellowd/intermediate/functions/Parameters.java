@@ -47,6 +47,11 @@ public class Parameters {
     }
 
     public Memory prepareCall(ExecutionEnvironment env, Argument<?>... args) {
+        //If the braces are empty then treat the first arg as not present.
+        boolean isEmptyBraces = args.length == 0 || (args.length == 1 && args[0].isEmpty());
+        if (isEmptyBraces && params.length == 0)
+            return new SymbolTable();
+
         if (args.length < minSize)
             throw new FunctionInvocationException(String.format("Not enough args. %d given but %d required.", args.length, minSize));
         if (args.length > params.length)

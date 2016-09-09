@@ -6,29 +6,23 @@ import cas.cs4tb3.mellowd.intermediate.variables.DelayedResolution;
 import cas.cs4tb3.mellowd.intermediate.variables.Memory;
 import cas.cs4tb3.mellowd.parser.ExecutionEnvironment;
 
-import java.util.regex.Pattern;
-
 public class AssignmentStatement implements Statement {
-    private static final Pattern SPLITTER = Pattern.compile("\\.");
-
     private final String[] qualifier;
     private final String name;
     private final Expression<?> value;
     private final boolean isField;
     private final boolean percussionToggle;
 
-    public AssignmentStatement(String fullyQualifiedName, Expression<?> value, boolean isField, boolean percussionToggle) {
-        String[] split = SPLITTER.split(fullyQualifiedName);
-        this.qualifier = new String[split.length - 1];
-        System.arraycopy(split, 0, this.qualifier, 0, this.qualifier.length);
-        this.name = split[split.length - 1];
+    public AssignmentStatement(String[] qualifier, String name, Expression<?> value, boolean isField, boolean percussionToggle) {
+        this.qualifier = qualifier;
+        this.name = name;
         this.value = value;
         this.isField = isField;
         this.percussionToggle = percussionToggle;
     }
 
-    public AssignmentStatement(String fullyQualifiedName, Expression<?> value) {
-        this(fullyQualifiedName, value, false, false);
+    public AssignmentStatement(String[] qualifier, String name, Expression<?> value) {
+        this(qualifier, name, value, false, false);
     }
 
     @Override

@@ -8,4 +8,11 @@ melodyVar -> [a, b, c, d, e, f, g]
 myblock {
     //The variable values are not even attempted to be resolved until they are invoked
     phraseVar melodyVar*rhythmVar chordVar*rhythmVar
+
+    //Try referencing the global scope by putting a rhythm in a local
+    melodyVar*<q>
+    melodyVar -> [a, b, c]
+    melodyVar*<q>
+    this.melodyVar -> [d, e, f]
+    [melodyVar, this.melodyVar]*<q>
 }
