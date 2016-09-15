@@ -97,7 +97,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
             Expression<Indexable<?>> toIndex = new RuntimeIndexingSupportCheck(refValue, ctx.reference());
             int index = Integer.parseInt(ctx.NUMBER().getText());
             Expression<?> indexExp = new IndexExpression(toIndex, new Constant<>(index));
-            return new RuntimeTypeCheck<>(Pitch.class, indexExp, ctx.reference());
+            return new RuntimeTypeCheck<>(Pitch.class, indexExp, ctx);
         }
     }
 
@@ -510,7 +510,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         }
         FunctionBank.PercussionPair[] options = bank.resolve(functionName, args);
 
-        return new FunctionCall(new SourceLink(ctx), options, functionName, shouldReturn, args);
+        return new FunctionCall(new SourceLink(ctx), this.mellowD, options, functionName, shouldReturn, args);
     }
 
     @Override

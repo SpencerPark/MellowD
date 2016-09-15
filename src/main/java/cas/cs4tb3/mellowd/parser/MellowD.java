@@ -19,7 +19,7 @@ import java.util.*;
 public class MellowD implements ExecutionEnvironment {
     private final SourceFinder srcFinder;
 
-    private final Memory globalMemory;
+    private final PathMap<Memory> memory;
     private final Map<String, MellowDBlock> blocks;
     private final TimingEnvironment timingEnvironment;
     private final PathMap<FunctionBank> functions;
@@ -33,7 +33,8 @@ public class MellowD implements ExecutionEnvironment {
     public MellowD(SourceFinder finder, TimingEnvironment timingEnvironment) {
         this.srcFinder = finder;
 
-        this.globalMemory = new SymbolTable();
+        Memory globalMemory = new SymbolTable();
+        this.memory = new PathMap<>(globalMemory);
         this.blocks = new HashMap<>();
         this.timingEnvironment = timingEnvironment;
         this.functions = new PathMap<>(new FunctionBank());
@@ -71,7 +72,7 @@ public class MellowD implements ExecutionEnvironment {
             }
 
             MIDIChannel channel = new MIDIChannel(this.master.createTrack(), percussion, channelNum, timingEnvironment);
-            block = new MellowDBlock(this.globalMemory, name, channel);
+            block = new MellowDBlock(this.memory.get(), name, channel);
             this.blocks.put(name, block);
         } else {
             throw new AlreadyDefinedException("A block with the name "+name+" is already defined.");
@@ -85,7 +86,7 @@ public class MellowD implements ExecutionEnvironment {
     }
 
     public Memory getGlobalMemory() {
-        return globalMemory;
+        return this.memory.get();
     }
 
     @Override
@@ -95,8 +96,12 @@ public class MellowD implements ExecutionEnvironment {
 
     @Override
     public Memory getMemory(String... qualifier) {
-        //TODO let the qualifier reference external sources
-        return globalMemory;
+        return this.memory.get(qualifier);
+    }
+
+    @Override
+    public Memory createScope(String... qualifier) {
+        return this.memory.putIfAbsent(SymbolTable::new, qualifier);
     }
 
     public SourceFinder getSrcFinder() {

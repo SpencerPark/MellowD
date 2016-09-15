@@ -9,5 +9,7 @@ public interface ExecutionEnvironment {
 
     Memory getMemory(String... qualifier);
 
+    Memory createScope(String... qualifier);
+
     TimingEnvironment getTimingEnvironment();
 }

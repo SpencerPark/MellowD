@@ -22,6 +22,11 @@ public class PercussionToggledEnvironment implements ExecutionEnvironment {
     }
 
     @Override
+    public Memory createScope(String... qualifier) {
+        return wrapped.createScope(qualifier);
+    }
+
+    @Override
     public TimingEnvironment getTimingEnvironment() {
         return wrapped.getTimingEnvironment();
     }

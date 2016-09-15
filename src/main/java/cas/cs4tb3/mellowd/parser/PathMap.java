@@ -2,6 +2,7 @@ package cas.cs4tb3.mellowd.parser;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class PathMap<T> {
     private final Map<String, PathMap<T>> children;
@@ -10,6 +11,29 @@ public class PathMap<T> {
     public PathMap(T data) {
         this.data = data;
         this.children = new LinkedHashMap<>();
+    }
+
+    public T putIfAbsent(Supplier<T> dataCreator, String... path) {
+        return putIfAbsentInternal(dataCreator, path, 0);
+    }
+
+    private T putIfAbsentInternal(Supplier<T> dataCreator, String[] path, int index) {
+        if (index == path.length) {
+            if (this.data == null)
+                this.data = dataCreator.get();
+
+            return this.data;
+        } else {
+            //The data needs to be placed in a child node
+            PathMap<T> child = children.get(path[index]);
+            if (child == null) {
+                //Add the child because it doesn't exist yet
+                child = new PathMap<>(null);
+                children.put(path[0], child);
+            }
+            //Put the data in the child
+            return child.putIfAbsentInternal(dataCreator, path, index + 1);
+        }
     }
 
     public boolean put(T data, String... path) {

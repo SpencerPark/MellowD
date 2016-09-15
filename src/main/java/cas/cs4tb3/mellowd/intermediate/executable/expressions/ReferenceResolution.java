@@ -22,6 +22,7 @@ public class ReferenceResolution implements Expression<Object> {
         }
 
         Memory memory = environment.getMemory(qualifier);
+        if (memory == null) return null;
         return memory.get(name);
     }
 }

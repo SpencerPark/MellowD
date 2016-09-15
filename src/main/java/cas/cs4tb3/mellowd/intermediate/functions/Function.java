@@ -4,6 +4,7 @@ import cas.cs4tb3.mellowd.intermediate.Output;
 import cas.cs4tb3.mellowd.intermediate.executable.statements.Statement;
 import cas.cs4tb3.mellowd.intermediate.variables.Memory;
 import cas.cs4tb3.mellowd.parser.ExecutionEnvironment;
+import cas.cs4tb3.mellowd.parser.MellowD;
 
 public class Function {
     private final FunctionSignature signature;
@@ -20,9 +21,9 @@ public class Function {
         return percussion;
     }
 
-    public void evaluate(ExecutionEnvironment environment, Output output, boolean shouldReturn, Argument<?>... args) {
+    public void evaluate(MellowD mellowD, ExecutionEnvironment environment, Output output, boolean shouldReturn, Argument<?>... args) {
         Memory argument = signature.getParameters().prepareCall(environment, args);
-        FunctionExecutionEnvironment functionEnv = new FunctionExecutionEnvironment(environment, argument, shouldReturn, percussion);
+        FunctionExecutionEnvironment functionEnv = new FunctionExecutionEnvironment(mellowD, environment, argument, signature.getName(), shouldReturn, percussion);
 
         body.execute(functionEnv, output);
     }

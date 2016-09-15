@@ -13,8 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class MellowDBlock implements Output, ExecutionEnvironment {
-    private final Memory globalMemory;
-    private final Memory localMemory;
+    private final PathMap<Memory> memory;
     private final String name;
     private final MIDIChannel channel;
     private final List<Statement> code;
@@ -23,8 +22,9 @@ public class MellowDBlock implements Output, ExecutionEnvironment {
     private GradualDynamicChange gradualStart = null;
 
     public MellowDBlock(Memory globalMemory, String name, MIDIChannel channel) {
-        this.globalMemory = globalMemory;
-        this.localMemory = new SymbolTable(globalMemory);
+        Memory localMemory = new SymbolTable(globalMemory);
+        this.memory = new PathMap<>(localMemory);
+        this.memory.put(globalMemory, "this");
         this.name = name;
         this.channel = channel;
         this.code = new LinkedList<>();
@@ -49,11 +49,12 @@ public class MellowDBlock implements Output, ExecutionEnvironment {
 
     @Override
     public Memory getMemory(String... qualifier) {
-        //TODO reference the memory of other source files
-        if (qualifier.length == 1 && qualifier[0].equals("this")) {
-            return globalMemory;
-        }
-        return localMemory;
+        return this.memory.get(qualifier);
+    }
+
+    @Override
+    public Memory createScope(String... qualifier) {
+        return this.memory.putIfAbsent(SymbolTable::new, qualifier);
     }
 
     @Override
