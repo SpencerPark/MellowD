@@ -30,17 +30,17 @@ public final class Pitch implements MidiNoteMessageSource, Transposable<Pitch>, 
         for (int i = 0; i < 128; i++) ALL_PITCHES[i] = new Pitch(i);
     }
 
-    public static final int DEFAULT_OCTAVE = 2;
+    public static final int DEFAULT_OCTAVE = 4;
 
     //To get started a static reference by name to a whole tone pitch is retrieved. From here
     //the caller would chain calls to the various wrapper methods to obtain the desired pitch.
+    public static final Pitch C = ALL_PITCHES[0  + (DEFAULT_OCTAVE * 12)];
+    public static final Pitch D = ALL_PITCHES[2  + (DEFAULT_OCTAVE * 12)];
+    public static final Pitch E = ALL_PITCHES[4  + (DEFAULT_OCTAVE * 12)];
+    public static final Pitch F = ALL_PITCHES[5  + (DEFAULT_OCTAVE * 12)];
+    public static final Pitch G = ALL_PITCHES[7  + (DEFAULT_OCTAVE * 12)];
     public static final Pitch A = ALL_PITCHES[9  + (DEFAULT_OCTAVE * 12)];
     public static final Pitch B = ALL_PITCHES[11 + (DEFAULT_OCTAVE * 12)];
-    public static final Pitch C = ALL_PITCHES[12 + (DEFAULT_OCTAVE * 12)];
-    public static final Pitch D = ALL_PITCHES[14 + (DEFAULT_OCTAVE * 12)];
-    public static final Pitch E = ALL_PITCHES[16 + (DEFAULT_OCTAVE * 12)];
-    public static final Pitch F = ALL_PITCHES[17 + (DEFAULT_OCTAVE * 12)];
-    public static final Pitch G = ALL_PITCHES[19 + (DEFAULT_OCTAVE * 12)];
 
     //The `REST` is a special instance that will be check for reference equality to insert
     //silence rather than sound. It is described in a Mellow D source file with a `*`.
@@ -102,16 +102,16 @@ public final class Pitch implements MidiNoteMessageSource, Transposable<Pitch>, 
     //Using java's integer division logic we can divide by 12 (the semi-tones per octave) and
     //round down all at once to get the octave a note is in.
     public int getOctave() {
-        return ( midiNum + 3 ) / 12;
+        return midiNum / 12;
     }
 
     //In order to get the note value we can take the remainder of the MIDI note number when divided
     //by 12 (`midiNum % 12`). This gives the note number in octave 0. The we can just preform an
     //octave shift up to the desired octave (`octave * 12`).
-    /*public Pitch inOctave(int octave) {
+    public Pitch inOctave(int octave) {
         if (this == REST) return REST;
         return getPitch((octave * 12) + (midiNum % 12));
-    }*/
+    }
 
     //Intervals
     //---------
