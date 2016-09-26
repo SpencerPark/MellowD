@@ -154,6 +154,12 @@ public final class Pitch implements MidiNoteMessageSource, Transposable<Pitch>, 
         return getPitch(midiNum + 9);
     }
 
+    //*majorSixth*: 9 semi-tones above the root
+    public Pitch majorSixth() {
+        if (this == REST) return REST;
+        return getPitch(midiNum + 9);
+    }
+
     //*minorSeventh*: 10 semi-tones above the root
     public Pitch minorSeventh() {
         if (this == REST) return REST;

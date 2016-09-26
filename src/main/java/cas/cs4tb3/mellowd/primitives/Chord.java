@@ -204,6 +204,9 @@ public class Chord implements MidiNoteMessageSource, ConcatableComponent.TypeCho
             case "maj7":    return majorSeventh(pitch);
             case "aug7":    return augmentedSeventh(pitch);
             case "maj7s5":  return majorSeventhSharpFive(pitch);
+            case "6":
+            case "maj6":    return majorSixth(pitch);
+            case "min6":    return minorSixth(pitch);
             default:        return null;
         }
     }
@@ -264,6 +267,22 @@ public class Chord implements MidiNoteMessageSource, ConcatableComponent.TypeCho
     //**Diminished**: Cdim (root, minor 3rd, diminished 5th)
     public static Chord diminished(Pitch root) {
         return new Chord(root, root.minorThird(), root.diminishedFifth());
+    }
+
+    //Sixths
+    //------
+    //
+    //Triads with an added fourth note that is a sixth interval
+    //above the root.
+
+    //**Major Sixth**: Cmaj6 (root, major 3rd, perfect 5th, major 6th)
+    public static Chord majorSixth(Pitch root) {
+        return new Chord(root, root.minorThird(), root.perfectFifth(), root.majorSixth());
+    }
+
+    //**Minor Sixth**: Cmin6 (root, minor 3rd, perfect 5th, major 6th)
+    public static Chord minorSixth(Pitch root) {
+        return new Chord(root, root.minorThird(), root.perfectFifth(), root.majorSixth());
     }
 
     //Sevenths
