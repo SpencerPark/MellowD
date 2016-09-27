@@ -93,6 +93,7 @@ public class MIDIChannel {
     private int pitchBend = GeneralMidiConstants.NO_PITCH_BEND;
     private final Map<MIDIControl<?>, Object> controllers;
     private int octaveShift = 0;
+    private int transposeShift = 0;
 
     //This is a counter keeping track of the times that the slurred flag has been set
     //so that 2 calls to slurred require another 2 calls to un-slur.
@@ -152,6 +153,14 @@ public class MIDIChannel {
 
     public void setOctaveShift(int octaveShift) {
         this.octaveShift = octaveShift;
+    }
+
+    public int getTranspose() {
+        return transposeShift;
+    }
+
+    public void setTranspose(int numSemiTones) {
+        this.transposeShift = numSemiTones;
     }
 
     public synchronized final long stepIntoFuture(long stateTimeMod) {
@@ -276,7 +285,7 @@ public class MIDIChannel {
 
     public void playNote(Pitch pitch, int velocityMod, long duration, int offVelocity) {
         if (pitch == Pitch.REST) return;
-        Pitch toPlay = pitch.shiftOctave(this.getOctaveShift());
+        Pitch toPlay = pitch.shiftOctave(this.getOctaveShift()).transpose(this.getTranspose());
 
         if (isSlurred() && this.noteStates.get(toPlay).isSlurred) {
             MidiEvent offEvent = noteOffEvents.get(toPlay);

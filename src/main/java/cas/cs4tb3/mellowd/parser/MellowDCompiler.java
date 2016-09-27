@@ -389,6 +389,12 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
                 else
                     throw new CompilationException(ctx, new IllegalArgumentException("Cannot set sound bank to  "+ctx.configVal));
                 break;
+            case "transpose":
+                if (ctx.configVal instanceof Number)
+                    playable = new TransposeChange(((Number) ctx.configVal).intValue());
+                else
+                    throw new CompilationException(ctx, new IllegalArgumentException("Cannot transpose by "+ctx.configVal));
+                break;
             default:
                 MIDIControl<?> controller = MIDIControl.getController(ctx.IDENTIFIER().getText());
                 if (controller.getControllerType().equals(Knob.class)) {

@@ -1,6 +1,7 @@
 package cas.cs4tb3.mellowd.parser;
 
 import cas.cs4tb3.mellowd.compiler.SourceFinder;
+import cas.cs4tb3.mellowd.intermediate.functions.defaults.TransposeFunction;
 import cas.cs4tb3.mellowd.midi.TimingEnvironment;
 import cas.cs4tb3.mellowd.intermediate.executable.CodeExecutor;
 import cas.cs4tb3.mellowd.intermediate.executable.statements.PercussionToggledEnvironment;
@@ -54,6 +55,9 @@ public class MellowD implements ExecutionEnvironment {
 
         bank.addFunction(OctaveShiftFunction.getInstance(true));
         bank.addFunction(OctaveShiftFunction.getInstance(false));
+
+        bank.addFunction(TransposeFunction.getInstance(true));
+        bank.addFunction(TransposeFunction.getInstance(false));
     }
 
     public MellowDBlock defineBlock(String name, boolean percussion) {
