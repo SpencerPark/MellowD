@@ -199,8 +199,8 @@ public class Chord implements MidiNoteMessageSource, ConcatableComponent.TypeCho
             case "maj7b5":  return majorSeventhFlatFive(pitch);
             case "min7":    return minorSeventh(pitch);
             case "minmaj7": return minorMajorSeventh(pitch);
-            case "dom7":    return dominantSeventh(pitch);
             case "7":
+            case "dom7":    return dominantSeventh(pitch);
             case "maj7":    return majorSeventh(pitch);
             case "aug7":    return augmentedSeventh(pitch);
             case "maj7s5":  return majorSeventhSharpFive(pitch);
