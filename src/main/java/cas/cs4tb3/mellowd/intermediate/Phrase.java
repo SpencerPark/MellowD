@@ -53,7 +53,7 @@ public class Phrase implements Playable {
                 sustainPedal.release();
             }
 
-            Sound sound = melody.getAt(i % numNotes).createSound(rhythm.getBeat(i % numBeats));
+            Sound sound = melody.getElementAt(i % numNotes).createSound(rhythm.getBeat(i % numBeats));
             sound.play(channel);
 
             //Update the tracker

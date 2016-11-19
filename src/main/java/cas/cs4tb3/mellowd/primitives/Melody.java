@@ -3,6 +3,8 @@
 
 package cas.cs4tb3.mellowd.primitives;
 
+import cas.cs4tb3.mellowd.intermediate.functions.operations.Indexable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +19,7 @@ import java.util.List;
 //may function more like a trill but never the less, this class will function the same.
 //
 //The Melody class is simply a list wrapper. The order of the sounds is important.
-public class Melody implements ConcatableComponent.TypeMelody {
+public class Melody implements ConcatableComponent.TypeMelody, Indexable<Articulatable> {
     //This is the data that supports the melody.
     private final List<Articulated> sounds;
 
@@ -60,8 +62,16 @@ public class Melody implements ConcatableComponent.TypeMelody {
         return this.sounds.size();
     }
 
-    public Articulated getAt(int i) {
+    public Articulated getElementAt(int i) {
         return this.sounds.get(i);
+    }
+
+    @Override
+    public Articulatable getAt(int index) {
+        if (this.sounds.isEmpty())
+            return null;
+
+        return this.sounds.get(Indexable.calcIndex(index, this.sounds.size())).getElement();
     }
 
     @Override

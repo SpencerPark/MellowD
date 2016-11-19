@@ -42,10 +42,8 @@ public class Chord implements MidiNoteMessageSource, ConcatableComponent.TypeCho
     //This method provides access to the internal array of pitches. It is used for accessing
     //specific notes via the mellow d syntax `chordName:index`.
     public Pitch getPitchAt(int index) {
-        if (index >= pitches.length) {
-            return pitches[index % pitches.length].shiftOctave(index / pitches.length);
-        }
-        return pitches[index];
+        int shift = Indexable.calcIndexOverflow(index, size());
+        return pitches[Indexable.calcIndex(index, size())].shiftOctave(shift);
     }
 
     @Override

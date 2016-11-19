@@ -23,7 +23,7 @@ public class RuntimeIndexingSupportCheck extends SourceLink implements Expressio
     @Override
     public Indexable<?> evaluate(ExecutionEnvironment environment) {
         Object value = expression.evaluate(environment);
-        if (value == null || Indexable.class.isAssignableFrom(value.getClass())) {
+        if (value == null || value instanceof Indexable) {
             return (Indexable) value;
         } else {
             return throwCompilationException(new IndexingNotSupportedException(text));

@@ -12,6 +12,8 @@ public interface Articulated extends ConcatableComponent.TypeMelody {
 
     void setArticulation(Articulation articulation);
 
+    Articulatable getElement();
+
     @Override
     default void appendTo(Melody root) {
         root.add(this);
