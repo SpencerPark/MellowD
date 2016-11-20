@@ -61,6 +61,13 @@ public class GeneralMidiConstants {
     public static final int SOFT_SWITCH_CC = 67;
     public static final int LEGATO_SWITCH_CC = 68;
     public static final int HOLD_SWITCH_CC = 69;
+    /**
+     * This one works slightly differently. It doesn't make any state
+     * changes to the channel. Just shuts all sounds off immediately.
+     *
+     * Uses a value byte of 0
+     */
+    public static final int ALL_SOUNDS_OFF_CC = 120;
 
     public static final int CONTROLLER_VAL_ON = 127;
     public static final int CONTROLLER_VAL_OFF = 0;

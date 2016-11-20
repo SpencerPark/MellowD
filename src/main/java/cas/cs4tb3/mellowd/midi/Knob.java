@@ -28,7 +28,7 @@ public class Knob {
 
         this.setting = newSetting;
         try {
-            this.midiChannel.getMidiTrack().add(new MidiEvent(new ShortMessage(ShortMessage.CONTROL_CHANGE, midiChannel.getChannelNum(), type.getControlNumber(), setting), this.midiChannel.getStateTime()));
+            this.midiChannel.addMessage(new ShortMessage(ShortMessage.CONTROL_CHANGE, midiChannel.getChannelNum(), type.getControlNumber(), setting), true);
         } catch (InvalidMidiDataException e) {
             throw new MidiRuntimeException("Cannot twist " + type.getName() + " knob (cc=" + type.getControlNumber() + ") to " + setting + ".", e);
         }

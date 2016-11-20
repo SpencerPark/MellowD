@@ -1,21 +1,22 @@
 package cas.cs4tb3.mellowd.parser;
 
 import cas.cs4tb3.mellowd.compiler.SourceFinder;
-import cas.cs4tb3.mellowd.intermediate.functions.defaults.TransposeFunction;
-import cas.cs4tb3.mellowd.midi.TimingEnvironment;
 import cas.cs4tb3.mellowd.intermediate.executable.CodeExecutor;
 import cas.cs4tb3.mellowd.intermediate.executable.statements.PercussionToggledEnvironment;
+import cas.cs4tb3.mellowd.intermediate.functions.DefaultFunctions;
 import cas.cs4tb3.mellowd.intermediate.functions.FunctionBank;
-import cas.cs4tb3.mellowd.intermediate.functions.defaults.InstrumentChangeFunction;
-import cas.cs4tb3.mellowd.intermediate.functions.defaults.OctaveShiftFunction;
 import cas.cs4tb3.mellowd.intermediate.variables.AlreadyDefinedException;
 import cas.cs4tb3.mellowd.intermediate.variables.Memory;
 import cas.cs4tb3.mellowd.intermediate.variables.SymbolTable;
 import cas.cs4tb3.mellowd.midi.GeneralMidiConstants;
 import cas.cs4tb3.mellowd.midi.MIDIChannel;
+import cas.cs4tb3.mellowd.midi.TimingEnvironment;
 
 import javax.sound.midi.Sequence;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
 
 public class MellowD implements ExecutionEnvironment {
     private final SourceFinder srcFinder;
@@ -50,14 +51,7 @@ public class MellowD implements ExecutionEnvironment {
 
     private void addDefaultFunctionsToBank() {
         FunctionBank bank = this.functions.get();
-        bank.addFunction(InstrumentChangeFunction.getInstance(true));
-        bank.addFunction(InstrumentChangeFunction.getInstance(false));
-
-        bank.addFunction(OctaveShiftFunction.getInstance(true));
-        bank.addFunction(OctaveShiftFunction.getInstance(false));
-
-        bank.addFunction(TransposeFunction.getInstance(true));
-        bank.addFunction(TransposeFunction.getInstance(false));
+        DefaultFunctions.addAllToFunctionBank(bank);
     }
 
     public MellowDBlock defineBlock(String name, boolean percussion) {

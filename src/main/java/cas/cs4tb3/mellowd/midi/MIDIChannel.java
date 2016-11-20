@@ -94,6 +94,7 @@ public class MIDIChannel {
     private final Map<MIDIControl<?>, Object> controllers;
     private int octaveShift = 0;
     private int transposeShift = 0;
+    private boolean muted = false;
 
     //This is a counter keeping track of the times that the slurred flag has been set
     //so that 2 calls to slurred require another 2 calls to un-slur.
@@ -119,8 +120,14 @@ public class MIDIChannel {
         return channelNum;
     }
 
-    protected Track getMidiTrack() {
-        return midiTrack;
+    protected void addMessage(MidiMessage message, boolean overrideMute) {
+        if (overrideMute || !muted)
+            this.midiTrack.add(new MidiEvent(message, getStateTime()));
+    }
+
+    protected void addEvent(MidiEvent event, boolean overrideMute) {
+        if (overrideMute || !muted)
+            this.midiTrack.add(event);
     }
 
     public long getStateTime() {
@@ -161,6 +168,23 @@ public class MIDIChannel {
 
     public void setTranspose(int numSemiTones) {
         this.transposeShift = numSemiTones;
+    }
+
+    public boolean isMuted() {
+        return muted;
+    }
+
+    public void setMuted(boolean muted) {
+        if (!this.muted && muted) {
+            //We need to immediately silence the channel as we are making
+            //the transition from un muted to muted
+            try {
+                addMessage(new ShortMessage(ShortMessage.CONTROL_CHANGE, getChannelNum(), GeneralMidiConstants.ALL_SOUNDS_OFF_CC, 0), true);
+            } catch (InvalidMidiDataException e) {
+                throw new MidiRuntimeException("Cannot make control change " + GeneralMidiConstants.ALL_SOUNDS_OFF_CC, e);
+            }
+        }
+        this.muted = muted;
     }
 
     public synchronized final long stepIntoFuture(long stateTimeMod) {
@@ -228,7 +252,7 @@ public class MIDIChannel {
     //have finished playing and therefor this message must be properly placed at the end with the invocation
     //of this method.
     public final void finalizeEOT() {
-        midiTrack.add(new MidiEvent(Compiler.EOT_MESSAGE, this.stateTime + timingEnvironment.getPPQ()));
+        addEvent(new MidiEvent(Compiler.EOT_MESSAGE, this.stateTime + timingEnvironment.getPPQ()), true);
     }
 
     public final void setPitchBend(int bendAmt) {
@@ -239,7 +263,7 @@ public class MIDIChannel {
         } catch (InvalidMidiDataException e) {
             throw new MidiRuntimeException("Cannot set pitch bend to " + bendAmt + ".", e);
         }
-        this.midiTrack.add(new MidiEvent(resetMessage, this.stateTime));
+        addMessage(resetMessage, true);
         this.pitchBend = bendAmt;
     }
 
@@ -253,8 +277,8 @@ public class MIDIChannel {
         //Preform the sound bank change sequence described in the
         //[General MIDI Constants](../midi/GeneralMidiConstants.html).
         try {
-            this.midiTrack.add(new MidiEvent(new ShortMessage(ShortMessage.CONTROL_CHANGE, channelNum, GeneralMidiConstants.BANK_SELECT_CC_1, GeneralMidiConstants.BANK_SELECT_CC_1_VAL), stateTime));
-            this.midiTrack.add(new MidiEvent(new ShortMessage(ShortMessage.CONTROL_CHANGE, channelNum, GeneralMidiConstants.BANK_SELECT_CC_2, soundBank), stateTime));
+            addMessage(new ShortMessage(ShortMessage.CONTROL_CHANGE, channelNum, GeneralMidiConstants.BANK_SELECT_CC_1, GeneralMidiConstants.BANK_SELECT_CC_1_VAL), true);
+            addMessage(new ShortMessage(ShortMessage.CONTROL_CHANGE, channelNum, GeneralMidiConstants.BANK_SELECT_CC_2, soundBank), true);
             this.soundBank = soundBank;
         } catch (InvalidMidiDataException e) {
             throw new MidiRuntimeException("Cannot set sound bank to " + soundBank + ".", e);
@@ -266,7 +290,7 @@ public class MIDIChannel {
 
         //Add the program change message
         try {
-            this.midiTrack.add(new MidiEvent(new ShortMessage(ShortMessage.PROGRAM_CHANGE, channelNum, instrument, 0), stateTime));
+            addMessage(new ShortMessage(ShortMessage.PROGRAM_CHANGE, channelNum, instrument, 0), true);
             this.instrument = instrument;
         } catch (InvalidMidiDataException e) {
             throw new MidiRuntimeException("Cannot set the instrument to " + instrument + ".", e);
@@ -324,7 +348,7 @@ public class MIDIChannel {
         } catch (InvalidMidiDataException e) {
             throw new MidiRuntimeException("Cannot turn note on (" + pitch.getMidiNum() + ") with dynamic of " + this.dynamic.louder(velocityMod).getVelocity() + ".", e);
         }
-        this.midiTrack.add(new MidiEvent(message, this.stateTime));
+        addMessage(message, false);
 
         this.noteOffEvents.set(pitch, null);
         this.noteStates.set(pitch, NoteState.getState(true, isSlurred()));
@@ -339,7 +363,7 @@ public class MIDIChannel {
         }
 
         MidiEvent offEvent = new MidiEvent(message, this.stateTime);
-        this.midiTrack.add(offEvent);
+        addEvent(offEvent, true);
         this.noteOffEvents.set(pitch, offEvent);
 
         this.noteStates.set(pitch, NoteState.getState(false, isSlurred()));

@@ -366,7 +366,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     @Override
     public Statement visitBlockConfiguration(MellowDParser.BlockConfigurationContext ctx) {
         Playable playable;
-        switch (ctx.IDENTIFIER().getText()) {
+        switch (ctx.IDENTIFIER().getText().toLowerCase()) {
             case "instrument":
                 if (ctx.configVal instanceof Number)
                     playable = new InstrumentChange(((Number) ctx.configVal).intValue(), 0);
@@ -395,8 +395,17 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
                 else
                     throw new CompilationException(ctx, new IllegalArgumentException("Cannot transpose by "+ctx.configVal));
                 break;
+            case "mute":
+                if (ctx.configVal instanceof Boolean)
+                    playable = ChannelMute.getInstance((Boolean) ctx.configVal);
+                else
+                    throw new CompilationException(ctx, new IllegalArgumentException("Mute is a switch and can be configured by 'true' or 'false' for muted or un-muted. Not '" + ctx.configVal + "'"));
+                break;
             default:
                 MIDIControl<?> controller = MIDIControl.getController(ctx.IDENTIFIER().getText());
+                if (controller == null)
+                    throw new CompilationException(ctx.IDENTIFIER(), new IllegalArgumentException("Unknown configuration option '" + ctx.IDENTIFIER().getText() + "'"));
+
                 if (controller.getControllerType().equals(Knob.class)) {
                     if (ctx.configVal instanceof Number)
                         playable = new MIDIKnobChange((MIDIControl<Knob>) controller, ((Number) ctx.configVal).intValue());

@@ -3,18 +3,13 @@
 
 package cas.cs4tb3.mellowd.primitives;
 
+import cas.cs4tb3.mellowd.intermediate.functions.operations.OctaveShiftable;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Transposable;
-import cas.cs4tb3.mellowd.midi.MidiNoteMessageSource;
-
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.ShortMessage;
-import java.util.Collection;
-import java.util.Collections;
 
 //Pitch is a key building block in the Mellow D compiler. It specifies the value of the played
 //note. MIDI restricts the note value to 7 bits, hence we have 0-127 to work with. 0 corresponds
 //to the musical note c with each consecutive number adding a semi-tone to the note value.
-public final class Pitch implements MidiNoteMessageSource, Transposable<Pitch>, ConcatableComponent.TypeChord, ConcatableComponent.TypeMelody, Articulatable {
+public final class Pitch implements Transposable<Pitch>, OctaveShiftable<Pitch>, ConcatableComponent.TypeChord, ConcatableComponent.TypeMelody, Articulatable {
     //The `NOTE_NAMES` array maps a midi num in the lowest octave to a note name. Here
     //it is clear to see the mapping from number to note for a total of 12 semi-tones in
     //an octave.
@@ -183,23 +178,6 @@ public final class Pitch implements MidiNoteMessageSource, Transposable<Pitch>, 
     public String toString() {
         if (this == REST) return "REST";
         return midiNum + ":" + NOTE_NAMES[midiNum%12] + Integer.toString(midiNum/12);
-    }
-
-    //Implement the [MidiNoteMessageSource](midi/MidiNoteMessageSource.html) methods. They just put a
-    //new short message into a list for compatibility reasons. The only special case is the `REST` which
-    //results in no messages being generated.
-    @Override
-    public Collection<ShortMessage> noteOn(int channel, int velocity) throws InvalidMidiDataException {
-        if (this == REST)
-            return Collections.emptyList();
-        return Collections.singletonList(new ShortMessage(ShortMessage.NOTE_ON, channel, midiNum, velocity));
-    }
-
-    @Override
-    public Collection<ShortMessage> noteOff(int channel, int velocity) throws InvalidMidiDataException {
-        if (this == REST)
-            return Collections.emptyList();
-        return Collections.singletonList(new ShortMessage(ShortMessage.NOTE_OFF, channel, midiNum, velocity));
     }
 
     @Override
