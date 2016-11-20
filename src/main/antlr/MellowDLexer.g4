@@ -7,7 +7,7 @@ KEYWORD_PERCUSSION : 'percussion' ;
 KEYWORD_DEF : 'def' ;
 KEYWORD_BLOCK : 'block' ;
 KEYWORD_FUNCTION : 'function' ;
-KEYWORD_RETURN : 'return' ;
+KEYWORD_SAVE : 'save' ;
 KEYWORD_IMPORT : 'import' ;
 KEYWORD_FROM : 'from' ;
 KEYWORD_AS : 'as' ;

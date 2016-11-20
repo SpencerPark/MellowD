@@ -290,9 +290,9 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     public Statement visitVarDeclaration(MellowDParser.VarDeclarationContext ctx, boolean isField) {
         boolean percussionToggle = ctx.STAR() != null;
 
+        //This list will always contain at least 1 IDENTIFIER
         List<TerminalNode> fullyQualifiedID = ctx.IDENTIFIER();
-        if (ctx.KEYWORD_RETURN() != null)
-            fullyQualifiedID.add(0, ctx.KEYWORD_RETURN());
+
         String[] qualifier = new String[fullyQualifiedID.size()-1];
         for (int i = 0; i < qualifier.length; i++)
             qualifier[i] = fullyQualifiedID.get(i).getText();
@@ -492,7 +492,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
     @Override
     public Statement visitFunctionCall(MellowDParser.FunctionCallContext ctx) {
-        boolean shouldReturn = ctx.KEYWORD_RETURN() != null;
+        boolean shouldSave = ctx.KEYWORD_SAVE() != null;
 
         List<TerminalNode> fullFunctionName = ctx.IDENTIFIER();
         String[] bankQualifier = new String[fullFunctionName.size()-1];
@@ -516,7 +516,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         }
         FunctionBank.PercussionPair[] options = bank.resolve(functionName, args);
 
-        return new FunctionCall(new SourceLink(ctx), this.mellowD, options, functionName, shouldReturn, args);
+        return new FunctionCall(new SourceLink(ctx), this.mellowD, options, functionName, shouldSave, args);
     }
 
     @Override
