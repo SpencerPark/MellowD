@@ -16,7 +16,8 @@ public class ArticulatedChord implements Articulated {
         this.articulation = Articulation.NONE;
     }
 
-    public Chord getChord() {
+    @Override
+    public Chord getElement() {
         return chord;
     }
 
@@ -29,29 +30,6 @@ public class ArticulatedChord implements Articulated {
     public void setArticulation(Articulation articulation) {
         this.articulation = articulation;
     }
-
-    //Overloading groovy operators
-    public Pitch getAt(int index) {
-        return chord.getPitchAt(index);
-    }
-
-    public ArticulatedChord plus(int transposeAmt) {
-        return new ArticulatedChord(this.chord.transpose(transposeAmt), this.articulation);
-    }
-
-    public ArticulatedChord minus(int transposeAmt) {
-        return new ArticulatedChord(this.chord.transpose(-transposeAmt), this.articulation);
-    }
-
-    public ArticulatedChord leftShift(int octaveShift) {
-        return shiftOctave(-octaveShift);
-    }
-
-    public ArticulatedChord rightShift(int octaveShift) {
-        return shiftOctave(octaveShift);
-    }
-
-    //End groovy overloading
 
     @Override
     public ArticulatedChord shiftOctave(int octaveShift) {

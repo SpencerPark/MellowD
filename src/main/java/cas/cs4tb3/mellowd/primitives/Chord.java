@@ -4,12 +4,13 @@
 package cas.cs4tb3.mellowd.primitives;
 
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Indexable;
+import cas.cs4tb3.mellowd.intermediate.functions.operations.OctaveShiftable;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Transposable;
-import cas.cs4tb3.mellowd.midi.MidiNoteMessageSource;
 
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.ShortMessage;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,7 +19,7 @@ import java.util.regex.Pattern;
 //are defined between `(` and `)` tokens. The `,` separated pitches make up the chord.
 //
 //This class contains a variety of standard chords frequently used in compositions.
-public class Chord implements MidiNoteMessageSource, ConcatableComponent.TypeChord, ConcatableComponent.TypeMelody, Transposable<Chord>, Articulatable, Indexable<Pitch> {
+public class Chord implements ConcatableComponent.TypeChord, ConcatableComponent.TypeMelody, Transposable<Chord>, Articulatable, Indexable<Pitch>, OctaveShiftable<Chord> {
     //The `CHORD_NAME_PATTERN` is a regular expression for matching chord names. There are a common
     //collection of chord patterns that are frequently used and the compiler should treat them as
     //all defined as variables. This is of course not possible so they are virtually defined and if
@@ -41,14 +42,10 @@ public class Chord implements MidiNoteMessageSource, ConcatableComponent.TypeCho
 
     //This method provides access to the internal array of pitches. It is used for accessing
     //specific notes via the mellow d syntax `chordName:index`.
-    public Pitch getPitchAt(int index) {
+    @Override
+    public Pitch getAtIndex(int index) {
         int shift = Indexable.calcIndexOverflow(index, size());
         return pitches[Indexable.calcIndex(index, size())].shiftOctave(shift);
-    }
-
-    @Override
-    public Pitch getAt(int index) {
-        return getPitchAt(index);
     }
 
     //`getPitches` leaks a copy of the pitches that make up this chord.
@@ -80,8 +77,6 @@ public class Chord implements MidiNoteMessageSource, ConcatableComponent.TypeCho
         return new Chord(pitches);
     }
 
-    //Chords defined as variables need to be reevaluated in the current octave
-    //for them to have any use.
     @Override
     public Chord shiftOctave(int octaveShift) {
         Pitch[] pitches = new Pitch[this.pitches.length];
@@ -119,26 +114,6 @@ public class Chord implements MidiNoteMessageSource, ConcatableComponent.TypeCho
     public void append(Pitch p) {
         this.pitches = Arrays.copyOf(this.pitches, this.pitches.length + 1);
         this.pitches[this.pitches.length - 1] = p;
-    }
-
-    //`noteOn` and `noteOff` are the methods doing the actual compiling. They collect the compilation
-    //results of each of the pitches making up this chord and return the collection.
-    @Override
-    public Collection<ShortMessage> noteOn(int channel, int velocity) throws InvalidMidiDataException {
-        Collection<ShortMessage> messages = new ArrayList<>(pitches.length);
-        for (Pitch p : pitches) {
-            messages.add(new ShortMessage(ShortMessage.NOTE_ON, channel, p.getMidiNum(), velocity));
-        }
-        return messages;
-    }
-
-    @Override
-    public Collection<ShortMessage> noteOff(int channel, int velocity) throws InvalidMidiDataException {
-        Collection<ShortMessage> messages = new ArrayList<>(pitches.length);
-        for (Pitch p : pitches) {
-            messages.add(new ShortMessage(ShortMessage.NOTE_OFF, channel, p.getMidiNum(), velocity));
-        }
-        return messages;
     }
 
     //The `resolve` method is the method that provides the lookup by name support described above with

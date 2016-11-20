@@ -1,10 +1,9 @@
 package cas.cs4tb3.mellowd.primitives;
 
 import cas.cs4tb3.mellowd.intermediate.Sound;
+import cas.cs4tb3.mellowd.intermediate.functions.operations.OctaveShiftable;
 
-public interface Articulated extends ConcatableComponent.TypeMelody {
-
-    Articulated shiftOctave(int octaveShift);
+public interface Articulated extends ConcatableComponent.TypeMelody, OctaveShiftable<Articulated> {
 
     Sound createSound(Beat beat);
 

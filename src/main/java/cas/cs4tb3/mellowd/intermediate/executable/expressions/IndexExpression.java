@@ -14,6 +14,6 @@ public class IndexExpression implements Expression<Object> {
 
     @Override
     public Object evaluate(ExecutionEnvironment environment) {
-        return expression.evaluate(environment).getAt(index.evaluate(environment));
+        return expression.evaluate(environment).getAtIndex(index.evaluate(environment));
     }
 }

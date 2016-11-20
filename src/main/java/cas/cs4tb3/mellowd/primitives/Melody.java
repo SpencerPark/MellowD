@@ -4,6 +4,7 @@
 package cas.cs4tb3.mellowd.primitives;
 
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Indexable;
+import cas.cs4tb3.mellowd.intermediate.functions.operations.OctaveShiftable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +20,7 @@ import java.util.List;
 //may function more like a trill but never the less, this class will function the same.
 //
 //The Melody class is simply a list wrapper. The order of the sounds is important.
-public class Melody implements ConcatableComponent.TypeMelody, Indexable<Articulatable> {
+public class Melody implements ConcatableComponent.TypeMelody, Indexable<Articulatable>, OctaveShiftable<Melody> {
     //This is the data that supports the melody.
     private final List<Articulated> sounds;
 
@@ -47,10 +48,8 @@ public class Melody implements ConcatableComponent.TypeMelody, Indexable<Articul
         this.sounds.add(sound);
     }
 
-    //Melodies defined as variables need to be reevaluated in the current octave
-    //for them to have any use.
-    public TypeMelody shiftOctave(int octaveShift) {
-        if (octaveShift == 0) return this;
+    @Override
+    public Melody shiftOctave(int octaveShift) {
         List<Articulated> sounds = new ArrayList<>(this.sounds.size());
         for (Articulated s : this.sounds) {
             sounds.add(s.shiftOctave(octaveShift));
@@ -62,16 +61,16 @@ public class Melody implements ConcatableComponent.TypeMelody, Indexable<Articul
         return this.sounds.size();
     }
 
-    public Articulated getElementAt(int i) {
-        return this.sounds.get(i);
+    public Articulated getElementAtIndex(int index) {
+        return this.sounds.get(Indexable.calcIndex(index, size()));
     }
 
     @Override
-    public Articulatable getAt(int index) {
+    public Articulatable getAtIndex(int index) {
         if (this.sounds.isEmpty())
             return null;
 
-        return this.sounds.get(Indexable.calcIndex(index, this.sounds.size())).getElement();
+        return this.sounds.get(Indexable.calcIndex(index, size())).getElement();
     }
 
     @Override

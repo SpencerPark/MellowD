@@ -1,8 +1,15 @@
 package cas.cs4tb3.mellowd.intermediate.functions.operations;
 
+/**
+ * Implementations can be indexed to return an object of type {@link T} via
+ * the {@link #getAtIndex(int)} method.
+ *
+ * @param <T> The type of the object that exists in this container. The type
+ *            of the object returned by {@link #getAtIndex(int)}
+ */
 public interface Indexable<T> {
 
-    T getAt(int index);
+    T getAtIndex(int index);
 
     /**
      * Calculate the true, inbound, index given by the index notation.
@@ -47,6 +54,6 @@ public interface Indexable<T> {
             throw new IllegalArgumentException("Cannot calculate index overflow of an empty indexable.");
 
         if (index < 0) return index / size;
-        else           return (index + 1) / size;
+        else return (index + 1) / size;
     }
 }

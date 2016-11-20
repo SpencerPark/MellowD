@@ -94,23 +94,29 @@ public class Beat implements ConcatableComponent.TypeRhythm {
         this.slurred = slurred;
     }
 
+    public void flipSlur() {
+        this.slurred = !this.slurred;
+    }
+
     @Override
     public String toString() {
+        String str;
         if (this.numQuarters == 4d) {
-            return "w";
+            str = "w";
         } else if (this.numQuarters == 2d) {
-            return "h";
+            str = "h";
         } else if (this.numQuarters == 1d) {
-            return "q";
+            str = "q";
         } else if (this.numQuarters == 1/2d) {
-            return "e";
+            str = "e";
         } else if (this.numQuarters == 1/4d) {
-            return "s";
+            str = "s";
         } else if (this.numQuarters == 1/8d) {
             return "t";
         } else {
-            return String.format("r{%.2f}", this.numQuarters);
+            str = String.format("r{%.2f}", this.numQuarters);
         }
+        return isSlurred() ? str + "_" : str;
     }
 
     @Override

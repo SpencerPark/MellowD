@@ -5,10 +5,7 @@ package cas.cs4tb3.mellowd.primitives;
 
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Indexable;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 //The `Rhythm` is responsible for the timing considerations in playable sounds. It specifies
 //the duration in the form of a [Beat](../Beat.html). In a Mellow D source file a rhythm is
@@ -17,50 +14,28 @@ import java.util.List;
 //overlapping and the notes connecting more smoothly.
 public class Rhythm implements ConcatableComponent.TypeRhythm, Indexable<Beat> {
     private final List<Beat> beats;
-    private final BitSet slurred;
 
     //Creating a rhythm is done by specifying zero or more beats that make up the rhythm.
     public Rhythm() {
         this.beats = new ArrayList<>();
-        this.slurred = new BitSet();
-    }
-
-    public Rhythm(Beat onlyBeat, boolean slurred) {
-        this.beats = Collections.singletonList(onlyBeat);
-        this.slurred = new BitSet();
-        this.slurred.set(0, slurred);
-    }
-
-    //Rhythm also defines some methods for manipulating and retrieving the data
-    //stored in this class.
-
-    //`getBeat` returns the beat at a given position in the rhythm. This will throw
-    //an index out of bounds exception if the `index` is &lt; 0 or &ge; numBeats().
-    public Beat getBeat(int index){
-        return beats.get(index);
     }
 
     public boolean isSlurred(int index) {
-        return slurred.get(index);
+        return getAtIndex(Indexable.calcIndex(index, size())).isSlurred();
     }
 
     //`append` adds a beat to the rhythm. It is equivalent to calling `append(beat, false)`
     //as the added beat will not be slurred.
     public void append(Beat beat) {
         this.beats.add(beat);
-        this.slurred.set(this.beats.size()-1, beat.isSlurred());
     }
 
     public void append(Rhythm other) {
-        int startingIndex = this.beats.size();
         this.beats.addAll(other.beats);
-        for (int i = 0; i < other.size(); i++) {
-            this.slurred.set(startingIndex + i, other.isSlurred(i));
-        }
     }
 
     public void setSlurred(int index, boolean slurred) {
-        this.slurred.set(index, slurred);
+        getAtIndex(Indexable.calcIndex(index, size())).setSlurred(slurred);
     }
 
     @Override
@@ -69,7 +44,7 @@ public class Rhythm implements ConcatableComponent.TypeRhythm, Indexable<Beat> {
     }
 
     public void slurAll() {
-        this.slurred.flip(0, this.beats.size());
+        this.beats.forEach(Beat::flipSlur);
     }
 
     public int size() {
@@ -86,7 +61,7 @@ public class Rhythm implements ConcatableComponent.TypeRhythm, Indexable<Beat> {
     }
 
     @Override
-    public Beat getAt(int index) {
+    public Beat getAtIndex(int index) {
         return this.beats.get(Indexable.calcIndex(index, size()));
     }
 
@@ -98,15 +73,15 @@ public class Rhythm implements ConcatableComponent.TypeRhythm, Indexable<Beat> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("<");
-        for (int i = 0; i < this.size(); i++) {
-            sb.append(this.beats.get(i));
-            if (this.slurred.get(i))
-                sb.append('_');
-            sb.append(", ");
-        }
+
+        for (Beat b : this.beats)
+            sb.append(b).append(", ");
+
         if (sb.length() > 1)
             sb.setLength(sb.length() - 2);
+
         sb.append('>');
+
         return sb.toString();
     }
 }

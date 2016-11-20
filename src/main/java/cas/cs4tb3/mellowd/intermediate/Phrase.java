@@ -41,7 +41,7 @@ public class Phrase implements Playable {
 
         Pedal sustainPedal = channel.getController(MIDIControl.SUSTAIN);
         for (int i = 0; i < numElements; i++) {
-            boolean slurred = rhythm.isSlurred(i % numBeats);
+            boolean slurred = rhythm.isSlurred(i);
 
             if (slurred && !lastSlurred) {
                 //This note is the first is a section of slurred components
@@ -53,7 +53,7 @@ public class Phrase implements Playable {
                 sustainPedal.release();
             }
 
-            Sound sound = melody.getElementAt(i % numNotes).createSound(rhythm.getBeat(i % numBeats));
+            Sound sound = melody.getElementAtIndex(i).createSound(rhythm.getAtIndex(i));
             sound.play(channel);
 
             //Update the tracker
@@ -69,7 +69,7 @@ public class Phrase implements Playable {
 
         long ticks = 0;
         for (int i = 0; i < numElements; i++) {
-            ticks += env.ticksInBeat(this.rhythm.getBeat(i % numBeats));
+            ticks += env.ticksInBeat(this.rhythm.getAtIndex(i));
         }
 
         return ticks;

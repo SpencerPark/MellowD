@@ -16,10 +16,6 @@ public class ArticulatedPitch implements Articulated {
         this.articulation = Articulation.NONE;
     }
 
-    public Pitch getPitch() {
-        return pitch;
-    }
-
     @Override
     public Articulation getArticulation() {
         return articulation;
@@ -30,33 +26,10 @@ public class ArticulatedPitch implements Articulated {
         this.articulation = articulation;
     }
 
-    //Overloading groovy operators
-
-    public ArticulatedPitch plus(int transposeAmt) {
-        return new ArticulatedPitch(this.pitch.transpose(transposeAmt), this.articulation);
+    @Override
+    public Pitch getElement() {
+        return pitch;
     }
-
-    public ArticulatedPitch minus(int transposeAmt) {
-        return new ArticulatedPitch(this.pitch.transpose(-transposeAmt), this.articulation);
-    }
-
-    public ArticulatedPitch leftShift(int octaveShift) {
-        return shiftOctave(-octaveShift);
-    }
-
-    public ArticulatedPitch rightShift(int octaveShift) {
-        return shiftOctave(octaveShift);
-    }
-
-    public Object asType(Class<?> type) {
-        if (type.equals(Pitch.class)) {
-            return this.pitch;
-        }
-
-        return type.cast(this);
-    }
-
-    //End groovy overloading
 
     @Override
     public ArticulatedPitch shiftOctave(int octaveShift) {

@@ -134,27 +134,6 @@ public class ErrorResponseTest {
     //Test that various incorrect variable declarations and references are caught
     //and handled appropriately.
 
-    //Make sure that attempts to index a melody are caught
-    @Test
-    public void indexAMelody() throws Exception {
-        MellowDParser parser = parserFor("" +
-                "def block myblock\n" +
-                "myChord -> [a, b, c]" +
-                "myblock{" +
-                "    [myChord:0]*<q>" +
-                "}");
-
-        try {
-            parseAndCompileSong(parser).execute();
-        } catch (CompilationException e) {
-            printExpectedError(e);
-            return;
-        }
-
-        fail("Variable myChord was a melody when it should have been a chord to index but the compiler" +
-                "silently handled it.");
-    }
-
     //Make sure that attempts to make a phrase from a rhythm identifier starred with
     //a rhythm are caught.
     @Test

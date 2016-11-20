@@ -1,9 +1,16 @@
 package cas.cs4tb3.mellowd.intermediate.functions.operations;
 
 /**
- * Created on 2016-06-20.
+ * Implementations can be concatenated with objects of type {@link P} to produce
+ * a resulting object of type {@link R} via the {@link #concat(P)} method
+ *
+ * @param <P> Generally the same type as the implementing class but is technically
+ *            the of the object that is concatenated with this object.
+ * @param <R> Generally the same type as the implementing class but is technically
+ *            the resulting type of preforming a concatenation with an object of type
+ *            {@link P}
  */
-public interface Concatable<T extends Concatable<T>> {
+public interface Concatable<P, R> {
 
-    T concat(T after);
+    R concat(P after);
 }
