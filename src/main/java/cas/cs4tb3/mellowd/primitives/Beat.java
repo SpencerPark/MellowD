@@ -3,11 +3,13 @@
 
 package cas.cs4tb3.mellowd.primitives;
 
+import cas.cs4tb3.mellowd.intermediate.functions.operations.Slurrable;
+
 //A `Beat` represent a classical definition of a note duration.
 //Each beat has the number of quarter notes it is equivalent to (possibly a fraction),
 //for converting from `PPQN` (ticks per quarter note) to a duration in ticks that the
 //beat should be held for.
-public class Beat implements ConcatableComponent.TypeRhythm {
+public class Beat implements Slurrable {
     //All beats must start out as one of the following durations which can then
     //later on be manipulated via dots to extend the duration or wrapping inside a tuplet.
     public static Beat WHOLE()          { return new Beat(4d);   }
@@ -117,10 +119,5 @@ public class Beat implements ConcatableComponent.TypeRhythm {
             str = String.format("r{%.2f}", this.numQuarters);
         }
         return isSlurred() ? str + "_" : str;
-    }
-
-    @Override
-    public void appendTo(Rhythm root) {
-        root.append(this);
     }
 }

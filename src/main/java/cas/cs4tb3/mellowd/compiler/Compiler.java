@@ -179,7 +179,7 @@ public class Compiler {
             //located in the `outdir`.
             } else {
                 try {
-                    //If the compilation result is empty then add the EOT event to
+                    //If the compilation result is empty then append the EOT event to
                     //make the output file playable.
                     if (compilationResult.getTickLength() == 0) {
                         compilationResult.getTracks()[0].add(new MidiEvent(EOT_MESSAGE, 1));

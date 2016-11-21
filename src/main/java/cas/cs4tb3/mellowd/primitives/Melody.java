@@ -20,7 +20,7 @@ import java.util.List;
 //may function more like a trill but never the less, this class will function the same.
 //
 //The Melody class is simply a list wrapper. The order of the sounds is important.
-public class Melody implements ConcatableComponent.TypeMelody, Indexable<Articulatable>, OctaveShiftable<Melody> {
+public class Melody implements Indexable<Articulatable>, OctaveShiftable<Melody> {
     //This is the data that supports the melody.
     private final List<Articulated> sounds;
 
@@ -37,15 +37,23 @@ public class Melody implements ConcatableComponent.TypeMelody, Indexable<Articul
         this.sounds = sounds;
     }
 
-    //`add` is overloaded to support single or multiple concatenation. When
+    //`append` is overloaded to support single or multiple concatenation. When
     //concatenated with another melody the ordering of the additions remains
     //the same, just appended to the end of the melody.
-    public void add(Melody melody) {
+    public void append(Melody melody) {
         this.sounds.addAll(melody.sounds);
     }
 
-    public void add(Articulated sound) {
+    public void append(Articulated sound) {
         this.sounds.add(sound);
+    }
+
+    public void append(Pitch pitch) {
+        this.sounds.add(new ArticulatedPitch(pitch));
+    }
+
+    public void append(Chord chord) {
+        this.sounds.add(new ArticulatedChord(chord));
     }
 
     @Override
@@ -71,10 +79,5 @@ public class Melody implements ConcatableComponent.TypeMelody, Indexable<Articul
             return null;
 
         return this.sounds.get(Indexable.calcIndex(index, size())).getElement();
-    }
-
-    @Override
-    public void appendTo(Melody root) {
-        root.add(this);
     }
 }

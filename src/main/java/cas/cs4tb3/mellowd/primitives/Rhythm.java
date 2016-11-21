@@ -4,6 +4,7 @@
 package cas.cs4tb3.mellowd.primitives;
 
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Indexable;
+import cas.cs4tb3.mellowd.intermediate.functions.operations.Slurrable;
 
 import java.util.*;
 
@@ -12,7 +13,7 @@ import java.util.*;
 //a comma separated list of beats wrapped in `<` and `>`. Each beat is referred to by the first
 //letter in it's name. Additionally beats can be slurred together. This results in the durations
 //overlapping and the notes connecting more smoothly.
-public class Rhythm implements ConcatableComponent.TypeRhythm, Indexable<Beat> {
+public class Rhythm implements Slurrable, Indexable<Beat> {
     private final List<Beat> beats;
 
     //Creating a rhythm is done by specifying zero or more beats that make up the rhythm.
@@ -63,11 +64,6 @@ public class Rhythm implements ConcatableComponent.TypeRhythm, Indexable<Beat> {
     @Override
     public Beat getAtIndex(int index) {
         return this.beats.get(Indexable.calcIndex(index, size()));
-    }
-
-    @Override
-    public void appendTo(Rhythm root) {
-        root.append(this);
     }
 
     @Override

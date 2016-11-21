@@ -6,6 +6,7 @@ import cas.cs4tb3.mellowd.intermediate.executable.expressions.*;
 import cas.cs4tb3.mellowd.intermediate.executable.statements.*;
 import cas.cs4tb3.mellowd.intermediate.functions.*;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Indexable;
+import cas.cs4tb3.mellowd.intermediate.functions.operations.Slurrable;
 import cas.cs4tb3.mellowd.intermediate.variables.*;
 import cas.cs4tb3.mellowd.midi.GeneralMidiInstrument;
 import cas.cs4tb3.mellowd.midi.Knob;
@@ -32,19 +33,40 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     private static final Constant<Articulation> ARTICULATION_TENUTO = new Constant<>(Articulation.TENUTO);
 
     protected final MellowD mellowD;
+    protected final ConcatenationDelegate<Melody> melodyConcatenationDelegate = new ConcatenationDelegate<>();
+    protected final ConcatenationDelegate<Chord> chordConcatenationDelegate = new ConcatenationDelegate<>();
+    protected final ConcatenationDelegate<Rhythm> rhythmConcatenationDelegate = new ConcatenationDelegate<>();
+
+    protected final Class<?>[] melodyParamTypes;
+    protected final Class<?>[] chordParamTypes;
+    protected final Class<Slurrable> rhythmParamType;
 
     public MellowDCompiler(MellowD mellowD) {
         this.mellowD = mellowD;
+
+        this.melodyConcatenationDelegate.addDelegate(Melody.class, Melody::append);
+        this.melodyConcatenationDelegate.addDelegate(Articulated.class, Melody::append);
+        this.melodyConcatenationDelegate.addDelegate(Pitch.class, Melody::append);
+        this.melodyConcatenationDelegate.addDelegate(Chord.class, Melody::append);
+        this.melodyParamTypes = new Class[]{ Melody.class, Articulated.class, Pitch.class, Chord.class };
+
+        this.chordConcatenationDelegate.addDelegate(Pitch.class, Chord::append);
+        this.chordConcatenationDelegate.addDelegate(Chord.class, Chord::append);
+        this.chordParamTypes = new Class[]{ Pitch.class, Chord.class };
+
+        this.rhythmConcatenationDelegate.addDelegate(Beat.class, Rhythm::append);
+        this.rhythmConcatenationDelegate.addDelegate(Rhythm.class, Rhythm::append);
+        this.rhythmParamType = Slurrable.class;
     }
 
     public <T> Expression<T> visitReference(MellowDParser.ReferenceContext ctx, Class<T> desiredType) {
         List<TerminalNode> fullyQualifiedID = ctx.IDENTIFIER();
         if (!fullyQualifiedID.isEmpty()) {
-            String[] qualifier = new String[fullyQualifiedID.size()-1];
+            String[] qualifier = new String[fullyQualifiedID.size() - 1];
             for (int i = 0; i < qualifier.length; i++)
                 qualifier[i] = fullyQualifiedID.get(i).getText();
 
-            String name = fullyQualifiedID.get(fullyQualifiedID.size()-1).getText();
+            String name = fullyQualifiedID.get(fullyQualifiedID.size() - 1).getText();
             return new RuntimeTypeCheck<>(desiredType, new ReferenceResolution(qualifier, name), ctx);
         } else {
             Constant<Chord> chordConstant = new Constant<>(Chord.resolve(ctx.CHORD_IDENTIFIER().getText()));
@@ -61,14 +83,22 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     public Constant<Articulation> visitArticulation(MellowDParser.ArticulationContext ctx) {
         if (ctx == null || ctx.art == null) return ARTICULATION_NONE;
         switch (ctx.art) {
-            case NONE:          return ARTICULATION_NONE;
-            case STACCATO:      return ARTICULATION_STACCATO;
-            case STACCATISSIMO: return ARTICULATION_STACCATISSIMO;
-            case MARCATO:       return ARTICULATION_MARCATO;
-            case ACCENT:        return ARTICULATION_ACCENT;
-            case TENUTO:        return ARTICULATION_TENUTO;
-            case GLISCANDO:     return ARTICULATION_GLISCANDO;
-            default:    throw new Error("New articulation created without updating visitArticulation()");
+            case NONE:
+                return ARTICULATION_NONE;
+            case STACCATO:
+                return ARTICULATION_STACCATO;
+            case STACCATISSIMO:
+                return ARTICULATION_STACCATISSIMO;
+            case MARCATO:
+                return ARTICULATION_MARCATO;
+            case ACCENT:
+                return ARTICULATION_ACCENT;
+            case TENUTO:
+                return ARTICULATION_TENUTO;
+            case GLISCANDO:
+                return ARTICULATION_GLISCANDO;
+            default:
+                throw new Error("New articulation created without updating visitArticulation()");
         }
     }
 
@@ -102,7 +132,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     }
 
     @Override
-    public Expression<? extends ConcatableComponent.TypeChord> visitChordParam(MellowDParser.ChordParamContext ctx) {
+    public Expression<?> visitChordParam(MellowDParser.ChordParamContext ctx) {
         MellowDParser.NoteDefContext noteDef = ctx.noteDef();
         if (noteDef != null) {
             return visitNoteDef(noteDef);
@@ -114,27 +144,25 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
             if (indexNode != null) {
                 Expression<Indexable<?>> toIndex = new RuntimeIndexingSupportCheck(valueExpr, refId);
                 int index = Integer.parseInt(indexNode.getText());
-                Expression<?> indexExpr = new IndexExpression(toIndex, new Constant<>(index));
-                return new RuntimeTypeCheck<>(ConcatableComponent.TypeChord.class, indexExpr, refId);
+                valueExpr = new IndexExpression(toIndex, new Constant<>(index));
             }
 
-
-            return new RuntimeTypeCheck<>(ConcatableComponent.TypeChord.class, valueExpr, refId);
+            return new RuntimeUnionTypeCheck(valueExpr, refId, this.chordParamTypes);
         }
     }
 
     @Override
     public Expression<Chord> visitChord(MellowDParser.ChordContext ctx) {
-        Concatenation<Chord, ConcatableComponent.TypeChord> result = new Concatenation<>(Chord::new);
+        Concatenation<Chord> result = new Concatenation<>(Chord::new, this.chordConcatenationDelegate);
         ctx.params.forEach(paramCtx -> {
-            Expression<? extends ConcatableComponent.TypeChord> paramExpr = visitChordParam(paramCtx);
+            Expression<?> paramExpr = visitChordParam(paramCtx);
             result.addArgument(paramExpr);
         });
         return result;
     }
 
     @Override
-    public Expression<? extends ConcatableComponent.TypeMelody> visitMelodyParam(MellowDParser.MelodyParamContext ctx) {
+    public Expression<?> visitMelodyParam(MellowDParser.MelodyParamContext ctx) {
         if (ctx.STAR() != null)
             return REST;
 
@@ -150,13 +178,13 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
                 Expression<Chord> chordExpr = visitChord((MellowDParser.ChordContext) elementCtx);
                 return new Articulate<>(chordExpr, articulation);
             case MellowDParser.RULE_reference:
-                Expression<ConcatableComponent.TypeMelody> melody = visitReference((MellowDParser.ReferenceContext) elementCtx, ConcatableComponent.TypeMelody.class);
+                Expression<?> melody = visitReference((MellowDParser.ReferenceContext) elementCtx);
                 melody = new RuntimeNullCheck<>(elementCtx.getText(), melody, elementCtx);
                 if (articulationCtx != null) {
                     Expression<Articulatable> comp = new RuntimeTypeCheck<>(Articulatable.class, melody, elementCtx);
                     return new Articulate<>(comp, articulation);
                 }
-                return melody;
+                return new RuntimeUnionTypeCheck(melody, elementCtx, this.melodyParamTypes);
             default:
                 throw new Error("A new choice was added to the mellodyParam rule without updating visitMelodyParam()");
         }
@@ -165,9 +193,9 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
     @Override
     public Expression<Melody> visitMelody(MellowDParser.MelodyContext ctx) {
-        Concatenation<Melody, ConcatableComponent.TypeMelody> result = new Concatenation<>(Melody::new);
+        Concatenation<Melody> result = new Concatenation<>(Melody::new, this.melodyConcatenationDelegate);
         ctx.params.forEach(paramCtx -> {
-            Expression<? extends ConcatableComponent.TypeMelody> paramExpr = visitMelodyParam(paramCtx);
+            Expression<?> paramExpr = visitMelodyParam(paramCtx);
             result.addArgument(paramExpr);
         });
         return result;
@@ -192,9 +220,9 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         int tupletDenominator = ctx.div != null ? Integer.parseInt(ctx.div.getText()) : tupletNumerator - 1;
 
         if (tupletNumerator <= 1) {
-            throw new IllegalArgumentException("Cannot create tuplet with a numerator of "+tupletNumerator);
+            throw new IllegalArgumentException("Cannot create tuplet with a numerator of " + tupletNumerator);
         } else if (tupletDenominator < 1) {
-            throw new IllegalArgumentException("Cannot create a tuplet with a denominator of "+tupletDenominator);
+            throw new IllegalArgumentException("Cannot create a tuplet with a denominator of " + tupletDenominator);
         }
 
         if (ctx.singleDivision != null) {
@@ -216,7 +244,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     }
 
     @Override
-    public Expression<? extends ConcatableComponent.TypeRhythm> visitRhythmParam(MellowDParser.RhythmParamContext ctx) {
+    public Expression<?> visitRhythmParam(MellowDParser.RhythmParamContext ctx) {
         ParserRuleContext paramCtx = ((ParserRuleContext) ctx.getChild(0));
         switch (paramCtx.getRuleIndex()) {
             case MellowDParser.RULE_rhythmDef:
@@ -224,10 +252,10 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
                 beat.setSlurred(ctx.slurDepth % 2 == 1);
                 return new Constant<>(beat);
             case MellowDParser.RULE_reference:
-                Expression<ConcatableComponent.TypeRhythm> comp = visitReference((MellowDParser.ReferenceContext) paramCtx, ConcatableComponent.TypeRhythm.class);
+                Expression<Slurrable> comp = visitReference((MellowDParser.ReferenceContext) paramCtx, this.rhythmParamType);
                 boolean slur = ctx.slurDepth % 2 == 1;
                 return e -> {
-                    ConcatableComponent.TypeRhythm val = comp.evaluate(e);
+                    Slurrable val = comp.evaluate(e);
                     val.setSlurred(slur);
                     return val;
                 };
@@ -241,9 +269,9 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     }
 
     private Expression<Rhythm> buildRhythm(List<MellowDParser.RhythmParamContext> params) {
-        Concatenation<Rhythm, ConcatableComponent.TypeRhythm> result = new Concatenation<>(Rhythm::new);
+        Concatenation<Rhythm> result = new Concatenation<>(Rhythm::new, this.rhythmConcatenationDelegate);
         params.forEach(paramCtx -> {
-            Expression<? extends ConcatableComponent.TypeRhythm> paramExpr = visitRhythmParam(paramCtx);
+            Expression<?> paramExpr = visitRhythmParam(paramCtx);
             result.addArgument(paramExpr);
         });
         return result;
@@ -268,7 +296,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         } else if (ctx.STRING() != null) {
             String raw = ctx.getText();
             //Trim the surrounding quotes
-            return new Constant<>(raw.substring(1, raw.length()-1));
+            return new Constant<>(raw.substring(1, raw.length() - 1));
         } else if (ctx.KEYWORD_TRUE() != null) {
             return TRUE;
         } else if (ctx.KEYWORD_FALSE() != null) {
@@ -277,11 +305,16 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
         ParserRuleContext valueCtx = (ParserRuleContext) ctx.getChild(0);
         switch (valueCtx.getRuleIndex()) {
-            case MellowDParser.RULE_reference: return visitReference((MellowDParser.ReferenceContext) valueCtx);
-            case MellowDParser.RULE_chord: return visitChord((MellowDParser.ChordContext) valueCtx);
-            case MellowDParser.RULE_melody: return visitMelody((MellowDParser.MelodyContext) valueCtx);
-            case MellowDParser.RULE_rhythm: return visitRhythm((MellowDParser.RhythmContext) valueCtx);
-            case MellowDParser.RULE_phrase: return visitPhrase((MellowDParser.PhraseContext) valueCtx);
+            case MellowDParser.RULE_reference:
+                return visitReference((MellowDParser.ReferenceContext) valueCtx);
+            case MellowDParser.RULE_chord:
+                return visitChord((MellowDParser.ChordContext) valueCtx);
+            case MellowDParser.RULE_melody:
+                return visitMelody((MellowDParser.MelodyContext) valueCtx);
+            case MellowDParser.RULE_rhythm:
+                return visitRhythm((MellowDParser.RhythmContext) valueCtx);
+            case MellowDParser.RULE_phrase:
+                return visitPhrase((MellowDParser.PhraseContext) valueCtx);
             default:
                 throw new Error("Another branch was added to the MellowDParser without updating the visitValue() method.");
         }
@@ -293,11 +326,11 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         //This list will always contain at least 1 IDENTIFIER
         List<TerminalNode> fullyQualifiedID = ctx.IDENTIFIER();
 
-        String[] qualifier = new String[fullyQualifiedID.size()-1];
+        String[] qualifier = new String[fullyQualifiedID.size() - 1];
         for (int i = 0; i < qualifier.length; i++)
             qualifier[i] = fullyQualifiedID.get(i).getText();
 
-        String name = fullyQualifiedID.get(fullyQualifiedID.size()-1).getText();
+        String name = fullyQualifiedID.get(fullyQualifiedID.size() - 1).getText();
 
         Expression<?> valueExpr = visitValue(ctx.value());
 
@@ -337,7 +370,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
                 Articulation art = ctx.art == null ? Articulation.NONE : ctx.art.art;
 
                 melody = new RuntimeNullCheck<>(lhsCtx.getText(), value, lhsCtx).thenApply(lhsResolved -> {
-                    if (lhsResolved instanceof Chord ) {
+                    if (lhsResolved instanceof Chord) {
                         return new Melody(new ArticulatedChord((Chord) lhsResolved, art));
                     } else if (lhsResolved instanceof Melody) {
                         return (Melody) lhsResolved;
@@ -372,28 +405,29 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
                     playable = new InstrumentChange(((Number) ctx.configVal).intValue(), 0);
                 else if (ctx.configVal instanceof String) {
                     GeneralMidiInstrument instrument = GeneralMidiInstrument.lookup((String) ctx.configVal);
-                    if (instrument == null) throw new CompilationException(ctx, new UndefinedReferenceException((String) ctx.configVal));
+                    if (instrument == null)
+                        throw new CompilationException(ctx, new UndefinedReferenceException((String) ctx.configVal));
                     playable = new InstrumentChange(instrument);
                 } else
-                    throw new CompilationException(ctx, new IllegalArgumentException("Cannot set an instrument to be "+ctx.configVal));
+                    throw new CompilationException(ctx, new IllegalArgumentException("Cannot set an instrument to be " + ctx.configVal));
                 break;
             case "octave":
                 if (ctx.configVal instanceof Number)
                     playable = new OctaveShift(((Number) ctx.configVal).intValue());
                 else
-                    throw new CompilationException(ctx, new IllegalArgumentException("Cannot shift the octave by "+ctx.configVal));
+                    throw new CompilationException(ctx, new IllegalArgumentException("Cannot shift the octave by " + ctx.configVal));
                 break;
             case "soundbank":
                 if (ctx.configVal instanceof Number)
                     playable = new SoundbankChange(((Number) ctx.configVal).intValue());
                 else
-                    throw new CompilationException(ctx, new IllegalArgumentException("Cannot set sound bank to  "+ctx.configVal));
+                    throw new CompilationException(ctx, new IllegalArgumentException("Cannot set sound bank to  " + ctx.configVal));
                 break;
             case "transpose":
                 if (ctx.configVal instanceof Number)
                     playable = new TransposeChange(((Number) ctx.configVal).intValue());
                 else
-                    throw new CompilationException(ctx, new IllegalArgumentException("Cannot transpose by "+ctx.configVal));
+                    throw new CompilationException(ctx, new IllegalArgumentException("Cannot transpose by " + ctx.configVal));
                 break;
             case "mute":
                 if (ctx.configVal instanceof Boolean)
@@ -493,10 +527,9 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
         if (name == null)
             if (value == null) return Argument.getEmptyArgInstance();
-            else               return new Argument<>(value);
-        else
-            if (value == null) return new Argument<>(name);
-            else               return new Argument<>(name, value);
+            else return new Argument<>(value);
+        else if (value == null) return new Argument<>(name);
+        else return new Argument<>(name, value);
     }
 
     @Override
@@ -504,10 +537,10 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         boolean shouldSave = ctx.KEYWORD_SAVE() != null;
 
         List<TerminalNode> fullFunctionName = ctx.IDENTIFIER();
-        String[] bankQualifier = new String[fullFunctionName.size()-1];
+        String[] bankQualifier = new String[fullFunctionName.size() - 1];
         for (int i = 0; i < bankQualifier.length; i++)
             bankQualifier[i] = fullFunctionName.get(i).getText();
-        String functionName = fullFunctionName.get(fullFunctionName.size()-1).getText();
+        String functionName = fullFunctionName.get(fullFunctionName.size() - 1).getText();
 
         Argument<?>[] args = ctx.argument().stream()
                 .map(this::visitArgument)
@@ -515,7 +548,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         FunctionBank bank = mellowD.getFunctionBank(bankQualifier);
         if (bank == null) {
             Token start = fullFunctionName.get(0).getSymbol();
-            Token stop = fullFunctionName.get(fullFunctionName.size()-1).getSymbol();
+            Token stop = fullFunctionName.get(fullFunctionName.size() - 1).getSymbol();
             throw new CompilationException(start.getStartIndex(),
                     start.getLine(),
                     start.getCharPositionInLine(),
@@ -552,11 +585,10 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
                 reference = new Reference(ctx.IDENTIFIER().getText(), type, defaultValue);
             else
                 reference = new Reference<>(ctx.IDENTIFIER().getText(), type);
+        else if (defaultValue != null)
+            reference = new DynamicallyTypedReference(ctx.IDENTIFIER().getText(), defaultValue);
         else
-            if (defaultValue != null)
-                reference = new DynamicallyTypedReference(ctx.IDENTIFIER().getText(), defaultValue);
-            else
-                reference = new DynamicallyTypedReference(ctx.IDENTIFIER().getText());
+            reference = new DynamicallyTypedReference(ctx.IDENTIFIER().getText());
 
         return new Parameter<>(reference, optional);
     }

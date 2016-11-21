@@ -1,29 +1,31 @@
 package cas.cs4tb3.mellowd.intermediate.executable.expressions;
 
 import cas.cs4tb3.mellowd.parser.ExecutionEnvironment;
-import cas.cs4tb3.mellowd.primitives.ConcatableComponent;
+import cas.cs4tb3.mellowd.primitives.ConcatenationDelegate;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class Concatenation<T, U extends ConcatableComponent> implements Expression<T> {
+public class Concatenation<T> implements Expression<T> {
     private final Supplier<T> root;
-    private final List<Expression<? extends U>> params;
+    private final ConcatenationDelegate<T> concatenationDelegate;
+    private final List<Expression<?>> params;
 
-    public Concatenation(Supplier<T> root) {
+    public Concatenation(Supplier<T> root, ConcatenationDelegate<T> concatenationDelegate) {
         this.root = root;
+        this.concatenationDelegate = concatenationDelegate;
         this.params = new LinkedList<>();
     }
 
-    public void addArgument(Expression<? extends U> arg) {
+    public void addArgument(Expression<?> arg) {
         this.params.add(arg);
     }
 
     @Override
     public T evaluate(ExecutionEnvironment environment) {
         T evalRes = root.get();
-        this.params.forEach(e -> e.evaluate(environment).appendTo(evalRes));
+        this.params.forEach(e -> concatenationDelegate.append(evalRes, e.evaluate(environment)));
         return evalRes;
     }
 }

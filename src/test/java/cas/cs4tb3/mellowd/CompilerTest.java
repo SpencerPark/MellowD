@@ -128,7 +128,7 @@ public class CompilerTest {
             outFile.createNewFile();
         }
 
-        //If the compilation result is empty then add the EOT_MESSAGE to make the track playable
+        //If the compilation result is empty then append the EOT_MESSAGE to make the track playable
         if (compilationResult.getTickLength() == 0) {
             compilationResult.getTracks()[0].add(new MidiEvent(Compiler.EOT_MESSAGE, 1));
         }

@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 //are defined between `(` and `)` tokens. The `,` separated pitches make up the chord.
 //
 //This class contains a variety of standard chords frequently used in compositions.
-public class Chord implements ConcatableComponent.TypeChord, ConcatableComponent.TypeMelody, Transposable<Chord>, Articulatable, Indexable<Pitch>, OctaveShiftable<Chord> {
+public class Chord implements Transposable<Chord>, Articulatable, Indexable<Pitch>, OctaveShiftable<Chord> {
     //The `CHORD_NAME_PATTERN` is a regular expression for matching chord names. There are a common
     //collection of chord patterns that are frequently used and the compiler should treat them as
     //all defined as variables. This is of course not possible so they are virtually defined and if
@@ -86,34 +86,17 @@ public class Chord implements ConcatableComponent.TypeChord, ConcatableComponent
         return new Chord(pitches);
     }
 
-    @Override
-    public void appendTo(Chord root) {
-        int i = root.size();
-        root.pitches = Arrays.copyOf(root.pitches, root.size() + this.size());
-        for (Pitch p : this.pitches) {
-            root.pitches[i++] = p;
-        }
-    }
-
-    @Override
-    public void appendTo(Melody root) {
-        root.add(new ArticulatedChord(this));
-    }
-
-    @Override
-    public void appendTo(Object root) {
-        if (root instanceof Melody) {
-            appendTo(((Melody) root));
-        } else if (root instanceof Chord) {
-            appendTo(((Chord) root));
-        } else {
-            throw new IllegalArgumentException("Cannot append a chord to a " + root.getClass().getName());
-        }
-    }
-
     public void append(Pitch p) {
         this.pitches = Arrays.copyOf(this.pitches, this.pitches.length + 1);
         this.pitches[this.pitches.length - 1] = p;
+    }
+
+    public void append(Chord chord) {
+        int i = size();
+        pitches = Arrays.copyOf(pitches, size() + chord.size());
+        for (Pitch p : chord.pitches) {
+            pitches[i++] = p;
+        }
     }
 
     //The `resolve` method is the method that provides the lookup by name support described above with

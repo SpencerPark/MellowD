@@ -391,7 +391,7 @@ public class MIDIChannel {
         }*/
         Rhythm r = new Rhythm();
         Melody m = new Melody();
-        m.add(new ArticulatedChord(Chord.major(Pitch.C)));
+        m.append(new ArticulatedChord(Chord.major(Pitch.C)));
 
         System.out.println(r);
         System.out.println(m);
