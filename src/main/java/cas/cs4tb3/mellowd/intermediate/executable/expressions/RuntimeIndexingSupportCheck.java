@@ -7,7 +7,7 @@ import cas.cs4tb3.mellowd.parser.IndexingNotSupportedException;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-public class RuntimeIndexingSupportCheck extends SourceLink implements Expression<Indexable<?>> {
+public class RuntimeIndexingSupportCheck extends SourceLink implements Expression<Indexable<?, ?>> {
     protected final Expression<?> expression;
 
     public RuntimeIndexingSupportCheck(Expression<?> expression, ParserRuleContext tokenInfo) {
@@ -21,7 +21,7 @@ public class RuntimeIndexingSupportCheck extends SourceLink implements Expressio
     }
 
     @Override
-    public Indexable<?> evaluate(ExecutionEnvironment environment) {
+    public Indexable<?, ?> evaluate(ExecutionEnvironment environment) {
         Object value = expression.evaluate(environment);
         if (value == null || value instanceof Indexable) {
             return (Indexable) value;

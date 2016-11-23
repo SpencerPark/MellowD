@@ -1,15 +1,22 @@
 package cas.cs4tb3.mellowd.intermediate.functions.operations;
 
+import java.util.function.IntConsumer;
+
 /**
  * Implementations can be indexed to return an object of type {@link T} via
- * the {@link #getAtIndex(int)} method.
+ * the {@link #getAtIndex(int)} method. They can also be indexed over a range to
+ * return an object of type {@link U} via the {@link #getAtRange(int, int)} method.
  *
  * @param <T> The type of the object that exists in this container. The type
  *            of the object returned by {@link #getAtIndex(int)}
+ * @param <U> The type of a sub container of this object. Usually the same type as the class but is essentially just
+ *            the type returned by {@link #getAtRange(int, int)}
  */
-public interface Indexable<T> {
+public interface Indexable<T, U> {
 
     T getAtIndex(int index);
+
+    U getAtRange(int lower, int upper);
 
     /**
      * Calculate the true, inbound, index given by the index notation.
@@ -53,7 +60,44 @@ public interface Indexable<T> {
         if (size <= 0)
             throw new IllegalArgumentException("Cannot calculate index overflow of an empty indexable.");
 
-        if (index < 0) return index / size;
-        else return (index + 1) / size;
+        return index / size;
+    }
+
+    /**
+     * Iterate over to described range. There are 3 types of iterations based on the bounds.
+     * <p>
+     * If {@code lower == upper}: the range is just a single index, the {@code lower = upper} index
+     * <p>
+     * If {@code upper > lower}: the standard case for iterating forwards from {@code lower} to {@code upper}
+     * <p>
+     * If {@code lower > upper}: iterating backwards from {@code upper} to {@code lower}.
+     *
+     * @param lower the left side of the range (inclusive)
+     * @param upper the right side of the range (inclusive)
+     * @param apply the consumer to apply to each index in the range
+     */
+    static void forEachInRange(int lower, int upper, IntConsumer apply) {
+        if (upper == lower) {
+            apply.accept(lower);
+        } else if (upper > lower) {
+            for (int i = lower; i <= upper; i++)
+                apply.accept(i);
+        } else {
+            for (int i = upper; i >= lower; i--)
+                apply.accept(i);
+        }
+    }
+
+    /**
+     * Calculate the number of indexes in the range
+     *
+     * @param lower the left side of the range (inclusive)
+     * @param upper the right side of the range (inclusive)
+     *
+     * @return the number of indexes in the range
+     */
+    static int sizeOfRange(int lower, int upper) {
+        if (upper >= lower) return upper - lower + 1;
+        return lower - upper + 1;
     }
 }

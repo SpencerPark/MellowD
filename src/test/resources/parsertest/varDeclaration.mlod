@@ -1,4 +1,3 @@
-phraseVar -> [a, b, c]*<q, q, q>
 rhythmVar -> <w, h, q, e, s>
 chordVar -> (a$-1, b#+1, c)
 melodyVar -> [a, b, c, d, e, f, g]

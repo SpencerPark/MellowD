@@ -13,7 +13,7 @@ import java.util.*;
 //a comma separated list of beats wrapped in `<` and `>`. Each beat is referred to by the first
 //letter in it's name. Additionally beats can be slurred together. This results in the durations
 //overlapping and the notes connecting more smoothly.
-public class Rhythm implements Slurrable, Indexable<Beat> {
+public class Rhythm implements Slurrable, Indexable<Beat, Rhythm> {
     private final List<Beat> beats;
 
     //Creating a rhythm is done by specifying zero or more beats that make up the rhythm.
@@ -64,6 +64,16 @@ public class Rhythm implements Slurrable, Indexable<Beat> {
     @Override
     public Beat getAtIndex(int index) {
         return this.beats.get(Indexable.calcIndex(index, size()));
+    }
+
+    @Override
+    public Rhythm getAtRange(int lower, int upper) {
+        Rhythm r = new Rhythm();
+
+        int size = size();
+        Indexable.forEachInRange(lower, upper, i -> r.append(this.beats.get(Indexable.calcIndex(i, size))));
+
+        return r;
     }
 
     @Override

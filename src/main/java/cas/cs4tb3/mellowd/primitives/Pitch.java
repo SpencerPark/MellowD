@@ -3,6 +3,7 @@
 
 package cas.cs4tb3.mellowd.primitives;
 
+import cas.cs4tb3.mellowd.intermediate.functions.operations.Articulatable;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.OctaveShiftable;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Transposable;
 

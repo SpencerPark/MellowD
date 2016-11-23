@@ -2,7 +2,6 @@ def percussion block percussionBlock
 
 percussionVar ->* [clap, clap]
 percussionChord ->* (snare, bass)
-percussionPhrase ->* [clap, percussionChord]*<e>
 
 percussionBlock {
     [bassDrum2, bass2, *]*<e>
@@ -56,6 +55,5 @@ percussionBlock {
 
 percussionBlock {
     (claves, sWhistle)*<e>
-    percussionPhrase
     [percussionChord:0, percussionChord:1, percussionChord]*<e, e, q>
 }

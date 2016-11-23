@@ -103,13 +103,13 @@ CHORD_IDENTIFIER
         )?
     ;
 IDENTIFIER
-    :   ( [i-lnoruvx-zA-Z]
+    :   ( [_i-lnoruvx-zA-Z]
         |   ( [a-hqstw]
             | ( 'm' [pf]? )
             | ( 'p' 'p'? 'p'? 'p'? )
             | ( 'f' 'f'? 'f'? 'f'? )
             )[a-zA-Z0-9]
-        ) [a-zA-Z0-9]*
+        ) ([a-zA-Z0-9] | '_' [a-zA-Z0-9])*
     ;
 
 //Octave shift up and down respectively.

@@ -25,7 +25,7 @@ public class IncorrectTypeException extends RuntimeException {
     private static String buildMessage(String identifier, Class<?> actual, Class<?>... expected) {
         return String.format("Identifier (%s) points to %s not an instance of %s.",
                 identifier,
-                actual != null ? "an instance of " + actual.getName() : "null",
+                actual != null ? "an instance of " + actual.getSimpleName() : "null",
                 Arrays.stream(expected)
                         .map(Class::getSimpleName)
                         .collect(Collectors.joining(", ", "[", "]")));

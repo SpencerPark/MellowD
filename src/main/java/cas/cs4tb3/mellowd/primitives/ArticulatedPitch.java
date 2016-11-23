@@ -41,4 +41,8 @@ public class ArticulatedPitch implements Articulated {
         return Sound.newSound(this.pitch, beat, this.articulation);
     }
 
+    @Override
+    public Articulated articulate(Articulation articulation) {
+        return new ArticulatedPitch(this.pitch, articulation);
+    }
 }

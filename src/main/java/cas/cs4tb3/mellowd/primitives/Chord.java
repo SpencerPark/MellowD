@@ -3,6 +3,7 @@
 
 package cas.cs4tb3.mellowd.primitives;
 
+import cas.cs4tb3.mellowd.intermediate.functions.operations.Articulatable;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Indexable;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.OctaveShiftable;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Transposable;
@@ -19,7 +20,7 @@ import java.util.regex.Pattern;
 //are defined between `(` and `)` tokens. The `,` separated pitches make up the chord.
 //
 //This class contains a variety of standard chords frequently used in compositions.
-public class Chord implements Transposable<Chord>, Articulatable, Indexable<Pitch>, OctaveShiftable<Chord> {
+public class Chord implements Transposable<Chord>, Articulatable, Indexable<Pitch, Chord>, OctaveShiftable<Chord> {
     //The `CHORD_NAME_PATTERN` is a regular expression for matching chord names. There are a common
     //collection of chord patterns that are frequently used and the compiler should treat them as
     //all defined as variables. This is of course not possible so they are virtually defined and if
@@ -46,6 +47,16 @@ public class Chord implements Transposable<Chord>, Articulatable, Indexable<Pitc
     public Pitch getAtIndex(int index) {
         int shift = Indexable.calcIndexOverflow(index, size());
         return pitches[Indexable.calcIndex(index, size())].shiftOctave(shift);
+    }
+
+    @Override
+    public Chord getAtRange(int lower, int upper) {
+        Pitch[] newChord = new Pitch[Indexable.sizeOfRange(lower, upper)];
+
+        int[] index = { 0 };
+        Indexable.forEachInRange(lower, upper, i -> newChord[index[0]++] = getAtIndex(i));
+
+        return new Chord(newChord);
     }
 
     //`getPitches` leaks a copy of the pitches that make up this chord.

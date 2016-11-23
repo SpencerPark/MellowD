@@ -1,13 +1,12 @@
 def block myblock
 
-phraseVar -> [a, b, c]*<q, q, q>
 rhythmVar -> <w, h, q, e, s>
 chordVar -> (a$-1, b#+1, c)
 melodyVar -> [a, b, c, d, e, f, g]
 
 myblock {
     //The variable values are not even attempted to be resolved until they are invoked
-    phraseVar melodyVar*rhythmVar chordVar*rhythmVar
+    melodyVar*rhythmVar chordVar*rhythmVar
 
     //Try referencing the global scope by putting a rhythm in a local
     melodyVar*<q>

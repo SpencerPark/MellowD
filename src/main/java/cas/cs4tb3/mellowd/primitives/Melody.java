@@ -20,7 +20,7 @@ import java.util.List;
 //may function more like a trill but never the less, this class will function the same.
 //
 //The Melody class is simply a list wrapper. The order of the sounds is important.
-public class Melody implements Indexable<Articulatable>, OctaveShiftable<Melody> {
+public class Melody implements Indexable<Articulated, Melody>, OctaveShiftable<Melody> {
     //This is the data that supports the melody.
     private final List<Articulated> sounds;
 
@@ -74,10 +74,20 @@ public class Melody implements Indexable<Articulatable>, OctaveShiftable<Melody>
     }
 
     @Override
-    public Articulatable getAtIndex(int index) {
+    public Articulated getAtIndex(int index) {
         if (this.sounds.isEmpty())
             return null;
 
-        return this.sounds.get(Indexable.calcIndex(index, size())).getElement();
+        return this.sounds.get(Indexable.calcIndex(index, size()));
+    }
+
+    @Override
+    public Melody getAtRange(int lower, int upper) {
+        List<Articulated> newElements = new ArrayList<>(Indexable.sizeOfRange(lower, upper));
+
+        int size = size();
+        Indexable.forEachInRange(lower, upper, i -> newElements.add(sounds.get(Indexable.calcIndex(i, size))));
+
+        return new Melody(newElements);
     }
 }

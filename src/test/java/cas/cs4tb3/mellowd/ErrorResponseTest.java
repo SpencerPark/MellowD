@@ -202,8 +202,8 @@ public class ErrorResponseTest {
         MellowDParser parser = parserFor("" +
                 "def percussion block myblock\n" +
                 "hHat -> <q>" +
-                "sample ->* [hHat, tri, lBongo]*<q>" +
-                "myblock { sample }");
+                "sample ->* [hHat, tri, lBongo]" +
+                "myblock { sample*<q> }");
 
         try {
             parseAndCompileSong(parser).execute();

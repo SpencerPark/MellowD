@@ -17,10 +17,6 @@ public class CodeBlock implements Statement {
         this.statements.add(statement);
     }
 
-    public List<Statement> getStatements() {
-        return statements;
-    }
-
     @Override
     public void execute(ExecutionEnvironment environment, Output output) {
         for (Statement stmt : statements) {
