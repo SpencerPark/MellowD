@@ -190,7 +190,7 @@ value
 //Each mapping is put into the compiler's symbol table. Adding a `*` after the assignment token
 //parses the value as if it was inside a percussion block.
 varDeclaration
-    :   IDENTIFIER ASSIGNMENT STAR? value
+    :   identifier ASSIGNMENT STAR? value
     ;
 
 //Dynamics are what change the velocity of a note. Mellow D supports the main dynamic identifiers

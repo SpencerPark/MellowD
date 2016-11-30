@@ -111,7 +111,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     @Override
     public Expression<Integer> visitNumberOrId(MellowDParser.NumberOrIdContext ctx) {
         MellowDParser.IdentifierContext idCtx = ctx.identifier();
-        if (idCtx != null) return lookupIdentifier(idCtx, Integer.class);
+        if (idCtx != null) return new RuntimeNullCheck<>(idCtx.getText(), lookupIdentifier(idCtx, Integer.class), idCtx);
         return new Constant<>(visitNumber(ctx.number()));
     }
 
@@ -416,9 +416,11 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     public Statement visitVarDeclaration(MellowDParser.VarDeclarationContext ctx, boolean isField) {
         boolean percussionToggle = ctx.STAR() != null;
 
+        Identifier identifier = visitIdentifier(ctx.identifier());
+
         Expression<?> valueExpr = visitValue(ctx.value());
 
-        return new AssignmentStatement(new String[0], ctx.IDENTIFIER().getText(), valueExpr, isField, percussionToggle);
+        return new AssignmentStatement(identifier.qualifier, identifier.name, valueExpr, isField, percussionToggle);
     }
 
     @Override
