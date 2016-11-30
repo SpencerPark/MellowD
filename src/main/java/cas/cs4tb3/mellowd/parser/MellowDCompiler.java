@@ -15,6 +15,7 @@ import cas.cs4tb3.mellowd.midi.MIDIControl;
 import cas.cs4tb3.mellowd.midi.Pedal;
 import cas.cs4tb3.mellowd.primitives.*;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.File;
@@ -107,25 +108,39 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         return ctx.amt;
     }
 
-    private Expression<?> possiblyIndex(ParserRuleContext ctx, Expression<?> expr, MellowDParser.IndexContext indexContext, MellowDParser.UpperIndexContext upperIndexContext) {
+    @Override
+    public Expression<Integer> visitNumberOrId(MellowDParser.NumberOrIdContext ctx) {
+        MellowDParser.IdentifierContext idCtx = ctx.identifier();
+        if (idCtx != null) return lookupIdentifier(idCtx, Integer.class);
+        return new Constant<>(visitNumber(ctx.number()));
+    }
+
+    @Override
+    public Pair<Expression<Integer>, Expression<Integer>> visitRange(MellowDParser.RangeContext ctx) {
+        Expression<Integer> lower = visitNumberOrId(ctx.lower);
+        Expression<Integer> upper = ctx.upper != null ? visitNumberOrId(ctx.upper) : null;
+
+        return new Pair<>(lower, upper);
+    }
+
+    @Override
+    public List<Pair<Expression<Integer>, Expression<Integer>>> visitIndex(MellowDParser.IndexContext ctx) {
+        List<Pair<Expression<Integer>, Expression<Integer>>> indexes = new LinkedList<>();
+
+        ctx.range().forEach(rangeCtx -> indexes.add(visitRange(rangeCtx)));
+
+        return indexes;
+    }
+
+    private Expression<?> possiblyIndex(ParserRuleContext ctx, Expression<?> expr, MellowDParser.IndexContext indexContext) {
         if (indexContext == null) return expr;
 
-        Expression<Indexable<?, ?>> indexable = new RuntimeIndexingSupportCheck(expr, ctx);
+        for (Pair<Expression<Integer>, Expression<Integer>> range : visitIndex(indexContext)) {
+            Expression<Indexable<?, ?>> indexable = new RuntimeIndexingSupportCheck(expr, ctx);
+            expr = new IndexExpression(indexable, range.a, range.b);
+        }
 
-        if (upperIndexContext == null)
-            return new IndexExpression(indexable, visitIndex(indexContext));
-
-        return new IndexExpression(indexable, visitIndex(indexContext), visitUpperIndex(upperIndexContext));
-    }
-
-    @Override
-    public Expression<Integer> visitIndex(MellowDParser.IndexContext ctx) {
-        return new Constant<>(visitNumber(ctx.number()));
-    }
-
-    @Override
-    public Expression<Integer> visitUpperIndex(MellowDParser.UpperIndexContext ctx) {
-        return new Constant<>(visitNumber(ctx.number()));
+        return expr;
     }
 
     @Override
@@ -173,37 +188,35 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
     @Override
     public Expression<Chord> visitChord(MellowDParser.ChordContext ctx) {
-        TerminalNode literalChord = ctx.CHORD_IDENTIFIER();
-        if (literalChord != null) {
-            return new Constant<>(Chord.resolve(literalChord.getText()));
-        } else {
-            Concatenation<Chord> result = new Concatenation<>(Chord::new, this.chordConcatenationDelegate);
-            ctx.params.forEach(paramCtx -> {
-                Expression<?> paramExpr = visitChordParam(paramCtx);
-                result.addArgument(paramExpr);
-            });
-            return result;
-        }
+        Concatenation<Chord> result = new Concatenation<>(Chord::new, this.chordConcatenationDelegate);
+        ctx.params.forEach(paramCtx -> {
+            Expression<?> paramExpr = visitChordParam(paramCtx);
+            result.addArgument(paramExpr);
+        });
+        return result;
     }
 
     @Override
     public Expression<?> visitChordParam(MellowDParser.ChordParamContext ctx) {
         MellowDParser.NoteContext note = ctx.note();
-        if (note != null) {
+        if (note != null)
             return visitNote(note);
-        }
+
+        MellowDParser.ChordContext chord = ctx.chord();
+        if (chord != null)
+            return visitChord(chord);
 
         Expression<?> valueExpr;
-        MellowDParser.ChordContext chord = ctx.chord();
-        if (chord != null) {
-            valueExpr = visitChord(chord);
+        TerminalNode chordLiteral = ctx.CHORD_IDENTIFIER();
+        if (chordLiteral != null) {
+            valueExpr = new Constant<>(Chord.resolve(chordLiteral.getText()));
         } else {
             MellowDParser.IdentifierContext idCtx = ctx.identifier();
             valueExpr = lookupIdentifier(idCtx);
         }
 
         valueExpr = new RuntimeNullCheck<>(ctx.getText(), valueExpr, ctx);
-        valueExpr = possiblyIndex(ctx, valueExpr, ctx.index(), ctx.upperIndex());
+        valueExpr = possiblyIndex(ctx, valueExpr, ctx.index());
 
         return new RuntimeUnionTypeCheck(valueExpr, ctx, this.chordParamTypes);
     }
@@ -232,24 +245,24 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
         Expression<?> paramExpr;
         MellowDParser.ChordContext chord = ctx.chord();
-        MellowDParser.MelodyContext melody;
         if (chord != null) {
             paramExpr = visitChord(chord);
-        } else if ((melody = ctx.melody()) != null) {
-            paramExpr = visitMelody(melody);
         } else {
             MellowDParser.IdentifierContext identifier = ctx.identifier();
-            paramExpr = lookupIdentifier(identifier);
+            if (identifier != null) {
+                paramExpr = lookupIdentifier(identifier);
+                paramExpr = new RuntimeNullCheck<>(identifier.getText(), paramExpr, identifier);
+            } else {
+                paramExpr = new Constant<>(Chord.resolve(ctx.CHORD_IDENTIFIER().getText()));
+            }
+
+            MellowDParser.IndexContext index = ctx.index();
+            paramExpr = possiblyIndex(ctx, paramExpr, index);
         }
-
-        MellowDParser.IndexContext index = ctx.index();
-        MellowDParser.UpperIndexContext upperIndex = ctx.upperIndex();
-
-        paramExpr = new RuntimeNullCheck<>(ctx.getText(), paramExpr, ctx);
-        paramExpr = possiblyIndex(ctx, paramExpr, index, upperIndex);
 
         if (articulation != null) {
             Expression<Articulatable> resolvedArticulatable = new RuntimeTypeCheck<>(Articulatable.class, paramExpr, ctx);
+            resolvedArticulatable = new RuntimeNullCheck<>(ctx.getText(), resolvedArticulatable, ctx);
             return new Articulate(resolvedArticulatable, articulationExpr);
         }
 
@@ -319,39 +332,36 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         if (beat != null)
             return new RuntimeSlur<>(new Constant<>(visitBeat(beat)), slurred);
 
-        Expression<?> paramExpr;
         MellowDParser.SlurredRhythmContext slurredRhythm = ctx.slurredRhythm();
-        MellowDParser.RhythmContext rhythm;
-        MellowDParser.TupletContext tuplet;
-        if (slurredRhythm != null) {
-            paramExpr = new RuntimeSlur<>(visitSlurredRhythm(slurredRhythm), slurred);
-        } else if ((rhythm = ctx.rhythm()) != null) {
-            paramExpr = new RuntimeSlur<>(visitRhythm(rhythm), slurred);
-        } else if ((tuplet = ctx.tuplet()) != null) {
-            paramExpr = new RuntimeSlur<>(visitTuplet(tuplet), slurred);
-        } else {
-            MellowDParser.IdentifierContext identifier = ctx.identifier();
-            paramExpr = lookupIdentifier(identifier);
-        }
+        if (slurredRhythm != null)
+            return new RuntimeSlur<>(visitSlurredRhythm(slurredRhythm), slurred);
+
+        MellowDParser.TupletContext tuplet = ctx.tuplet();
+        if (tuplet != null)
+            return new RuntimeSlur<>(visitTuplet(tuplet), slurred);
+
+        MellowDParser.IdentifierContext identifier = ctx.identifier();
+        Expression<?> idExpr = lookupIdentifier(identifier);
 
         MellowDParser.IndexContext index = ctx.index();
-        MellowDParser.UpperIndexContext upperIndex = ctx.upperIndex();
 
-        paramExpr = new RuntimeNullCheck<>(ctx.getText(), paramExpr, ctx);
-        paramExpr = possiblyIndex(ctx, paramExpr, index, upperIndex);
+        idExpr = new RuntimeNullCheck<>(identifier.getText(), idExpr, identifier);
+        if (index != null) {
+            //We want to make sure that it will actually be indexed to avoid a duplicate runtime null check
+            idExpr = possiblyIndex(identifier, idExpr, index);
+            idExpr = new RuntimeNullCheck<>(identifier.getText(), idExpr, identifier);
+        }
 
-        return new RuntimeSlur<>(new RuntimeTypeCheck<>(Slurrable.class, paramExpr, ctx), slurred);
+        return new RuntimeSlur<>(new RuntimeTypeCheck<>(Slurrable.class, idExpr, ctx), slurred);
     }
 
     @Override
     public Expression<?> visitValue(MellowDParser.ValueContext ctx) {
-        MellowDParser.NoteContext note = ctx.note();
-        if (note != null)
-            return visitNote(note);
+        if (ctx.KEYWORD_TRUE() != null)
+            return TRUE;
 
-        MellowDParser.NumberContext number = ctx.number();
-        if (number != null)
-            return new Constant<>(visitNumber(number));
+        if (ctx.KEYWORD_FALSE() != null)
+            return FALSE;
 
         TerminalNode STRING = ctx.STRING();
         if (STRING != null) {
@@ -359,36 +369,46 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
             return new Constant<>(raw.substring(1, raw.length() - 1));
         }
 
-        if (ctx.KEYWORD_TRUE() != null)
-            return TRUE;
+        MellowDParser.NoteContext note = ctx.note();
+        if (note != null)
+            return visitNote(note);
 
-        if (ctx.KEYWORD_FALSE() != null)
-            return FALSE;
+        MellowDParser.BeatContext beat = ctx.beat();
+        if (beat != null)
+            return new Constant<>(visitBeat(beat));
+
+        MellowDParser.NumberContext number = ctx.number();
+        if (number != null)
+            return new Constant<>(visitNumber(number));
+
+        MellowDParser.ChordContext chord = ctx.chord();
+        if (chord != null)
+            return visitChord(chord);
+
+        MellowDParser.MelodyContext melody = ctx.melody();
+        if (melody != null)
+            return visitMelody(melody);
+
+        MellowDParser.RhythmContext rhythm = ctx.rhythm();
+        if (rhythm != null)
+            return visitRhythm(rhythm);
 
         Expression<?> valueExpr;
-        MellowDParser.ChordContext chord = ctx.chord();
-        MellowDParser.MelodyContext melody;
-        MellowDParser.RhythmContext rhythm;
-        MellowDParser.TupletContext tuplet;
-        if (chord != null)
-            valueExpr = visitChord(chord);
-        else if ((melody = ctx.melody()) != null)
-            valueExpr = visitMelody(melody);
-        else if ((rhythm = ctx.rhythm()) != null)
-            valueExpr = visitRhythm(rhythm);
-        else if ((tuplet = ctx.tuplet()) != null)
-            valueExpr = visitTuplet(tuplet);
-        else {
+        TerminalNode chordID = ctx.CHORD_IDENTIFIER();
+        if (chordID != null) {
+            valueExpr = new Constant<>(Chord.resolve(chordID.getText()));
+        } else {
             MellowDParser.IdentifierContext identifier = ctx.identifier();
             valueExpr = lookupIdentifier(identifier);
         }
 
         MellowDParser.IndexContext index = ctx.index();
-        MellowDParser.UpperIndexContext upperIndex = ctx.upperIndex();
 
         valueExpr = new RuntimeNullCheck<>(ctx.getText(), valueExpr, ctx);
-        valueExpr = possiblyIndex(ctx, valueExpr, index, upperIndex);
-        valueExpr = new RuntimeNullCheck<>(ctx.getText(), valueExpr, ctx);
+        if (index != null) {
+            valueExpr = possiblyIndex(ctx, valueExpr, index);
+            valueExpr = new RuntimeNullCheck<>(ctx.getText(), valueExpr, ctx);
+        }
 
         return valueExpr;
     }
@@ -396,11 +416,9 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     public Statement visitVarDeclaration(MellowDParser.VarDeclarationContext ctx, boolean isField) {
         boolean percussionToggle = ctx.STAR() != null;
 
-        Identifier identifier = visitIdentifier(ctx.identifier());
-
         Expression<?> valueExpr = visitValue(ctx.value());
 
-        return new AssignmentStatement(identifier.qualifier, identifier.name, valueExpr, isField, percussionToggle);
+        return new AssignmentStatement(new String[0], ctx.IDENTIFIER().getText(), valueExpr, isField, percussionToggle);
     }
 
     @Override
@@ -420,54 +438,24 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
     @Override
     public Expression<Phrase> visitPhrase(MellowDParser.PhraseContext ctx) {
-        Expression<?> unresolvedLhs;
+        Expression<Melody> lhs;
 
         MellowDParser.MelodyContext melody = ctx.melody();
-        MellowDParser.ChordContext chord;
-        Constant<Articulation> articulation = visitArticulation(ctx.articulation());
         if (melody != null) {
-            unresolvedLhs = visitMelody(melody);
-        } else if ((chord = ctx.chord()) != null) {
-            unresolvedLhs = visitChord(chord);
+            lhs = visitMelody(melody);
         } else {
-            unresolvedLhs = lookupIdentifier(ctx.melodyRef);
-            unresolvedLhs = new RuntimeNullCheck<>(ctx.melodyRef.getText(), unresolvedLhs, ctx.melodyRef);
+            lhs = lookupIdentifier(ctx.melodyRef, Melody.class);
+            lhs = new RuntimeNullCheck<>(ctx.melodyRef.getText(), lhs, ctx.melodyRef);
         }
 
-        unresolvedLhs = possiblyIndex(ctx, unresolvedLhs, ctx.melodyIndex, ctx.melodyUpperIndex);
-        unresolvedLhs = new RuntimeNullCheck<>(ctx.getText(), unresolvedLhs, ctx);
-
-        Expression<Melody> lhs;
-        if (articulation != ARTICULATION_NONE) {
-            lhs = new Articulate(new RuntimeTypeCheck<>(Articulatable.class, unresolvedLhs, ctx),
-                    articulation).thenApply(Melody::new);
-        } else {
-            lhs = unresolvedLhs.thenApply(any -> {
-                if (any instanceof Articulated) {
-                    return new Melody((Articulated) any);
-                } else if (any instanceof Articulatable) {
-                    return new Melody(((Articulatable) any).articulate(Articulation.NONE));
-                } else if (any instanceof Melody) {
-                    return (Melody) any;
-                } else {
-                    throw new CompilationException(ctx.melodyRef, new IncorrectTypeException(ctx.melodyRef.getText(), any.getClass(), this.melodyParamTypes));
-                }
-            });
-        }
-
-        Expression<?> unresolvedRhs;
+        Expression<Rhythm> rhs;
         MellowDParser.RhythmContext rhythm = ctx.rhythm();
         if (rhythm != null) {
-            unresolvedRhs = visitRhythm(rhythm);
+            rhs = visitRhythm(rhythm);
         } else {
-            unresolvedRhs = lookupIdentifier(ctx.rhythmRef);
-            unresolvedRhs = new RuntimeNullCheck<>(ctx.rhythmRef.getText(), unresolvedRhs, ctx.rhythmRef);
+            rhs = lookupIdentifier(ctx.rhythmRef, Rhythm.class);
+            rhs = new RuntimeNullCheck<>(ctx.rhythmRef.getText(), rhs, ctx.rhythmRef);
         }
-
-        unresolvedRhs = possiblyIndex(ctx, unresolvedRhs, ctx.rhythmIndex, ctx.rhythmUpperIndex);
-        unresolvedRhs = new RuntimeNullCheck<>(ctx.getText(), unresolvedRhs, ctx);
-
-        Expression<Rhythm> rhs = new RuntimeTypeCheck<>(Rhythm.class, unresolvedRhs, ctx);
 
         return new PhraseConstruction(lhs, rhs);
     }
@@ -591,7 +579,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     public Void visitImportStatement(MellowDParser.ImportStatementContext ctx) {
         Set<String> functions;
         if (ctx.STAR() != null) {
-            functions = Collections.EMPTY_SET;
+            functions = Collections.emptySet();
         } else {
             functions = new HashSet<>();
             functions.addAll(ctx.funcNames);

@@ -104,12 +104,14 @@ public class CompilerTest {
                     toCompile.getAbsolutePath(), e.getLocalizedMessage()));
         } catch (CompilationException e) {
             Throwable cause = e.getCause();
-            fail(String.format("Compilation exception on line %d@%d-%d:'%s'. Problem: %s\n",
+            String message = String.format("Compilation exception on line %d@%d-%d:'%s'. Problem: %s\n",
                     e.getLine(),
                     e.getStartPosInLine(),
                     e.getStartPosInLine() + (e.getStop() - e.getStart()),
                     e.getText(),
-                    cause.getMessage()));
+                    cause.getMessage());
+            System.out.println(message);
+            fail(message);
         } catch (ParseException e) {
             for (SyntaxErrorReport errorReport : e.getProblems()) {
                 System.out.println(errorReport.getErrorType().toString()+": "+errorReport.getMessage());

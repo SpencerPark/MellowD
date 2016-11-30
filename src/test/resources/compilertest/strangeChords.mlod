@@ -3,13 +3,13 @@ def block myblock
 chordVar -> (c, e, g, c+1)
 
 myblock {
-    (a, b, c)*<q>
-    chordVar*<q>
+    [(a, b, c)]*<q>
+    [chordVar]*<q>
     [chordVar:0., chordVar:1!, chordVar:2~]*<q>
-    (chordVar, e+1, f+1)*<q>
-    (chordVar)*<q>
-    chordVar^*<q>
-    (a, b$+1, c#+2)~*<q>
-    (Cmaj7, c+2)*<q>
-    (A#minmaj7-1:1, a-1)*<q>
+    [(chordVar, e+1, f+1)]*<q>
+    [(chordVar)]*<q>
+    [chordVar^]*<q>
+    [(a, b$+1, c#+2)~]*<q>
+    [(Cmaj7, c+2)]*<q>
+    [(A#minmaj7-1:1, a-1)]*<q>
 }

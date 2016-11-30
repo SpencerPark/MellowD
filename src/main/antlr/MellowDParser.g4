@@ -34,12 +34,14 @@ returns [int amt]
     : ( PLUS | minus = MINUS )? NUMBER { $amt = $minus != null ? -$NUMBER.int : $NUMBER.int; }
     ;
 
-index
-    : COLON number
+numberOrId : number | identifier ;
+
+range
+    : lower = numberOrId ( TILDA upper = numberOrId )?
     ;
 
-upperIndex
-    : TILDA number
+index
+    : ( COLON range )+
     ;
 
 //Articulation is a single articulation character. This rule returns the described
@@ -84,7 +86,6 @@ note
 //No individual note articulation is accepted.
 chord
     :   PAREN_OPEN params += chordParam ( COMMA params += chordParam )* PAREN_CLOSE
-    |   CHORD_IDENTIFIER
     ;
 
 //A chord param can be a note or a pointer to another chord that is optionally indexed.
@@ -93,9 +94,8 @@ chord
 //and the list is the collection required to accomplish this.
 chordParam
     :   note
-    |   (   chord
-        |   identifier
-        )   ( index upperIndex? )?
+    |   chord
+    |   ( identifier | CHORD_IDENTIFIER ) index?
     ;
 
 //A `melody` is made up of 1 or more `melodyParam`s seperated by a comma. Each melodyParam is
@@ -110,10 +110,8 @@ melody
 //melody. The `*` star character representing a rest.
 melodyParam
     :   (   note
-        |   (   chord
-            |   melody
-            |   identifier
-            )   ( index upperIndex? )?
+        |   chord
+        |   ( identifier | CHORD_IDENTIFIER ) index?
         ) articulation?
     |   STAR
     ;
@@ -158,7 +156,7 @@ slurredRhythm[int slurDepth]
 //of beats of the same duration so there is no reason to write the beat out multiple times. It is
 //therefore only written once but adds `num` beats to the rhythm.
 tuplet[int slurDepth]
-    :   num=NUMBER ( COLON div=NUMBER )?
+    :   num = NUMBER ( COLON div = NUMBER )?
         (   singleDivision = beat
         |   BRACKET_OPEN complexDivision += beat ( COMMA complexDivision += beat )* BRACKET_CLOSE
         )
@@ -167,25 +165,18 @@ tuplet[int slurDepth]
 //A `rhythmParam` takes any rhythm parameter and appends the appropriate beats to the rhythm it
 //belongs to. The `slur` argument specifies if this parameter is slurred or not. Each option
 //in this rule appends the appropriate beats to the rhythm.
-//TODO index a slurred rhythm, rhythm tuplet etc
 rhythmParam[int slurDepth]
     :   beat
-    |   (   slurredRhythm[$slurDepth]
-        |   rhythm[$slurDepth]
-        |   tuplet[$slurDepth]
-        |   identifier
-        )
-        ( index upperIndex? )?
+    |   slurredRhythm[$slurDepth]
+    |   tuplet[$slurDepth]
+    |   identifier index?
     ;
 
 value
-    :   (   identifier
-        |   chord
-        |   melody
-        |   rhythm[0]
-        |   tuplet[0]
-        )
-        ( index upperIndex? )?
+    :   ( identifier | CHORD_IDENTIFIER ) index?
+    |   chord
+    |   melody
+    |   rhythm[0]
     |   note
     |   beat
     |   number
@@ -199,7 +190,7 @@ value
 //Each mapping is put into the compiler's symbol table. Adding a `*` after the assignment token
 //parses the value as if it was inside a percussion block.
 varDeclaration
-    :   identifier ASSIGNMENT STAR? value
+    :   IDENTIFIER ASSIGNMENT STAR? value
     ;
 
 //Dynamics are what change the velocity of a note. Mellow D supports the main dynamic identifiers
@@ -221,9 +212,7 @@ locals [Dynamic dynamic]
         |   FFF   { $dynamic = Dynamic.fff;  }
         |   FFFF  { $dynamic = Dynamic.ffff; }
         )
-        ( ARROWS_LEFT
-        | ARROWS_RIGHT
-        )?
+        ( ARROWS_LEFT | ARROWS_RIGHT )?
     ;
 
 //TODO setup a mode switch for statement or expression mode
@@ -231,20 +220,9 @@ locals [Dynamic dynamic]
 //variable or a pitch definition `*` a rhythm. A pitch definition may be a melody, chord, or a pointer
 //to a melody or chord. The rhythm may be a direct rhythm declaration or a pointer to a rhythm.
 phrase
-    :   (   (   (   melody
-                |   chord
-                |   melodyRef = identifier
-                )
-                ( melodyIndex = index melodyUpperIndex = upperIndex? )?
-            ) art = articulation?
-            STAR
-            (   (   rhythm[0]
-                //Try to resolve the identifier as a rhythm and create a phrase from it
-                |   rhythmRef = identifier
-                )
-                ( rhythmIndex = index rhythmUpperIndex = upperIndex? )?
-            )
-        )
+    :   ( melody | melodyRef = identifier )
+        STAR
+        ( rhythm[0] | rhythmRef = identifier )
     ;
 
 blockConfiguration
@@ -319,15 +297,13 @@ functionCall
 
 parameter [boolean percussion]
 returns [Primitives type]
-    :   ( KEYWORD_CHORD     { $type = Primitives.CHORD; }
-        | KEYWORD_RHYTHM    { $type = Primitives.RHYTHM; }
-        | KEYWORD_MELODY    { $type = Primitives.MELODY; }
-        | KEYWORD_PHRASE    { $type = Primitives.PHRASE; }
+    :   (   KEYWORD_CHORD     { $type = Primitives.CHORD; }
+        |   KEYWORD_RHYTHM    { $type = Primitives.RHYTHM; }
+        |   KEYWORD_MELODY    { $type = Primitives.MELODY; }
+        |   KEYWORD_PHRASE    { $type = Primitives.PHRASE; }
         )?
         IDENTIFIER
-        ( OPTIONAL
-            ( ASSIGNMENT value )?
-        )?
+        ( OPTIONAL ( ASSIGNMENT value )? )?
     ;
 
 parameters [boolean percussion]

@@ -54,6 +54,6 @@ percussionBlock {
 }
 
 percussionBlock {
-    (claves, sWhistle)*<e>
+    [(claves, sWhistle)]*<e>
     [percussionChord:0, percussionChord:1, percussionChord]*<e, e, q>
 }

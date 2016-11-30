@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -162,7 +163,7 @@ public class ErrorResponseTest {
                 "def block myblock\n" +
                 "myChord -> [a, b, c]" +
                 "myblock{" +
-                "    (myChord, a)*<q>" +
+                "    [(myChord, a)]*<q>" +
                 "}");
 
         try {
@@ -183,7 +184,7 @@ public class ErrorResponseTest {
                 "myMel -> [a, b, c]" +
                 "myChord -> (c, e, g)" +
                 "myblock{" +
-                "    (myChord, myMel, a)*<q>" +
+                "    [(myChord, myMel, a)]*<q>" +
                 "}");
 
         try {
