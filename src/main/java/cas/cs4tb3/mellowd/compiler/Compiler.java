@@ -11,14 +11,13 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
-import org.antlr.v4.runtime.ANTLRFileStream;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.*;
 
 import javax.sound.midi.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -293,6 +292,22 @@ public class Compiler {
                 denominator,
                 tempo,
                 verbose);
+    }
+
+    public static Sequence compile(Reader src, SourceFinder srcFinder, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {
+        return compile(new ANTLRInputStream(src), srcFinder, numerator, denominator, tempo, verbose);
+    }
+
+    public static Sequence compile(InputStream src, SourceFinder srcFinder, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {
+        return compile(new ANTLRInputStream(src), srcFinder, numerator, denominator, tempo, verbose);
+    }
+
+    public static Sequence compile(String src, SourceFinder srcFinder, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {
+        return compile(new ANTLRInputStream(src), srcFinder, numerator, denominator, tempo, verbose);
+    }
+
+    public static Sequence compile(char[] src, int numCharsInSrc, SourceFinder srcFinder, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {
+        return compile(new ANTLRInputStream(src, numCharsInSrc), srcFinder, numerator, denominator, tempo, verbose);
     }
 
     //`compile` is the method that actually runs the compiler.
