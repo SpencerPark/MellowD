@@ -244,7 +244,7 @@ public class Chord implements Transposable<Chord>, Articulatable, Indexable<Pitc
 
     //**Major Sixth**: Cmaj6 (root, major 3rd, perfect 5th, major 6th)
     public static Chord majorSixth(Pitch root) {
-        return new Chord(root, root.minorThird(), root.perfectFifth(), root.majorSixth());
+        return new Chord(root, root.majorThird(), root.perfectFifth(), root.majorSixth());
     }
 
     //**Minor Sixth**: Cmin6 (root, minor 3rd, perfect 5th, major 6th)
