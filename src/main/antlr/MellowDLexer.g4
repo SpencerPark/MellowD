@@ -15,8 +15,22 @@ KEYWORD_CHORD : 'chord' ;
 KEYWORD_RHYTHM : 'rhythm' ;
 KEYWORD_MELODY : 'melody' ;
 KEYWORD_PHRASE : 'phrase' ;
+KEYWORD_DO : 'do' ;
+KEYWORD_IF : 'if' ;
+KEYWORD_ELSE : 'else' ;
 KEYWORD_TRUE : 'true' | 'on' ;
 KEYWORD_FALSE : 'false' | 'off' ;
+
+KEYWORD_LT : 'lt' ;
+KEYWORD_LEQ : 'leq' ;
+KEYWORD_GT : 'gt' ;
+KEYWORD_GEQ : 'geq' ;
+KEYWORD_EQ : 'eq' ;
+KEYWORD_NEQ : 'neq' ;
+
+KEYWORD_AND : 'and' ;
+KEYWORD_OR : 'or' ;
+KEYWORD_NOT : 'not' ;
 
 //**Dynamics**: Volume control.
 //The following rules are volume modifiers that when encountered change

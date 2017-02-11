@@ -10,8 +10,9 @@ options {
 
 //Declare all of the imports needed. These go in the class header
 @header {
-    import cas.cs4tb3.mellowd.primitives.*;
-    import java.util.LinkedList;
+import cas.cs4tb3.mellowd.primitives.*;
+import cas.cs4tb3.mellowd.intermediate.functions.operations.Comparable;
+import java.util.LinkedList;
 }
 
 //Begin defining the parser rules.
@@ -172,6 +173,24 @@ rhythmParam[int slurDepth]
     |   identifier index?
     ;
 
+comparisonOperator
+returns[Comparable.Operator op]
+    :   KEYWORD_LT      {$op = Comparable.Operator.LT; }
+    |   KEYWORD_LEQ     {$op = Comparable.Operator.LEQ;}
+    |   KEYWORD_GT      {$op = Comparable.Operator.GT; }
+    |   KEYWORD_GEQ     {$op = Comparable.Operator.GEQ;}
+    |   KEYWORD_EQ      {$op = Comparable.Operator.EQ; }
+    |   KEYWORD_NEQ     {$op = Comparable.Operator.NEQ;}
+    ;
+
+booleanExpression
+    :   left=comparison ( ( KEYWORD_AND | KEYWORD_OR ) right=comparison )*
+    ;
+
+comparison
+    :   left=value ( comparisonOperator right=value )*
+    ;
+
 value
     :   ( identifier | CHORD_IDENTIFIER ) index?
     |   chord
@@ -183,6 +202,15 @@ value
     |   STRING
     |   KEYWORD_TRUE
     |   KEYWORD_FALSE
+    |   KEYWORD_NOT? BRACE_OPEN booleanExpression BRACE_CLOSE
+    |   KEYWORD_NOT value
+    ;
+
+ifStatement //TODO maybe or was ok? problem is the cyclic expr
+    :   KEYWORD_DO codeBlock KEYWORD_IF booleanExpression
+        ( KEYWORD_ELSE KEYWORD_DO codeBlock
+            ( KEYWORD_IF booleanExpression KEYWORD_ELSE KEYWORD_DO codeBlock )*
+        )?
     ;
 
 //A variable declaration maps an identifier to a primitive. These primitives include [Chord](../primitives/Chord.html)
@@ -215,7 +243,6 @@ locals [Dynamic dynamic]
         ( ARROWS_LEFT | ARROWS_RIGHT )?
     ;
 
-//TODO setup a mode switch for statement or expression mode
 //Phrases are the finished product for a sequence of sounds. A phrase may be a pointer to a phrase
 //variable or a pitch definition `*` a rhythm. A pitch definition may be a melody, chord, or a pointer
 //to a melody or chord. The rhythm may be a direct rhythm declaration or a pointer to a rhythm.
@@ -248,6 +275,7 @@ statement
     |   phrase
     |   varDeclaration
     |   functionCall
+    |   ifStatement
     |   ( NUMBER | identifier ) STAR codeBlock
     ;
 
