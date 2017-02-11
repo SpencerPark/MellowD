@@ -35,7 +35,7 @@ public class IfStatement implements Statement {
             this.elseBranch = null;
         }
 
-        public Builder setElseIf(Expression<Boolean> condition, Statement statement) {
+        public Builder addElseIf(Expression<Boolean> condition, Statement statement) {
             this.branches.add(new Branch(condition, statement));
             return this;
         }
@@ -84,6 +84,7 @@ public class IfStatement implements Statement {
             }
         }
 
-        elseStatement.execute(environment, output);
+        if (hasElseBranch())
+            elseStatement.execute(environment, output);
     }
 }

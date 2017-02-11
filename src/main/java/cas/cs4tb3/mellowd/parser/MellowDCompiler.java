@@ -6,6 +6,7 @@ import cas.cs4tb3.mellowd.intermediate.executable.expressions.*;
 import cas.cs4tb3.mellowd.intermediate.executable.statements.*;
 import cas.cs4tb3.mellowd.intermediate.functions.*;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Articulatable;
+import cas.cs4tb3.mellowd.intermediate.functions.operations.Comparable;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Indexable;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Slurrable;
 import cas.cs4tb3.mellowd.intermediate.variables.*;
@@ -20,6 +21,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MellowDCompiler extends MellowDParserBaseVisitor {
     protected static final class Identifier {
@@ -356,6 +358,53 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     }
 
     @Override
+    public Comparable.Operator visitComparisonOperator(MellowDParser.ComparisonOperatorContext ctx) {
+        return ctx.op;
+    }
+
+    @Override
+    public Expression<Boolean> visitBooleanExpr(MellowDParser.BooleanExprContext ctx) {
+        List<Expression<Boolean>> operands = ctx.booleanANDExpr().stream()
+                .map(this::visitBooleanANDExpr)
+                .collect(Collectors.toList());
+
+        return new BooleanORChain(operands);
+    }
+
+    @Override
+    public Expression<Boolean> visitBooleanANDExpr(MellowDParser.BooleanANDExprContext ctx) {
+        List<Expression<Boolean>> operands = ctx.comparison().stream()
+                .map(this::visitComparison)
+                .collect(Collectors.toList());
+
+        return new BooleanANDChain(operands);
+    }
+
+    @Override
+    public Expression<Boolean> visitComparison(MellowDParser.ComparisonContext ctx) {
+        List<MellowDParser.ValueContext> operands = ctx.value();
+        List<MellowDParser.ComparisonOperatorContext> operators = ctx.comparisonOperator();
+
+        if (operands.size() == 1)
+            return new BooleanEvaluationExpression(visitValue(operands.get(0)));
+
+        List<Expression<Boolean>> comparisons = new ArrayList<>(operators.size());
+
+        Comparable.Operator op;
+        Expression<?> left, right;
+        // a lt b lt c -> a lt b AND b lt c
+        for (int i = 0; i < operators.size(); i++) {
+            left = visitValue(operands.get(i));
+            op = operators.get(i).op;
+            right = visitValue(operands.get(i + 1));
+
+            comparisons.add(new Comparison(left, op, right));
+        }
+
+        return new BooleanANDChain(comparisons);
+    }
+
+    @Override
     public Expression<?> visitValue(MellowDParser.ValueContext ctx) {
         if (ctx.KEYWORD_TRUE() != null)
             return TRUE;
@@ -393,6 +442,19 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         if (rhythm != null)
             return visitRhythm(rhythm);
 
+        boolean not = ctx.KEYWORD_NOT() != null;
+        MellowDParser.BooleanExprContext booleanExpr = ctx.booleanExpr();
+        if (booleanExpr != null)
+            return not
+                    ? new BooleanNotExpression(visitBooleanExpr(booleanExpr))
+                    : visitBooleanExpr(booleanExpr);
+
+        if (not) {
+            Expression<?> val = visitValue(ctx.value());
+            val = new BooleanEvaluationExpression(val);
+            return new BooleanEvaluationExpression(val);
+        }
+
         Expression<?> valueExpr;
         TerminalNode chordID = ctx.CHORD_IDENTIFIER();
         if (chordID != null) {
@@ -411,6 +473,32 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         }
 
         return valueExpr;
+    }
+
+    @Override
+    public Statement visitIfStatement(MellowDParser.IfStatementContext ctx) {
+        List<MellowDParser.CodeBlockContext> blocks = ctx.codeBlock();
+        List<MellowDParser.BooleanExprContext> conditions = ctx.booleanExpr();
+
+        //Initialize the ifStmt builder with the first condition and block
+        Expression<Boolean> condition = visitBooleanExpr(conditions.get(0));
+        Statement block = visitCodeBlock(blocks.get(0));
+        IfStatement.Builder ifStmt = new IfStatement.Builder(condition, block);
+
+        //Else If branches
+        for (int branchIdx = 1; branchIdx < conditions.size(); branchIdx++) {
+            condition = visitBooleanExpr(conditions.get(branchIdx));
+            block = visitCodeBlock(blocks.get(branchIdx));
+
+            ifStmt.addElseIf(condition, block);
+        }
+
+        if (conditions.size() < blocks.size()) {
+            //Else branch, add last block
+            ifStmt.setElse(visitCodeBlock(blocks.get(blocks.size() - 1)));
+        }
+
+        return ifStmt.build();
     }
 
     public Statement visitVarDeclaration(MellowDParser.VarDeclarationContext ctx, boolean isField) {
@@ -574,7 +662,11 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
             return visitVarDeclaration(varDeclaration, false);
 
         MellowDParser.FunctionCallContext functionCall = ctx.functionCall();
-        return visitFunctionCall(functionCall);
+        if (functionCall != null)
+            return visitFunctionCall(functionCall);
+
+        MellowDParser.IfStatementContext ifStatement = ctx.ifStatement();
+        return visitIfStatement(ifStatement);
     }
 
     @Override

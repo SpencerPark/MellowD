@@ -14,6 +14,25 @@ import java.util.*;
 //letter in it's name. Additionally beats can be slurred together. This results in the durations
 //overlapping and the notes connecting more smoothly.
 public class Rhythm implements Slurrable, Indexable<Beat, Rhythm> {
+
+    public static int compare(Rhythm left, Rhythm right) {
+        for (int i = 0; i < left.size(); i++) {
+            if (right.size() <= i) //Equal up to here but left is longer
+                return 1; //Treat right[i] as null
+
+            int cmp = Beat.compare(left.beats.get(i), right.beats.get(i));
+            if (cmp != 0)
+                return cmp;
+        }
+
+        //Equal up to the end of left
+        if (right.size() > left.size())
+            return -1; //Right has an extra beat
+
+        //Totally equal
+        return 0;
+    }
+
     private final List<Beat> beats;
 
     //Creating a rhythm is done by specifying zero or more beats that make up the rhythm.

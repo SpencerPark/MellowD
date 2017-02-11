@@ -22,9 +22,6 @@ identifier
     :   IDENTIFIER ( DOT IDENTIFIER )*
     ;
 
-//An octaveShift moves the note up or down an number of octaves. It matches the
-//pattern for a java integer so the string matched by this rule can be passed directly
-//into `Integer.parseInt` and doesn't need to return anything.
 directedNumber
 returns [int amt]
     : ( PLUS | minus = MINUS ) NUMBER { $amt = $minus!= null ? -$NUMBER.int : $NUMBER.int; }
@@ -183,12 +180,17 @@ returns[Comparable.Operator op]
     |   KEYWORD_NEQ     {$op = Comparable.Operator.NEQ;}
     ;
 
-booleanExpression
-    :   left=comparison ( ( KEYWORD_AND | KEYWORD_OR ) right=comparison )*
+booleanExpr
+    :   booleanANDExpr ( KEYWORD_OR booleanANDExpr )*
+    ;
+
+booleanANDExpr
+    :   comparison ( KEYWORD_AND comparison )*
     ;
 
 comparison
-    :   left=value ( comparisonOperator right=value )*
+locals[List<Comparable.Operator> operators = new LinkedList<>()]
+    :   value ( comparisonOperator value )*
     ;
 
 value
@@ -202,14 +204,14 @@ value
     |   STRING
     |   KEYWORD_TRUE
     |   KEYWORD_FALSE
-    |   KEYWORD_NOT? BRACE_OPEN booleanExpression BRACE_CLOSE
+    |   KEYWORD_NOT? BRACE_OPEN booleanExpr BRACE_CLOSE
     |   KEYWORD_NOT value
     ;
 
-ifStatement //TODO maybe or was ok? problem is the cyclic expr
-    :   KEYWORD_DO codeBlock KEYWORD_IF booleanExpression
+ifStatement
+    :   KEYWORD_DO codeBlock KEYWORD_IF booleanExpr
         ( KEYWORD_ELSE KEYWORD_DO codeBlock
-            ( KEYWORD_IF booleanExpression KEYWORD_ELSE KEYWORD_DO codeBlock )*
+            ( KEYWORD_IF booleanExpr KEYWORD_ELSE KEYWORD_DO codeBlock )*
         )?
     ;
 

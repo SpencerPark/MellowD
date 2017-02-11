@@ -21,6 +21,37 @@ import java.util.List;
 //
 //The Melody class is simply a list wrapper. The order of the sounds is important.
 public class Melody implements Indexable<Articulated, Melody>, OctaveShiftable<Melody> {
+
+    public static int compare(Melody left, Melody right) {
+        for (int i = 0; i < left.size(); i++) {
+            if (right.size() <= i) //Equal up to here but left is longer
+                return 1; //Treat right[i] as null
+
+            Articulated leftAtI = left.sounds.get(i);
+            Articulated rightAtI = right.sounds.get(i);
+            boolean leftIsPitch = leftAtI instanceof ArticulatedPitch;
+            boolean rightIsPitch = rightAtI instanceof ArticulatedPitch;
+
+            int cmp;
+            if (leftIsPitch && rightIsPitch)
+                cmp = Pitch.compare((Pitch) leftAtI.getElement(), (Pitch) rightAtI.getElement());
+            else if (!leftIsPitch && !rightIsPitch)
+                cmp = Chord.compare((Chord) leftAtI.getElement(), (Chord) rightAtI.getElement());
+            else
+                cmp = leftIsPitch ? -1 : 1;
+
+            if (cmp != 0)
+                return cmp;
+        }
+
+        //Equal up to the end of left
+        if (right.size() > left.size())
+            return -1; //Right has an extra element
+
+        //Totally equal
+        return 0;
+    }
+
     //This is the data that supports the melody.
     private final List<Articulated> sounds;
 

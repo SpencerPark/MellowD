@@ -21,6 +21,25 @@ import java.util.regex.Pattern;
 //
 //This class contains a variety of standard chords frequently used in compositions.
 public class Chord implements Transposable<Chord>, Articulatable, Indexable<Pitch, Chord>, OctaveShiftable<Chord> {
+
+    public static int compare(Chord left, Chord right) {
+        for (int i = 0; i < left.size(); i++) {
+            if (right.size() <= i) //Equal up to here but left is longer
+                return 1; //Treat right[i] as a rest
+
+            int cmp = Pitch.compare(left.pitches[i], right.pitches[i]);
+            if (cmp != 0)
+                return cmp;
+        }
+
+        //Equal up to the end of left
+        if (right.size() > left.size())
+            return -1; //Right has an extra non rest pitch
+
+        //Totally equal
+        return 0;
+    }
+
     //The `CHORD_NAME_PATTERN` is a regular expression for matching chord names. There are a common
     //collection of chord patterns that are frequently used and the compiler should treat them as
     //all defined as variables. This is of course not possible so they are virtually defined and if

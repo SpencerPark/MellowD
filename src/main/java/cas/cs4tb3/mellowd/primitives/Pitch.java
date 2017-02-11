@@ -49,6 +49,15 @@ public final class Pitch implements Transposable<Pitch>, OctaveShiftable<Pitch>,
         return ALL_PITCHES[Math.max(0, Math.min(midiNum, 127))];
     }
 
+    public static int compare(Pitch left, Pitch right) {
+        if (left == REST)
+            return right == REST ? 0 : -1;
+        else if (right == REST)
+            return 1;
+
+        return left.getMidiNum() - right.getMidiNum();
+    }
+
     private final int midiNum;
 
     private Pitch(int midiNum) {

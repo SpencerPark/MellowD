@@ -21,6 +21,10 @@ public class Beat implements Slurrable {
     
     public static final Beat ZERO = new Beat(0d);
 
+    public static int compare(Beat left, Beat right) {
+        return (int) (left.numQuarters - right.numQuarters);
+    }
+
     private final double numQuarters;
     private boolean slurred;
 
