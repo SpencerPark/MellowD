@@ -287,7 +287,7 @@ public class Compiler {
 
     public static Sequence compile(File src, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {
         return compile(new ANTLRFileStream(src.getAbsolutePath()),
-                new SourceFinder(src.getAbsoluteFile().getParentFile(), FILE_EXTENSION),
+                new DirectorySourceFinder(src.getAbsoluteFile().getParentFile(), FILE_EXTENSION),
                 numerator,
                 denominator,
                 tempo,

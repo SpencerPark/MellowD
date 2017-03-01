@@ -20,6 +20,7 @@ import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -363,21 +364,21 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     }
 
     @Override
-    public Expression<Boolean> visitBooleanExpr(MellowDParser.BooleanExprContext ctx) {
-        List<Expression<Boolean>> operands = ctx.booleanANDExpr().stream()
-                .map(this::visitBooleanANDExpr)
-                .collect(Collectors.toList());
-
-        return new BooleanORChain(operands);
-    }
-
-    @Override
-    public Expression<Boolean> visitBooleanANDExpr(MellowDParser.BooleanANDExprContext ctx) {
+    public Expression<Boolean> visitConjunction(MellowDParser.ConjunctionContext ctx) {
         List<Expression<Boolean>> operands = ctx.comparison().stream()
                 .map(this::visitComparison)
                 .collect(Collectors.toList());
 
         return new BooleanANDChain(operands);
+    }
+
+    @Override
+    public Expression<Boolean> visitDisjunction(MellowDParser.DisjunctionContext ctx) {
+        List<Expression<Boolean>> operands = ctx.conjunction().stream()
+                .map(this::visitConjunction)
+                .collect(Collectors.toList());
+
+        return new BooleanORChain(operands);
     }
 
     @Override
@@ -394,8 +395,8 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         Expression<?> left, right;
         // a lt b lt c -> a lt b AND b lt c
         for (int i = 0; i < operators.size(); i++) {
-            left = visitValue(operands.get(i));
-            op = operators.get(i).op;
+            left  = visitValue(operands.get(i));
+            op    = visitComparisonOperator(operators.get(i));
             right = visitValue(operands.get(i + 1));
 
             comparisons.add(new Comparison(left, op, right));
@@ -443,11 +444,11 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
             return visitRhythm(rhythm);
 
         boolean not = ctx.KEYWORD_NOT() != null;
-        MellowDParser.BooleanExprContext booleanExpr = ctx.booleanExpr();
+        MellowDParser.DisjunctionContext booleanExpr = ctx.disjunction();
         if (booleanExpr != null)
             return not
-                    ? new BooleanNotExpression(visitBooleanExpr(booleanExpr))
-                    : visitBooleanExpr(booleanExpr);
+                    ? new BooleanNotExpression(visitDisjunction(booleanExpr))
+                    : visitDisjunction(booleanExpr);
 
         if (not) {
             Expression<?> val = visitValue(ctx.value());
@@ -478,16 +479,16 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     @Override
     public Statement visitIfStatement(MellowDParser.IfStatementContext ctx) {
         List<MellowDParser.CodeBlockContext> blocks = ctx.codeBlock();
-        List<MellowDParser.BooleanExprContext> conditions = ctx.booleanExpr();
+        List<MellowDParser.DisjunctionContext> conditions = ctx.disjunction();
 
         //Initialize the ifStmt builder with the first condition and block
-        Expression<Boolean> condition = visitBooleanExpr(conditions.get(0));
+        Expression<Boolean> condition = visitDisjunction(conditions.get(0));
         Statement block = visitCodeBlock(blocks.get(0));
         IfStatement.Builder ifStmt = new IfStatement.Builder(condition, block);
 
         //Else If branches
         for (int branchIdx = 1; branchIdx < conditions.size(); branchIdx++) {
-            condition = visitBooleanExpr(conditions.get(branchIdx));
+            condition = visitDisjunction(conditions.get(branchIdx));
             block = visitCodeBlock(blocks.get(branchIdx));
 
             ifStmt.addElseIf(condition, block);
@@ -685,9 +686,9 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         MellowDCompiler importCompiler = new MellowDSelectiveCompiler(this.mellowD, path, as, functions);
 
         try {
-            File referencedSrc = this.mellowD.getSrcFinder().resolve(path);
+            InputStream referencedSrc = this.mellowD.getSrcFinder().resolve(path);
 
-            ANTLRInputStream inStream = new ANTLRFileStream(referencedSrc.getAbsolutePath());
+            ANTLRInputStream inStream = new ANTLRInputStream(referencedSrc);
             MellowDLexer lexer = new MellowDLexer(inStream);
 
             //The parser takes the tokens from the lexer as well as the timing environment constructed

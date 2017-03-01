@@ -180,11 +180,11 @@ returns[Comparable.Operator op]
     |   KEYWORD_NEQ     {$op = Comparable.Operator.NEQ;}
     ;
 
-booleanExpr
-    :   booleanANDExpr ( KEYWORD_OR booleanANDExpr )*
+disjunction
+    :   conjunction ( KEYWORD_OR conjunction )*
     ;
 
-booleanANDExpr
+conjunction
     :   comparison ( KEYWORD_AND comparison )*
     ;
 
@@ -204,14 +204,14 @@ value
     |   STRING
     |   KEYWORD_TRUE
     |   KEYWORD_FALSE
-    |   KEYWORD_NOT? BRACE_OPEN booleanExpr BRACE_CLOSE
+    |   KEYWORD_NOT? BRACE_OPEN disjunction BRACE_CLOSE
     |   KEYWORD_NOT value
     ;
 
 ifStatement
-    :   KEYWORD_DO codeBlock KEYWORD_IF booleanExpr
+    :   KEYWORD_DO codeBlock KEYWORD_IF disjunction
         ( KEYWORD_ELSE KEYWORD_DO codeBlock
-            ( KEYWORD_IF booleanExpr KEYWORD_ELSE KEYWORD_DO codeBlock )*
+            ( KEYWORD_IF disjunction KEYWORD_ELSE KEYWORD_DO codeBlock )*
         )?
     ;
 

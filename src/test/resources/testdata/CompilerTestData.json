@@ -45,5 +45,11 @@
     "timeNumerator": 4,
     "timeDenominator": 4,
     "tempo": 120
+  },
+  {
+    "compFileName": "ifStmt.mlod",
+    "timeNumerator": 4,
+    "timeDenominator": 4,
+    "tempo": 120
   }
 ]

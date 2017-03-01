@@ -1,0 +1,15 @@
+def block ifStmt {
+    octave: 5
+}
+
+ifStmt {
+    GOOD -> c
+    BAD -> b
+
+    do {
+        [GOOD]*<e>
+    } if a lt b
+    else do {
+        [BAD]*<e>
+    }
+}

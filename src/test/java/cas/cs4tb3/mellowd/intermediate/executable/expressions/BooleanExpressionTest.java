@@ -1,6 +1,5 @@
 package cas.cs4tb3.mellowd.intermediate.executable.expressions;
 
-import cas.cs4tb3.mellowd.parser.ExecutionEnvironment;
 import cas.cs4tb3.mellowd.primitives.Pitch;
 import cas.cs4tb3.mellowd.testutil.DummyEnvironment;
 import org.junit.Test;

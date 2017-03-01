@@ -4,11 +4,12 @@ version '2.2.0'
 apply plugin: 'java'
 apply plugin: 'antlr'
 apply plugin: 'maven-publish'
+apply plugin: 'jacoco'
 
 //Use java 8 source and class files
 compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
 }
 
 //All required libs are on the maven central repo
