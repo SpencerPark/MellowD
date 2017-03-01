@@ -6,7 +6,8 @@
 //first string is the path to the input file. The second is the name of the rule
 //to start parsing on. The third is the number of times to try and match the rule.
 [
-  [ "varDeclaration.mlod", "varDeclaration", "3"],
-  [ "simpleBlock.mlod", "song", "1"],
-  [ "chordNames.mlod", "song", "1"]
+  [ "varDeclaration.mlod", "varDeclaration", "3" ],
+  [ "simpleBlock.mlod", "song", "1" ],
+  [ "chordNames.mlod", "song", "1" ],
+  [ "comments.mlod", "song", "1" ]
 ]
