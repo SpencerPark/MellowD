@@ -20,7 +20,7 @@ public class DirectorySourceFinder implements SourceFinder {
     }
 
     @Override
-    public InputStream resolve(String... importPath) throws FileNotFoundException {
+    public InputStream resolve(String[] importPath) throws SourceResolutionException {
         StringBuilder path = new StringBuilder();
 
         for (int i = 0; i < importPath.length - 1; i++) {
@@ -35,23 +35,24 @@ public class DirectorySourceFinder implements SourceFinder {
 
         File source = new File(root, path.toString());
         if (source.exists()) {
-            if (source.isFile())
+            try {
                 return new FileInputStream(source);
-
-            throw new FileNotFoundException(String.format("Import path %s is a directory. It contains the following source files %s.",
-                    getPackage(importPath), Arrays.toString(listSourceNamesIn(source))));
+            } catch (FileNotFoundException e) {
+                throw new SourceResolutionException(importPath, String.format("Import path %s is a directory. It contains the following source files %s.",
+                        getPackage(importPath), Arrays.toString(listSourceNamesIn(source))));
+            }
         } else {
             String[] possible = lookForFilesWithWrongExtension(getPackage(importPath), name);
             if (possible == null)
-                throw new FileNotFoundException(String.format("The file named '%s' doesn't exist in the '%s' package.",
+                throw new SourceResolutionException(importPath, String.format("The file named '%s' doesn't exist in the '%s' package.",
                         name, getPackage(importPath)));
             Matcher m = FILE_EXTENSION_PATTERN.matcher(name);
             if (m.matches()) {
-                throw new FileNotFoundException(String.format("The file named '%s' doesn't exist in the '%s' package. Do you need to rename one of %s?",
+                throw new SourceResolutionException(importPath, String.format("The file named '%s' doesn't exist in the '%s' package. Do you need to rename one of %s?",
                         name, getPackage(importPath), Arrays.toString(possible)));
             } else {
                 //The wrong extension was given
-                throw new FileNotFoundException(String.format("The import '%s' doesn't have the '%s' extension.",
+                throw new SourceResolutionException(importPath, String.format("The import source '%s' doesn't have the '%s' extension.",
                         String.join(".", importPath), extension));
             }
         }
