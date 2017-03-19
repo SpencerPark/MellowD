@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 group 'cas.cs4tb3'
 version '2.2.0'
 
@@ -26,7 +28,7 @@ configurations {
 }
 
 //The compiler needs junit and gson to run the tests, antlr to generate
-//the parser and argparse4j to parse the command line arguments.
+//the parser.
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'com.google.code.gson', name: 'gson', version: '2.6.2'
@@ -34,8 +36,6 @@ dependencies {
     //Only shade the runtime because we don't need the generator after things are compiled
     antlr group: 'org.antlr', name: 'antlr4', version: '4.6'
     shade group: 'org.antlr', name: 'antlr4-runtime', version: '4.6'
-
-    shade group: 'net.sourceforge.argparse4j', name: 'argparse4j', version: '0.7.0'
 }
 
 //Add a manifest attribute, the shaded dependencies and antlr to the built jar.
@@ -47,7 +47,12 @@ jar {
     //Include all shaded dependencies in the jar
     from configurations.shade
             .collect { it.isDirectory() ? it : zipTree(it) }
+}
 
+processResources {
+    filter ReplaceTokens, tokens: [
+            "version" : rootProject.version
+    ]
 }
 
 def doccoMode = 'linear' /* linear, parallel, classic */
