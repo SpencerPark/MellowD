@@ -4,19 +4,13 @@ import cas.cs4tb3.mellowd.intermediate.Output;
 import cas.cs4tb3.mellowd.intermediate.Playable;
 import cas.cs4tb3.mellowd.intermediate.executable.SourceLink;
 import cas.cs4tb3.mellowd.parser.ExecutionEnvironment;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
-public class ContextFreeStatement extends SourceLink implements Statement {
+public class ContextFreeStatement implements Statement {
     private final Playable playable;
+    private final SourceLink sourceLink;
 
-    public ContextFreeStatement(ParserRuleContext info, Playable playable) {
-        super(info);
-        this.playable = playable;
-    }
-
-    public ContextFreeStatement(TerminalNode info, Playable playable) {
-        super(info);
+    public ContextFreeStatement(SourceLink sourceLink, Playable playable) {
+        this.sourceLink = sourceLink;
         this.playable = playable;
     }
 
@@ -29,7 +23,7 @@ public class ContextFreeStatement extends SourceLink implements Statement {
         try {
             output.put(playable);
         } catch (Exception e) {
-            throwCompilationException(e);
+            throw sourceLink.toCompilationException(e);
         }
     }
 }

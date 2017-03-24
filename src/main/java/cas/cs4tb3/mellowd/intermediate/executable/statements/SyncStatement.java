@@ -19,7 +19,7 @@ public class SyncStatement implements Statement {
         try {
             link.sync(output);
         } catch (InterruptedException e) {
-            sourceLink.throwCompilationException(e);
+            throw sourceLink.toCompilationException(e);
         }
     }
 }

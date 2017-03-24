@@ -15,11 +15,13 @@ import cas.cs4tb3.mellowd.midi.Knob;
 import cas.cs4tb3.mellowd.midi.MIDIControl;
 import cas.cs4tb3.mellowd.midi.Pedal;
 import cas.cs4tb3.mellowd.primitives.*;
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -93,7 +95,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
     private <T> Expression<T> lookupIdentifier(MellowDParser.IdentifierContext ctx, Class<T> desiredType) {
         Identifier identifier = visitIdentifier(ctx);
-        return new RuntimeTypeCheck<>(desiredType, new ReferenceResolution(identifier.qualifier, identifier.name), ctx);
+        return new RuntimeTypeCheck<>(desiredType, new ReferenceResolution(identifier.qualifier, identifier.name), new SourceLink(ctx));
     }
 
     private Expression<Object> lookupIdentifier(MellowDParser.IdentifierContext ctx) {
@@ -114,7 +116,8 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     @Override
     public Expression<Integer> visitNumberOrId(MellowDParser.NumberOrIdContext ctx) {
         MellowDParser.IdentifierContext idCtx = ctx.identifier();
-        if (idCtx != null) return new RuntimeNullCheck<>(idCtx.getText(), lookupIdentifier(idCtx, Integer.class), idCtx);
+        if (idCtx != null)
+            return new RuntimeNullCheck<>(idCtx.getText(), lookupIdentifier(idCtx, Integer.class), new SourceLink(idCtx));
         return new Constant<>(visitNumber(ctx.number()));
     }
 
@@ -138,8 +141,9 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     private Expression<?> possiblyIndex(ParserRuleContext ctx, Expression<?> expr, MellowDParser.IndexContext indexContext) {
         if (indexContext == null) return expr;
 
+        SourceLink link = new SourceLink(ctx);
         for (Pair<Expression<Integer>, Expression<Integer>> range : visitIndex(indexContext)) {
-            Expression<Indexable<?, ?>> indexable = new RuntimeIndexingSupportCheck(expr, ctx);
+            Expression<Indexable<?, ?>> indexable = new RuntimeIndexingSupportCheck(expr, link);
             expr = new IndexExpression(indexable, range.a, range.b);
         }
 
@@ -218,10 +222,11 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
             valueExpr = lookupIdentifier(idCtx);
         }
 
-        valueExpr = new RuntimeNullCheck<>(ctx.getText(), valueExpr, ctx);
+        SourceLink link = new SourceLink(ctx);
+        valueExpr = new RuntimeNullCheck<>(ctx.getText(), valueExpr, link);
         valueExpr = possiblyIndex(ctx, valueExpr, ctx.index());
 
-        return new RuntimeUnionTypeCheck(valueExpr, ctx, this.chordParamTypes);
+        return new RuntimeUnionTypeCheck(valueExpr, this.chordParamTypes, link);
     }
 
     @Override
@@ -246,6 +251,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         if (note != null)
             return new Articulate(visitNote(note), articulationExpr);
 
+        SourceLink link = new SourceLink(ctx);
         Expression<?> paramExpr;
         MellowDParser.ChordContext chord = ctx.chord();
         if (chord != null) {
@@ -254,7 +260,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
             MellowDParser.IdentifierContext identifier = ctx.identifier();
             if (identifier != null) {
                 paramExpr = lookupIdentifier(identifier);
-                paramExpr = new RuntimeNullCheck<>(identifier.getText(), paramExpr, identifier);
+                paramExpr = new RuntimeNullCheck<>(identifier.getText(), paramExpr, link);
             } else {
                 paramExpr = new Constant<>(Chord.resolve(ctx.CHORD_IDENTIFIER().getText()));
             }
@@ -264,12 +270,12 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         }
 
         if (articulation != null) {
-            Expression<Articulatable> resolvedArticulatable = new RuntimeTypeCheck<>(Articulatable.class, paramExpr, ctx);
-            resolvedArticulatable = new RuntimeNullCheck<>(ctx.getText(), resolvedArticulatable, ctx);
+            Expression<Articulatable> resolvedArticulatable = new RuntimeTypeCheck<>(Articulatable.class, paramExpr, link);
+            resolvedArticulatable = new RuntimeNullCheck<>(ctx.getText(), resolvedArticulatable, link);
             return new Articulate(resolvedArticulatable, articulationExpr);
         }
 
-        return new RuntimeUnionTypeCheck(paramExpr, ctx, this.melodyParamTypes);
+        return new RuntimeUnionTypeCheck(paramExpr, this.melodyParamTypes, link);
     }
 
     @Override
@@ -346,16 +352,18 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         MellowDParser.IdentifierContext identifier = ctx.identifier();
         Expression<?> idExpr = lookupIdentifier(identifier);
 
+        SourceLink link = new SourceLink(ctx);
+
         MellowDParser.IndexContext index = ctx.index();
 
-        idExpr = new RuntimeNullCheck<>(identifier.getText(), idExpr, identifier);
+        idExpr = new RuntimeNullCheck<>(identifier.getText(), idExpr, link);
         if (index != null) {
             //We want to make sure that it will actually be indexed to avoid a duplicate runtime null check
             idExpr = possiblyIndex(identifier, idExpr, index);
-            idExpr = new RuntimeNullCheck<>(identifier.getText(), idExpr, identifier);
+            idExpr = new RuntimeNullCheck<>(identifier.getText(), idExpr, link);
         }
 
-        return new RuntimeSlur<>(new RuntimeTypeCheck<>(Slurrable.class, idExpr, ctx), slurred);
+        return new RuntimeSlur<>(new RuntimeTypeCheck<>(Slurrable.class, idExpr, link), slurred);
     }
 
     @Override
@@ -395,8 +403,8 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         Expression<?> left, right;
         // a lt b lt c -> a lt b AND b lt c
         for (int i = 0; i < operators.size(); i++) {
-            left  = visitValue(operands.get(i));
-            op    = visitComparisonOperator(operators.get(i));
+            left = visitValue(operands.get(i));
+            op = visitComparisonOperator(operators.get(i));
             right = visitValue(operands.get(i + 1));
 
             comparisons.add(new Comparison(left, op, right));
@@ -467,10 +475,11 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
         MellowDParser.IndexContext index = ctx.index();
 
-        valueExpr = new RuntimeNullCheck<>(ctx.getText(), valueExpr, ctx);
+        SourceLink link = new SourceLink(ctx);
+        valueExpr = new RuntimeNullCheck<>(ctx.getText(), valueExpr, link);
         if (index != null) {
             valueExpr = possiblyIndex(ctx, valueExpr, index);
-            valueExpr = new RuntimeNullCheck<>(ctx.getText(), valueExpr, ctx);
+            valueExpr = new RuntimeNullCheck<>(ctx.getText(), valueExpr, link);
         }
 
         return valueExpr;
@@ -519,16 +528,19 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
     @Override
     public Statement visitDynamicDeclaration(MellowDParser.DynamicDeclarationContext ctx) {
+        SourceLink link = new SourceLink(ctx);
         if (ctx.ARROWS_LEFT() != null)
-            return new ContextFreeStatement(ctx, new GradualDynamicChange(ctx.dynamic, true));
+            return new ContextFreeStatement(link, new GradualDynamicChange(ctx.dynamic, true));
         else if (ctx.ARROWS_LEFT() != null)
-            return new ContextFreeStatement(ctx, new GradualDynamicChange(ctx.dynamic, false));
+            return new ContextFreeStatement(link, new GradualDynamicChange(ctx.dynamic, false));
         else
-            return new ContextFreeStatement(ctx, new DynamicChange(ctx.dynamic));
+            return new ContextFreeStatement(link, new DynamicChange(ctx.dynamic));
     }
 
     @Override
     public Expression<Phrase> visitPhrase(MellowDParser.PhraseContext ctx) {
+        SourceLink link = new SourceLink(ctx);
+
         Expression<Melody> lhs;
 
         MellowDParser.MelodyContext melody = ctx.melody();
@@ -536,7 +548,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
             lhs = visitMelody(melody);
         } else {
             lhs = lookupIdentifier(ctx.melodyRef, Melody.class);
-            lhs = new RuntimeNullCheck<>(ctx.melodyRef.getText(), lhs, ctx.melodyRef);
+            lhs = new RuntimeNullCheck<>(ctx.melodyRef.getText(), lhs, link);
         }
 
         Expression<Rhythm> rhs;
@@ -545,7 +557,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
             rhs = visitRhythm(rhythm);
         } else {
             rhs = lookupIdentifier(ctx.rhythmRef, Rhythm.class);
-            rhs = new RuntimeNullCheck<>(ctx.rhythmRef.getText(), rhs, ctx.rhythmRef);
+            rhs = new RuntimeNullCheck<>(ctx.rhythmRef.getText(), rhs, link);
         }
 
         return new PhraseConstruction(lhs, rhs);
@@ -612,7 +624,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
                 }
         }
 
-        return new ContextFreeStatement(ctx, playable);
+        return new ContextFreeStatement(new SourceLink(ctx), playable);
     }
 
     @Override

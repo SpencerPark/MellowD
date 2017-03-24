@@ -4,20 +4,14 @@ import cas.cs4tb3.mellowd.intermediate.executable.SourceLink;
 import cas.cs4tb3.mellowd.intermediate.functions.operations.Indexable;
 import cas.cs4tb3.mellowd.parser.ExecutionEnvironment;
 import cas.cs4tb3.mellowd.parser.IndexingNotSupportedException;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
-public class RuntimeIndexingSupportCheck extends SourceLink implements Expression<Indexable<?, ?>> {
+public class RuntimeIndexingSupportCheck implements Expression<Indexable<?, ?>> {
     protected final Expression<?> expression;
+    protected final SourceLink sourceLink;
 
-    public RuntimeIndexingSupportCheck(Expression<?> expression, ParserRuleContext tokenInfo) {
-        super(tokenInfo);
+    public RuntimeIndexingSupportCheck(Expression<?> expression, SourceLink sourceLink) {
         this.expression = expression;
-    }
-
-    public RuntimeIndexingSupportCheck(Expression<?> expression, TerminalNode tokenInfo) {
-        super(tokenInfo);
-        this.expression = expression;
+        this.sourceLink = sourceLink;
     }
 
     @Override
@@ -26,7 +20,7 @@ public class RuntimeIndexingSupportCheck extends SourceLink implements Expressio
         if (value == null || value instanceof Indexable) {
             return (Indexable) value;
         } else {
-            return throwCompilationException(new IndexingNotSupportedException(text));
+            throw sourceLink.toCompilationException(new IndexingNotSupportedException(sourceLink.text));
         }
     }
 }

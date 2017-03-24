@@ -29,7 +29,7 @@ public class SourceLink {
         this.text = info.getText();
     }
 
-    public <T> T throwCompilationException(Throwable cause) {
-        throw new CompilationException(start, line, startPosInLine, stop, text, cause);
+    public CompilationException toCompilationException(Throwable cause) {
+        return new CompilationException(start, line, startPosInLine, stop, text, cause);
     }
 }

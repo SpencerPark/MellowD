@@ -29,7 +29,7 @@ public class FunctionCall implements Statement {
     public void execute(ExecutionEnvironment environment, Output output) {
         if (options.length != 1) {
             //Too many functions, can't resolve just one.
-            sourceLink.throwCompilationException(new FunctionResolutionException(options, name, environment.isPercussion(), args));
+            throw sourceLink.toCompilationException(new FunctionResolutionException(options, name, environment.isPercussion(), args));
         } else {
             options[0].getPreferredVariant(environment.isPercussion()).evaluate(global, environment, output, shouldReturn, args);
         }
