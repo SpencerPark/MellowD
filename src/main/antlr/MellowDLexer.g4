@@ -3,6 +3,10 @@
 
 lexer grammar MellowDLexer;
 
+channels {
+    COMMENTS
+}
+
 KEYWORD_PERCUSSION : 'percussion' ;
 KEYWORD_DEF : 'def' ;
 KEYWORD_BLOCK : 'block' ;
@@ -160,9 +164,9 @@ STRING : '"' ~('\r' | '\n' | '"')* '"' ;
 //Skip comments. Line comments comment out all input untin the first matched
 //newline. Mellow D also supports multi-line comments like java comments. `/*`
 //opens the comment and `*/` closes the comment.
-LINE_COMMENT : '//' ~[\r\n]* '\r'? '\n' -> channel(HIDDEN) ;
-MULTI_LINE_COMMENT : '/*' ( MULTI_LINE_COMMENT | . )*? '*/' -> channel(HIDDEN) ;
+LINE_COMMENT : '//' ~[\r\n]* '\r'? '\n' -> channel(COMMENTS) ;
+MULTI_LINE_COMMENT : '/*' ( MULTI_LINE_COMMENT | . )*? '*/' -> channel(COMMENTS) ;
 
 //Ignore whitespace and pipes (|) as they can be used by the developer to format
 //their source however they like.
-SRC_SUGAR : [| \n\r\t] -> skip;
+SRC_SUGAR : [| \n\r\t] -> channel(HIDDEN);
