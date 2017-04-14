@@ -3,6 +3,7 @@ package cas.cs4tb3.mellowd.compiler;
 import javax.sound.midi.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 //A `VirtualMIDIPlayer` force feeds a sequence to a midi receiver. This simulates play-though
 //of the entire sequence without the delay in between notes.
@@ -58,7 +59,7 @@ public class VirtualMIDIPlayer {
         }
     }
 
-    private Collection<TimeStampedMIDIMessage> stampedMIDIMessages;
+    private List<TimeStampedMIDIMessage> stampedMIDIMessages;
     private double duration;
 
     //Create a new virtual player that is playing the given sequence.

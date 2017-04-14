@@ -1,7 +1,5 @@
 package cas.cs4tb3.mellowd.compiler;
 
-import cas.cs4tb3.mellowd.compiler.CompilerOptions;
-
 import java.io.PrintStream;
 
 public class ArgParser {
@@ -13,8 +11,8 @@ public class ArgParser {
 
     private static final String USAGE_MESSAGE = "" +
             "usage: mellowd [-h] [-p] [-ts numerator denominator] [-t tempo]\n" +
-            "               [-o output_dir] [-s source_dir]... [-wav] [-mid]\n" +
-            "               [--silent] [source_file]                         ";
+            "               [-o output_dir] [-s source_dir]... [-sf font]...\n" +
+            "               [-wav] [-mid] [--silent] [source_file]           ";
 
     private static final String OPT_DESC_HELP = "" +
             "    -h: display help about the usage of the mellowd command. Any\n" +
@@ -41,6 +39,11 @@ public class ArgParser {
             "               may be given multiple times to add multiple roots\n" +
             "      source_dir: path to the source directory. Absolute path or\n" +
             "                  relative to the calling directory.             ";
+    private static final String OPT_DESC_SOUNDFONT = "" +
+            "    -sf, --soundfont: add a soundfont file to the list of font  \n" +
+            "                      paths to be loaded during MIDI playback.  \n" +
+            "      font: path to the sound font (conventionally *.sf2, *.dls)\n" +
+            "            Absolute path or relative to the calling directory.  ";
     private static final String OPT_DESC_WAV = "" +
             "    -wav, --wave: set the output to include a .wav file. If no  \n" +
             "                  output modifier is given (-p, -wav, -mid) the \n" +
@@ -120,22 +123,27 @@ public class ArgParser {
                 case "-ts":
                 case "--timesig":
                     help.append('\n').append(OPT_DESC_TIMESIG);
-                    i = parseTimeSignature(options, args, i + 1);
+                    if (!showHelp) i = parseTimeSignature(options, args, i + 1);
                     break;
                 case "-t":
                 case "--tempo":
                     help.append('\n').append(OPT_DESC_TEMPO);
-                    i = parseTempo(options, args, i + 1);
+                    if (!showHelp) i = parseTempo(options, args, i + 1);
                     break;
                 case "-o":
                 case "--outdir":
                     help.append('\n').append(OPT_DESC_OUTDIR);
-                    i = parseOutdir(options, args, i + 1);
+                    if (!showHelp) i = parseOutdir(options, args, i + 1);
                     break;
                 case "-s":
                 case "--src":
                     help.append('\n').append(OPT_DESC_SRCDIR);
-                    i = parseSourceDir(options, args, i + 1);
+                    if (!showHelp) i = parseSourceDir(options, args, i + 1);
+                    break;
+                case "-sf":
+                case "--soundfont":
+                    help.append('\n').append(OPT_DESC_SOUNDFONT);
+                    if (!showHelp) i = parseSoundFont(options, args, i + 1);
                     break;
                 case "-p":
                 case "--play":
@@ -179,6 +187,7 @@ public class ArgParser {
                 help.append('\n').append(OPT_DESC_TEMPO);
                 help.append('\n').append(OPT_DESC_OUTDIR);
                 help.append('\n').append(OPT_DESC_SRCDIR);
+                help.append('\n').append(OPT_DESC_SOUNDFONT);
                 help.append('\n').append(OPT_DESC_PLAY);
                 help.append('\n').append(OPT_DESC_WAV);
                 help.append('\n').append(OPT_DESC_MID);
@@ -246,6 +255,17 @@ public class ArgParser {
         String sourceDir = args[pos];
 
         options.addSourceDirectory(sourceDir);
+
+        return pos + 1;
+    }
+
+    private static int parseSoundFont(CompilerOptions.Builder options, String[] args, int pos) throws Help {
+        if (args.length < pos + 1)
+            throw new Help("[Parse Error]: Expected path to the sound font to follow " + args[pos - 1]);
+
+        String soundFont = args[pos];
+
+        options.addSoundFont(soundFont);
 
         return pos + 1;
     }

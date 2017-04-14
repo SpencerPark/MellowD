@@ -3,9 +3,6 @@ package cas.cs4tb3.mellowd.compiler;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Receiver;
 
-/**
- * Created on 2016-04-30.
- */
 public class TimeStampedMIDIMessage {
     private final long timestamp;
     private final MidiMessage message;

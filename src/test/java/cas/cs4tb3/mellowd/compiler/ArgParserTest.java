@@ -178,6 +178,47 @@ public class ArgParserTest {
     }
 
     @Test
+    public void soundFontFlag() throws Exception {
+        String[] args = new String[] {
+                "--soundfont", "font.sf2"
+        };
+
+        CompilerOptions options = ArgParser.parse(args);
+
+        assertEquals("Sound font not added to the options", "font.sf2", options.getSoundFonts().get(0));
+    }
+
+    @Test
+    public void soundFontShortFlag() throws Exception {
+        String[] args = new String[] {
+                "-sf", "font.sf2"
+        };
+
+        CompilerOptions options = ArgParser.parse(args);
+
+        assertEquals("Sound font not added to the options", "font.sf2", options.getSoundFonts().get(0));
+    }
+
+    @Test
+    public void soundFontFlagMultiple() throws Exception {
+        String[] args = new String[] {
+                "--soundfont", "font.sf2", "--soundfont", "font1.sf2"
+        };
+
+        CompilerOptions options = ArgParser.parse(args);
+
+        assertEquals("Sound font not properly added to the options", "font.sf2", options.getSoundFonts().get(0));
+        assertEquals("Second sound font not properly added to ", "font1.sf2", options.getSoundFonts().get(1));
+    }
+
+    @Test
+    public void soundFontFlagValueMissing() throws Exception {
+        testThrowsException("No exception thrown when sound font flag given but value is missing",
+                "--soundfont"
+        );
+    }
+
+    @Test
     public void playFlag() throws Exception {
         String[] args = new String[] {
                 "--play"
@@ -293,6 +334,8 @@ public class ArgParserTest {
         assertEquals("Output directory is not the working directory by default", "", options.getOutputDirectory());
 
         assertTrue("Source directories are not empty by default", options.getSourceDirs().isEmpty());
+
+        assertTrue("Sound fonts are not empty by default", options.getSoundFonts().isEmpty());
 
         assertFalse("Play flag not disabled by default", options.shouldPlayLive());
         assertTrue("MIDI output flag not enabled by default", options.shouldOutputMIDI());

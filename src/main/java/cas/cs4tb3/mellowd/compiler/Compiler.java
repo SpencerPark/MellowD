@@ -5,6 +5,7 @@ package cas.cs4tb3.mellowd.compiler;
 
 import cas.cs4tb3.mellowd.midi.TimingEnvironment;
 import cas.cs4tb3.mellowd.parser.*;
+import com.sun.media.sound.AudioSynthesizer;
 import org.antlr.v4.runtime.*;
 
 import javax.sound.midi.*;
@@ -12,12 +13,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 //The `Compiler` class is the main entry point for the program.
 public class Compiler {
@@ -111,16 +117,18 @@ public class Compiler {
     private static void handleOutput(CompilerOptions options, File source, File outDir, Sequence compilationResult) {
         String srcName = source.getName().replace(FILE_EXTENSION, "");
         try {
-            Future<SequencePlayer> playing = null;
-
             if (options.shouldPlayLive()) {
+                //Create a music player from the sequencer and song.
+                SequencePlayer player = new SequencePlayer(MidiSystem.getSequencer(), createSoundFontLoader(options), compilationResult);
+
                 if (options.wantsVerbose())
                     System.out.printf("Playing %s\n", srcName);
 
-                //Create a music player from the sequencer and song.
-                SequencePlayer player = new SequencePlayer(MidiSystem.getSequencer(), compilationResult);
+                //Start the player with a 1000ms count in to account for the loading lag
+                player.playSync(1000L);
 
-                playing = player.play();
+                if (options.wantsVerbose())
+                    System.out.println("Play complete!");
             }
 
             try {
@@ -148,7 +156,7 @@ public class Compiler {
                         System.err.printf("Cannot create output file %s\n", formatPath(outFile));
                     } else {
                         long writeStartTime = System.nanoTime();
-                        WavIODelegate.getInstance().save(compilationResult, outFile);
+                        new WavIODelegate(createSoundFontLoader(options)).save(compilationResult, outFile);
 
                         if (options.wantsVerbose()) {
                             long writeTime = System.nanoTime() - writeStartTime;
@@ -161,14 +169,6 @@ public class Compiler {
                 System.err.printf("Error writing compilation result. Reason: %s.\n", e.getLocalizedMessage());
                 System.exit(1);
             }
-
-            try {
-                if (playing != null) {
-                    playing.get();
-                    if (options.wantsVerbose())
-                        System.out.println("Play complete!");
-                }
-            } catch (InterruptedException | ExecutionException ignored) { }
 
             System.exit(0);
             //If a MidiUnavailableException occurs let the user know the error and exit.
@@ -239,6 +239,51 @@ public class Compiler {
 
         //Return the input file
         return inFile;
+    }
+
+    private static Function<Synthesizer, Synthesizer> createSoundFontLoader(CompilerOptions options) {
+        return (synth) -> {
+            if (options.getSoundFonts().isEmpty()) return synth;
+
+            if (!synth.isOpen())
+                System.err.printf("Synth must be open before applying sound fonts\n");
+
+            for (String soundFontPath : options.getSoundFonts()) {
+                File soundFontFile = new File(soundFontPath);
+                if (options.wantsVerbose())
+                    System.out.printf("Loading sound font %s...\n", formatPath(soundFontFile));
+
+                Soundbank soundbank;
+                try {
+                    soundbank = MidiSystem.getSoundbank(soundFontFile);
+                } catch (InvalidMidiDataException e) {
+                    System.err.printf("Invalid sound font %s. Problem: %s\n",
+                            soundFontFile.getName(), e.getLocalizedMessage());
+                    System.exit(1);
+                    return synth;
+                } catch (IOException e) {
+                    System.err.printf("Error loading sound font %s. Problem: %s\n",
+                            soundFontFile.getName(), e.getLocalizedMessage());
+                    System.exit(1);
+                    return synth;
+                }
+
+                if (!synth.isSoundbankSupported(soundbank)) {
+                    System.err.printf("Sound font %s is not supported by your midi system's synthesizer.\n",
+                            soundFontFile.getName());
+                    System.exit(1);
+                    return synth;
+                }
+
+                boolean allLoaded = synth.loadAllInstruments(soundbank);
+
+                if (options.wantsVerbose())
+                    System.out.printf("Loaded %s instruments from sound font %s\n",
+                            allLoaded ? "all" : "some", formatPath(soundFontFile));
+            }
+
+            return synth;
+        };
     }
 
     public static Sequence compile(File src, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {

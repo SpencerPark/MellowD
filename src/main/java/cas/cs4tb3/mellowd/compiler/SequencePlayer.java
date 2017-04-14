@@ -3,16 +3,15 @@
 
 package cas.cs4tb3.mellowd.compiler;
 
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Sequence;
-import javax.sound.midi.Sequencer;
+import javax.sound.midi.*;
 import java.io.Closeable;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 //This class is a simple playback manager that provides some concurrency features
 //wrapped around the java midi sequencer. It provides `play()` and `stop()` methods
@@ -25,35 +24,63 @@ public class SequencePlayer implements Closeable {
 
     //Store the player and playback data
     private final Sequencer sequencer;
+    private final Function<Synthesizer, Synthesizer> soundfontLoader;
     private final Sequence sequence;
     //Track the state of this player such that `true` &harr; music playing.
     private boolean isPlaying;
     private final ExecutorService player = Executors.newSingleThreadExecutor(r -> new Thread(r, "SequencePlayer-"+PLAYER_NUM.getAndIncrement()));
 
     //This constructor simply takes the desired sequence player and sequence to play
-    public SequencePlayer(Sequencer sequencer, Sequence sequence) {
+    public SequencePlayer(Sequencer sequencer, Function<Synthesizer, Synthesizer> soundfontLoader, Sequence sequence) {
         this.sequencer = sequencer;
+        this.soundfontLoader = soundfontLoader;
         this.sequence = sequence;
 
         //To correctly update the `isPlaying` state variable we will register a listener
         //that sets the flag to false when it hears the sequencer end a track.
-        sequencer.addMetaEventListener(meta -> {
-            if (meta.getType() == END_OF_TRACK_MESSAGE) {
-                isPlaying = false;
-            }
-        });
+        sequencer.addMetaEventListener(meta -> isPlaying = (meta.getType() != END_OF_TRACK_MESSAGE));
     }
 
     //Here is the major part of this class. The `play()` method will play the sequence asynchronously
     //as the Sequencer already does but will also return a `Future` that will complete when the song
     //has finished playing or the playback has been aborted.
-    public Future<SequencePlayer> play() throws MidiUnavailableException, InvalidMidiDataException {
+    public Future<SequencePlayer> play(long countIn) throws MidiUnavailableException, InvalidMidiDataException {
         //Firstly check if this player is already in action, we can only allow one playback at a time
         if (isPlaying) throw new IllegalStateException("Player is already playing.");
 
         //Now we can set up the sequencer by opening it up and putting in our midi sequence
         if (!sequencer.isOpen()) sequencer.open();
         sequencer.setSequence(sequence);
+
+        Synthesizer synth = MidiSystem.getSynthesizer();
+        if (!synth.isOpen()) synth.open();
+
+        if (this.soundfontLoader != null)
+            synth = this.soundfontLoader.apply(synth);
+
+        //Connect the sequencer to the system synth so that any loaded soundfonts
+        //get used
+        List<Transmitter> transmitters = sequencer.getTransmitters();
+
+        //If there are no transmitters attached to the sequencer then get a fresh
+        //connection. Otherwise use the existing one to avoid a duplicate playback
+        Transmitter transmitter;
+        if (transmitters.isEmpty()) {
+            transmitter = sequencer.getTransmitter();
+        } else {
+            transmitter = transmitters.get(0);
+            for (int i = 1; i < transmitters.size(); i++)
+                transmitters.get(i).close();
+        }
+
+        transmitter.setReceiver(synth.getReceiver());
+
+        //Wait for the "countIn" time. The idea here is to possibly wait
+        //for the jvm to catch up with itself so the playback is smooth at
+        //the start.
+        try {
+            Thread.sleep(countIn);
+        } catch (InterruptedException ignored) { }
 
         //Next we start playing the sequence and set the flag to reflect this.
         isPlaying = true;
@@ -77,9 +104,9 @@ public class SequencePlayer implements Closeable {
 
     //This convenience method just executes it's asynchronous counterpart and block until
     //it's completion.
-    public void playSync() throws InvalidMidiDataException, MidiUnavailableException {
+    public void playSync(long countIn) throws InvalidMidiDataException, MidiUnavailableException {
         try {
-            play().get();
+            play(countIn).get();
         } catch (InterruptedException | ExecutionException ignore) { }
     }
 

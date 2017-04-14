@@ -1,9 +1,9 @@
 package cas.cs4tb3.mellowd.midi;
 
 import cas.cs4tb3.mellowd.compiler.Compiler;
-import cas.cs4tb3.mellowd.compiler.SequencePlayer;
-import cas.cs4tb3.mellowd.intermediate.Phrase;
-import cas.cs4tb3.mellowd.primitives.*;
+import cas.cs4tb3.mellowd.primitives.Beat;
+import cas.cs4tb3.mellowd.primitives.Dynamic;
+import cas.cs4tb3.mellowd.primitives.Pitch;
 
 import javax.sound.midi.*;
 import java.util.*;
@@ -367,40 +367,5 @@ public class MIDIChannel {
         this.noteOffEvents.set(pitch, offEvent);
 
         this.noteStates.set(pitch, NoteState.getState(false, isSlurred()));
-    }
-
-    public static void main(String[] args) throws InvalidMidiDataException, MidiUnavailableException {
-        TimingEnvironment timingEnvironment = new TimingEnvironment(4, 4, 120);
-        Sequence sequence = timingEnvironment.createSequence();
-        Track track = sequence.createTrack();
-        MIDIChannel channel = new MIDIChannel(track, false, 1, timingEnvironment);
-
-        //channel.changeInstrument(GeneralMidiInstrument.BASSOON);
-        channel.setDynamic(Dynamic.ffff);
-        //channel.setSlurred(true);
-
-        Pedal pedal = channel.getController(MIDIControl.SOSTENUTO);
-        //portamento.twist(60);
-        pedal.press();
-
-        //channel.noteOn(Pitch.C);
-
-        /*for (int i = 0; i < 5; i++) {
-            if (i == 3) channel.setSlurred(false);
-            Sound.newSound(Chord.major(Pitch.C), Beat.HALF, Articulation.NONE).play(channel);
-        }*/
-        Rhythm r = new Rhythm();
-        Melody m = new Melody();
-        m.append(new ArticulatedChord(Chord.major(Pitch.C)));
-
-        System.out.println(r);
-        System.out.println(m);
-        new Phrase(m, r).play(channel);
-
-        channel.finalizeEOT();
-
-        SequencePlayer player = new SequencePlayer(MidiSystem.getSequencer(), sequence);
-        player.playSync();
-        player.close();
     }
 }
