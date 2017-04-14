@@ -66,29 +66,31 @@ def toRelFile(File file) {
     return relPath;
 }
 
-task docco << {
-    exec {
-        String outDir = toRelFile(file("${project.docsDir}\\docco"));
-        executable = 'docco.cmd'
-        args += ['-o', "$outDir"]
-        //Always compile md files as linear because they look out of place
-        //when squeezed on the side with a blank window beside it
-        args += ['-l', doccoMode]
-        if (pathToLanguages) args += ['-L', pathToLanguages]
-        args += ['-t', 'site\\docco.jst']
-        args += ['-c', 'site\\docco.css']
-        sourceSets.main.allSource.plus(sourceSets.test.allSource).plus(sourceSets.test.resources)
-        //Exclude generated source files as they are not documented
-                .grep { !(it.path ==~ /.*generated-src.*/) }
-                .each { srcFile ->
-                    args += toRelFile(file(srcFile))
+task docco {
+    doLast {
+        exec {
+            String outDir = toRelFile(file("${project.docsDir}\\docco"));
+            executable = 'docco.cmd'
+            args += ['-o', "$outDir"]
+            //Always compile md files as linear because they look out of place
+            //when squeezed on the side with a blank window beside it
+            args += ['-l', doccoMode]
+            if (pathToLanguages) args += ['-L', pathToLanguages]
+            args += ['-t', 'site\\docco.jst']
+            args += ['-c', 'site\\docco.css']
+            sourceSets.main.allSource.plus(sourceSets.test.allSource).plus(sourceSets.test.resources)
+            //Exclude generated source files as they are not documented
+                    .grep { !(it.path ==~ /.*generated-src.*/) }
+                    .each { srcFile ->
+                args += toRelFile(file(srcFile))
+            }
+            args += toRelFile(file('index.md'))
+            args += toRelFile(file('langRef.md'))
         }
-        args += toRelFile(file('index.md'))
-        args += toRelFile(file('langRef.md'))
-    }
-    copy {
-        from 'site\\public'
-        into toRelFile(file("${project.docsDir}\\docco\\public"))
+        copy {
+            from 'site\\public'
+            into toRelFile(file("${project.docsDir}\\docco\\public"))
+        }
     }
 }
 
