@@ -124,26 +124,31 @@ public class ArgParser {
                 case "--timesig":
                     help.append('\n').append(OPT_DESC_TIMESIG);
                     if (!showHelp) i = parseTimeSignature(options, args, i + 1);
+                    else i++;
                     break;
                 case "-t":
                 case "--tempo":
                     help.append('\n').append(OPT_DESC_TEMPO);
                     if (!showHelp) i = parseTempo(options, args, i + 1);
+                    else i++;
                     break;
                 case "-o":
                 case "--outdir":
                     help.append('\n').append(OPT_DESC_OUTDIR);
                     if (!showHelp) i = parseOutdir(options, args, i + 1);
+                    else i++;
                     break;
                 case "-s":
                 case "--src":
                     help.append('\n').append(OPT_DESC_SRCDIR);
                     if (!showHelp) i = parseSourceDir(options, args, i + 1);
+                    else i++;
                     break;
                 case "-sf":
                 case "--soundfont":
                     help.append('\n').append(OPT_DESC_SOUNDFONT);
                     if (!showHelp) i = parseSoundFont(options, args, i + 1);
+                    else i++;
                     break;
                 case "-p":
                 case "--play":

@@ -5,7 +5,6 @@ package cas.cs4tb3.mellowd.compiler;
 
 import cas.cs4tb3.mellowd.midi.TimingEnvironment;
 import cas.cs4tb3.mellowd.parser.*;
-import com.sun.media.sound.AudioSynthesizer;
 import org.antlr.v4.runtime.*;
 
 import javax.sound.midi.*;
@@ -13,17 +12,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 //The `Compiler` class is the main entry point for the program.
 public class Compiler {
