@@ -1,7 +1,8 @@
 def percussion block rhythmTest
 def percussion block rhythmTestMetronome
-rhythmVar -> <w, h, q, e, s>
-otherRhythmVar -> <w., h.., q..., w...., s.....>
+
+def rhythmVar -> <w, h, q, e, s>
+def otherRhythmVar -> <w., h.., q..., w...., s.....>
 
 rhythmTest {
     [a]*rhythmVar

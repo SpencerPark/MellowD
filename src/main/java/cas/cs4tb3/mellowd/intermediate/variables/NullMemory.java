@@ -12,6 +12,9 @@ public class NullMemory implements Memory {
     public void set(String identifier, Object value) { }
 
     @Override
+    public void define(String identifier, Object value) { }
+
+    @Override
     public <T> T get(String identifier, Class<T> type) {
         return null;
     }

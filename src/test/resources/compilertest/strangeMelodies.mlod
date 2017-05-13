@@ -1,6 +1,7 @@
 def block myblock
-melVar -> [c, d, e, f, g, a, b, c+1]
-myChord -> Cmaj
+
+def melVar -> [c, d, e, f, g, a, b, c+1]
+def myChord -> Cmaj
 
 myblock {
     melVar*<q>

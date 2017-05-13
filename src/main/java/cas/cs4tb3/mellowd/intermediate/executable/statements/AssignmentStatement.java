@@ -10,19 +10,17 @@ public class AssignmentStatement implements Statement {
     private final String[] qualifier;
     private final String name;
     private final Expression<?> value;
-    private final boolean isField;
+    private final boolean isFinal;
+    private final boolean delayResolution;
     private final boolean percussionToggle;
 
-    public AssignmentStatement(String[] qualifier, String name, Expression<?> value, boolean isField, boolean percussionToggle) {
+    public AssignmentStatement(String[] qualifier, String name, Expression<?> value, boolean isFinal, boolean delayResolution, boolean percussionToggle) {
         this.qualifier = qualifier;
         this.name = name;
         this.value = value;
-        this.isField = isField;
+        this.isFinal = isFinal;
+        this.delayResolution = delayResolution;
         this.percussionToggle = percussionToggle;
-    }
-
-    public AssignmentStatement(String[] qualifier, String name, Expression<?> value) {
-        this(qualifier, name, value, false, false);
     }
 
     @Override
@@ -35,13 +33,13 @@ public class AssignmentStatement implements Statement {
         }
 
         Memory memory = environment.getMemory(qualifier);
-        if (isField) {
-            //These closure assignments will build the value when it is called
-            //so that all definitions first get a chance to be assigned allowing
-            //the assignment order to not matter
-            memory.set(name, (DelayedResolution) mem -> value.evaluate(env));
-        } else {
-            memory.set(name, value.evaluate(env));
-        }
+        Object toStore = this.delayResolution
+                ? (DelayedResolution) mem -> value.evaluate(env)
+                : value.evaluate(env);
+
+        if (this.isFinal)
+            memory.define(this.name, toStore);
+        else
+            memory.set(this.name, toStore);
     }
 }

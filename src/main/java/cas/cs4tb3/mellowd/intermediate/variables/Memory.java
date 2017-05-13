@@ -6,6 +6,8 @@ public interface Memory {
     //data and will return true if it does so.
     void set(String identifier, Object value);
 
+    void define(String identifier, Object value);
+
     //`get` is the based data output method for this class. It takes
     //the name of the `identifier` to lookup and the expected type. If the value
     //does not exist this method simply returns null. If the value exists but is the wrong type

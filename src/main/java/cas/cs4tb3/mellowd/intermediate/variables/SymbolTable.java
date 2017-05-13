@@ -4,7 +4,9 @@
 package cas.cs4tb3.mellowd.intermediate.variables;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 //A symbol table holds references. It is simply a Map at its core but it provides type
 //and exception handling functionality. The `@SuppressWarnings("unchecked")` stops the compiler
@@ -12,18 +14,20 @@ import java.util.Map;
 //compiler isn't convinced that it has been checked.
 @SuppressWarnings("unchecked")
 public class SymbolTable implements Memory {
-    private final Memory superTable;
-    //The `declarations` are the actually `name -> value` mappings.
+    private final Memory parentMemory;
     private final Map<String, Object> declarations;
+    private final Set<String> finalDeclarations;
 
     public SymbolTable() {
-        this.superTable = null;
+        this.parentMemory = null;
         declarations = new HashMap<>();
+        finalDeclarations = new HashSet<>();
     }
 
-    public SymbolTable(Memory superTable) {
-        this.superTable = superTable;
+    public SymbolTable(Memory parentMemory) {
+        this.parentMemory = parentMemory;
         declarations = new HashMap<>();
+        finalDeclarations = new HashSet<>();
     }
 
     //`set` is the only data input method for this class. It adds a
@@ -31,6 +35,19 @@ public class SymbolTable implements Memory {
     //data and will return true if it does so.
     @Override
     public void set(String identifier, Object value) {
+        if (this.finalDeclarations.contains(identifier))
+            throw new AlreadyDefinedException("Cannot set value for constant value " + identifier);
+        this.declarations.put(identifier, value);
+    }
+
+    @Override
+    public void define(String identifier, Object value) {
+        if (this.finalDeclarations.contains(identifier))
+            throw new AlreadyDefinedException("Constant value " + identifier + " already defined");
+        if (this.declarations.containsKey(identifier))
+            throw new AlreadyDefinedException("Identifier " + identifier + " already exists and cannot be made into a constant");
+
+        this.finalDeclarations.add(identifier);
         this.declarations.put(identifier, value);
     }
 
@@ -42,7 +59,7 @@ public class SymbolTable implements Memory {
     @Override
     public <T> T get(String identifier, Class<T> type) {
         Object value = get(identifier);
-        if (value == null) return superTable == null ? null : superTable.get(identifier, type);
+
         return type.isInstance(value) ? (T) value : null;
     }
 
@@ -50,20 +67,16 @@ public class SymbolTable implements Memory {
     public Object get(String identifier) {
         Object value = declarations.get(identifier);
 
-        if (value == null && superTable != null)
-            return superTable.get(identifier);
+        if (value == null && parentMemory != null)
+            return parentMemory.get(identifier);
 
         if (value instanceof DelayedResolution) {
             //We have a variable that is dependent on other data. We will try to resolve it now
             value = ((DelayedResolution) value).resolve(this);
             //If the resolution is successful we will store the resolved value
             if (value != null) {
-                this.set(identifier, value);
+                this.declarations.put(identifier, value);
             }
-        } else if (value instanceof ContextDependent) {
-            //We have a variable that has a different value depending on the context. We will
-            //resolve it now but leave the context dependent instance in the table.
-            value = ((ContextDependent) value).resolve(this);
         }
 
         return value;
@@ -123,7 +136,7 @@ public class SymbolTable implements Memory {
 
     @Override
     public int countReferences() {
-        return this.declarations.size() + ( this.superTable != null ? this.superTable.countReferences() : 0 );
+        return this.declarations.size() + ( this.parentMemory != null ? this.parentMemory.countReferences() : 0 );
     }
 
     @Override
@@ -144,11 +157,11 @@ public class SymbolTable implements Memory {
                     .append(val == null ? null : val.toString())
                     .append('\n');
         });
-        if (superTable != null) {
-            if (superTable instanceof SymbolTable) {
-                ((SymbolTable) superTable).dumpInternal(indentation + 1, sb);
+        if (parentMemory != null) {
+            if (parentMemory instanceof SymbolTable) {
+                ((SymbolTable) parentMemory).dumpInternal(indentation + 1, sb);
             } else {
-                sb.append(superTable.dump());
+                sb.append(parentMemory.dump());
             }
         }
     }

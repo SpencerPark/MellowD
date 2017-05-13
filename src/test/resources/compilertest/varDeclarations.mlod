@@ -1,8 +1,8 @@
 def block myblock
 
-rhythmVar -> <w, h, q, e, s>
-chordVar -> (a$-1, b#+1, c)
-melodyVar -> [a, b, c, d, e, f, g]
+def rhythmVar -> <w, h, q, e, s>
+def chordVar -> (a$-1, b#+1, c)
+def melodyVar -> [a, b, c, d, e, f, g]
 
 myblock {
     //The variable values are not even attempted to be resolved until they are invoked

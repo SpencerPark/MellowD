@@ -1,6 +1,6 @@
 def block myblock
 
-chordVar -> (c, e, g, c+1)
+def chordVar -> (c, e, g, c+1)
 
 myblock {
     [(a, b, c)]*<q>

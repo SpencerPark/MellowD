@@ -1,7 +1,7 @@
 def percussion block percussionBlock
 
-percussionVar ->* [clap, clap]
-percussionChord ->* (snare, bass)
+def percussionVar ->* [clap, clap]
+def percussionChord ->* (snare, bass)
 
 percussionBlock {
     [bassDrum2, bass2, *]*<e>

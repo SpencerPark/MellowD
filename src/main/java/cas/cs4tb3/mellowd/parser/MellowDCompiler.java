@@ -513,12 +513,17 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
     public Statement visitVarDeclaration(MellowDParser.VarDeclarationContext ctx, boolean isField) {
         boolean percussionToggle = ctx.STAR() != null;
+        boolean isConstant = ctx.KEYWORD_DEF() != null;
+
+        if (isField && !isConstant)
+            throw new CompilationException(ctx, new IllegalStateException("All variable definitions outside of a block must be constant ('def' keyword)"));
 
         Identifier identifier = visitIdentifier(ctx.identifier());
 
         Expression<?> valueExpr = visitValue(ctx.value());
 
-        return new AssignmentStatement(identifier.qualifier, identifier.name, valueExpr, isField, percussionToggle);
+        return new AssignmentStatement(identifier.qualifier, identifier.name, valueExpr,
+                isConstant, isField, percussionToggle);
     }
 
     @Override
