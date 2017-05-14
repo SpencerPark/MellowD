@@ -1,6 +1,6 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
-group 'cas.cs4tb3'
+group 'io.github.spencerpark'
 version '2.2.0'
 
 apply plugin: 'java'
@@ -42,7 +42,7 @@ dependencies {
 //The manifest attribute makes the jar executable.
 jar {
     manifest {
-        attributes 'Main-Class': 'cas.cs4tb3.mellowd.compiler.Compiler'
+        attributes 'Main-Class': 'io.github.spencerpark.mellowd.compiler.Compiler'
     }
     //Include all shaded dependencies in the jar
     from configurations.shade
@@ -51,7 +51,7 @@ jar {
 
 processResources {
     filter ReplaceTokens, tokens: [
-            "version" : rootProject.version
+            "version": rootProject.version
     ]
 }
 
@@ -99,8 +99,8 @@ test {
 }
 
 generateGrammarSource {
-    outputDirectory = file("${outputDirectory}/cas/cs4tb3/mellowd/parser")
-    arguments += ['-package', 'cas.cs4tb3.mellowd.parser']
+    outputDirectory = file("${outputDirectory}/io/github/spencerpark/mellowd/parser")
+    arguments += ['-package', 'io.github.spencerpark.mellowd.parser']
     arguments += ['-visitor']
     arguments += ['-no-listener']
 }
