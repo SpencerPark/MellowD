@@ -1,7 +1,6 @@
 package io.github.spencerpark.mellowd.compiler;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public class CompilerOptions {
@@ -11,15 +10,39 @@ public class CompilerOptions {
 
     public static class Builder {
         private String outputDir;
-        private int timeSignature = 0x0404;
-        private int tempo = 0;
-        private int outputType = 0;
-        private List<String> sourceDirs = new ArrayList<>();
-        private List<String> soundFonts = new ArrayList<>();
-        private String source = "";
-        private boolean silent = false;
+        private int timeSignature;
+        private int tempo;
+        private int outputType;
+        private List<String> sourceDirs;
+        private List<String> soundFonts;
+        private String source;
+        private boolean silent;
 
         public Builder() {
+            this.outputDir = null;
+            this.timeSignature = 0x0404;
+            this.tempo = 0;
+            this.outputType = 0;
+            this.sourceDirs = new LinkedList<>();
+            this.soundFonts = new LinkedList<>();
+            this.source = "";
+            this.silent = false;
+        }
+
+        public Builder(CompilerOptions.Builder extend) {
+            this.outputDir = extend.outputDir;
+            this.timeSignature = extend.timeSignature;
+            this.tempo = extend.tempo;
+            this.outputType = extend.outputType;
+
+            this.sourceDirs = new LinkedList<>();
+            this.sourceDirs.addAll(extend.sourceDirs);
+
+            this.soundFonts = new LinkedList<>();
+            this.soundFonts.addAll(extend.soundFonts);
+
+            this.source = extend.source;
+            this.silent = extend.silent;
         }
 
         public Builder setOutputDir(String outputDir) {
@@ -68,8 +91,8 @@ public class CompilerOptions {
                     this.timeSignature == 0 ? 0x0404 : this.timeSignature,
                     this.tempo == 0 ? 120 : this.tempo,
                     this.outputType == 0 ? OUTPUT_MIDI : this.outputType,
-                    this.sourceDirs == null ? Collections.emptyList() : this.sourceDirs,
-                    this.soundFonts == null ? Collections.emptyList() : this.soundFonts,
+                    this.sourceDirs,
+                    this.soundFonts,
                     this.silent,
                     this.source == null ? "" : this.source
             );
