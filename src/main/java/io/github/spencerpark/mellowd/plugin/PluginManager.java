@@ -80,9 +80,40 @@ public class PluginManager {
     }
 
     /**
+     * Apply the plugins with the given id's if they are loaded.
+     *
+     * @param mellowD the {@link MellowD} instance to apply the requested
+     *                plugins on.
+     * @param plugins the plugins to apply
+     */
+    public void applyIfLoaded(MellowD mellowD, Iterable<String> plugins) {
+        plugins.forEach(pluginId -> {
+            MellowDPlugin plugin = getPlugin(pluginId);
+            if (plugin != null) plugin.apply(mellowD);
+        });
+    }
+
+    /**
+     * Apply the plugins with the given id's. If they are not loaded, they
+     * will try to be loaded
+     *
+     * @param mellowD the {@link MellowD} instance to apply the requested
+     *                plugins on.
+     * @param plugins the plugins to apply
+     *
+     * @throws PluginLoadException if a plugin could not be loaded
+     */
+    public void applySome(MellowD mellowD, Iterable<String> plugins) throws PluginLoadException {
+        for (String pluginId : plugins) {
+            MellowDPlugin plugin = getOrLoadPlugin(pluginId);
+            if (plugin != null) plugin.apply(mellowD);
+        }
+    }
+
+    /**
      * Unload all of the plugins from this manager
      */
-    private void unloadAll() {
+    public void unloadAll() {
         this.plugins.values().forEach(MellowDPlugin::onUnload);
         this.plugins.clear();
     }

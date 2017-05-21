@@ -46,11 +46,8 @@ public class FunctionBank {
     }
 
     public boolean addFunction(Function function) {
-        PercussionPair pair = this.functionSignatures.get(function.getSignature());
-        if (pair == null) {
-            pair = new PercussionPair();
-            this.functionSignatures.put(function.getSignature(), pair);
-        }
+        PercussionPair pair = this.functionSignatures
+                .computeIfAbsent(function.getSignature(), signature -> new PercussionPair());
 
         return pair.putFunction(function);
     }
@@ -123,5 +120,18 @@ public class FunctionBank {
         }
 
         return possible;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder("\nFunctions: {\n");
+        this.functionSignatures.forEach((sig, pair) -> {
+            if (pair.getHarmonicVariant() != null)
+                str.append("\t").append(sig).append("\n");
+            if (pair.getPercussionVariant() != null)
+                str.append("\t").append(sig).append("\n");
+        });
+        str.append("}");
+        return str.toString();
     }
 }

@@ -114,7 +114,7 @@ public class MellowD implements ExecutionEnvironment {
         return this.functions.get(qualifier);
     }
 
-    public FunctionBank getOrCreateFunctionBank(String[] qualifier) {
+    public FunctionBank getOrCreateFunctionBank(String... qualifier) {
         FunctionBank bank = this.functions.get(qualifier);
 
         if (bank == null) {

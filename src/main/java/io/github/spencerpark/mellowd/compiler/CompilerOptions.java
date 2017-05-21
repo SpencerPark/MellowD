@@ -15,6 +15,7 @@ public class CompilerOptions {
         private int outputType;
         private List<String> sourceDirs;
         private List<String> soundFonts;
+        private List<String> plugins;
         private String source;
         private boolean silent;
 
@@ -25,6 +26,7 @@ public class CompilerOptions {
             this.outputType = 0;
             this.sourceDirs = new LinkedList<>();
             this.soundFonts = new LinkedList<>();
+            this.plugins = new LinkedList<>();
             this.source = "";
             this.silent = false;
         }
@@ -40,6 +42,9 @@ public class CompilerOptions {
 
             this.soundFonts = new LinkedList<>();
             this.soundFonts.addAll(extend.soundFonts);
+
+            this.plugins = new LinkedList<>();
+            this.soundFonts.addAll(extend.plugins);
 
             this.source = extend.source;
             this.silent = extend.silent;
@@ -75,6 +80,11 @@ public class CompilerOptions {
             return this;
         }
 
+        public Builder addPlugin(String plugin) {
+            this.plugins.add(plugin);
+            return this;
+        }
+
         public Builder setSilent(boolean silent) {
             this.silent = silent;
             return this;
@@ -93,6 +103,7 @@ public class CompilerOptions {
                     this.outputType == 0 ? OUTPUT_MIDI : this.outputType,
                     this.sourceDirs,
                     this.soundFonts,
+                    this.plugins,
                     this.silent,
                     this.source == null ? "" : this.source
             );
@@ -105,16 +116,19 @@ public class CompilerOptions {
     private final int outputType;
     private final List<String> sourceDirs;
     private final List<String> soundFonts;
+    private final List<String> plugins;
     private final boolean silent;
     private final String source;
 
-    public CompilerOptions(String outputDir, int timeSignature, int tempo, int outputType, List<String> sourceDirs, List<String> soundFonts, boolean silent, String source) {
+    public CompilerOptions(String outputDir, int timeSignature, int tempo, int outputType, List<String> sourceDirs,
+                           List<String> soundFonts, List<String> plugins, boolean silent, String source) {
         this.outputDir = outputDir;
         this.timeSignature = timeSignature;
         this.tempo = tempo;
         this.outputType = outputType;
         this.sourceDirs = sourceDirs;
         this.soundFonts = soundFonts;
+        this.plugins = plugins;
         this.silent = silent;
         this.source = source;
     }
@@ -220,6 +234,17 @@ public class CompilerOptions {
      */
     public List<String> getSoundFonts() {
         return this.soundFonts;
+    }
+
+    /**
+     * Get the list of the plugins required for execution. They must be available
+     * on the classpath and have an associated, properly formatted
+     * {@link io.github.spencerpark.mellowd.plugin.PluginMetaData} file.
+     *
+     * @return a list of plugin ids
+     */
+    public List<String> getPlugins() {
+        return this.plugins;
     }
 
     /**

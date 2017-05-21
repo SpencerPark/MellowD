@@ -1,7 +1,7 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
 group 'io.github.spencerpark'
-version '2.3.0'
+version '2.3.1'
 
 apply plugin: 'java'
 apply plugin: 'antlr'
@@ -50,6 +50,10 @@ jar {
 }
 
 processResources {
+    //Register the version as a property because the ot of date checks
+    //will see the metadata file as UP-TO-DATE since it only stores
+    //the @version@ token
+    inputs.property('version-meta', rootProject.version)
     filter ReplaceTokens, tokens: [
             "version": rootProject.version
     ]

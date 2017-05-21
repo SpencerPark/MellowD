@@ -1,9 +1,11 @@
 package io.github.spencerpark.mellowd.intermediate.functions;
 
+import io.github.spencerpark.mellowd.parser.ExecutionEnvironment;
+
 public class FunctionResolutionException extends RuntimeException {
     private final String message;
 
-    public FunctionResolutionException(FunctionBank.PercussionPair[] resolved, String name, boolean percussion, Argument<?>... arguments) {
+    public FunctionResolutionException(FunctionBank.PercussionPair[] resolved, String name, ExecutionEnvironment env, Argument<?>... arguments) {
         StringBuilder sb;
         if (resolved.length == 0) {
             sb = new StringBuilder("No functions match the signature described by ");
@@ -12,11 +14,11 @@ public class FunctionResolutionException extends RuntimeException {
         }
 
         sb.append(name);
-        if (percussion) sb.append('*');
+        if (env.isPercussion()) sb.append('*');
         sb.append("(");
         if (arguments.length > 0) {
-            sb.append(arguments[0]);
-            for (int i = 1; i < arguments.length; i++) sb.append(", ").append(arguments[i]);
+            sb.append(arguments[0].toString(env));
+            for (int i = 1; i < arguments.length; i++) sb.append(", ").append(arguments[i].toString(env));
         }
         sb.append(").");
 

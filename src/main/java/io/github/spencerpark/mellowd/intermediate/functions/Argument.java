@@ -1,9 +1,11 @@
 package io.github.spencerpark.mellowd.intermediate.functions;
 
 import io.github.spencerpark.mellowd.intermediate.executable.expressions.Expression;
+import io.github.spencerpark.mellowd.parser.ExecutionEnvironment;
 
 public class Argument<T> {
     private static final Argument<?> EMPTY_ARG_INSTANCE = new Argument<>(null, null);
+
     public static <T> Argument<T> getEmptyArgInstance() {
         return (Argument<T>) EMPTY_ARG_INSTANCE;
     }
@@ -46,12 +48,18 @@ public class Argument<T> {
         return isDeclaredNull() && !isNamed();
     }
 
-    @Override
-    public String toString() {
+    public String toString(ExecutionEnvironment env) {
         StringBuilder sb = new StringBuilder();
         if (isNamed()) sb.append(name).append(':');
         if (isDeclaredNull()) sb.append("null");
-        else                  sb.append(value);
+        else sb.append(env != null
+                ? value.evaluate(env)
+                : value.getClass().getSimpleName());
         return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toString(null);
     }
 }

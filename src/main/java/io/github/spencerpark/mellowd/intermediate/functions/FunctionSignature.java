@@ -24,7 +24,7 @@ public class FunctionSignature {
 
     @Override
     public String toString() {
-        return name + parameters;
+        return parameters.toString() + " => " + name;
     }
 
     @Override

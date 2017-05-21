@@ -4,6 +4,7 @@
 package io.github.spencerpark.mellowd;
 
 import io.github.spencerpark.mellowd.compiler.Compiler;
+import io.github.spencerpark.mellowd.compiler.CompilerOptions;
 import io.github.spencerpark.mellowd.parser.CompilationException;
 import io.github.spencerpark.mellowd.parser.ParseException;
 import io.github.spencerpark.mellowd.parser.SyntaxErrorReport;
@@ -96,7 +97,12 @@ public class CompilerTest {
                     TEST_NUM.getAndIncrement(), this.toCompile.getName(), this.outFile.getName(),
                     this.tempo, this.timeNumerator, this.timeDenominator);
             System.out.print("-----------------------------------------------------------------------------------\n");
-            Sequence compilationResult = Compiler.compile(toCompile, timeNumerator, timeDenominator, tempo, false);
+            CompilerOptions options = new CompilerOptions.Builder()
+                    .setTimeSignature(timeNumerator, timeDenominator)
+                    .setTempo(tempo)
+                    .setSilent(true)
+                    .build();
+            Sequence compilationResult = Compiler.compile(toCompile, options);
             writeOut(compilationResult);
             System.out.println();
         } catch (IOException e) {

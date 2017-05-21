@@ -7,6 +7,7 @@ import io.github.spencerpark.mellowd.intermediate.variables.SymbolTable;
 import io.github.spencerpark.mellowd.parser.ExecutionEnvironment;
 
 import java.util.Arrays;
+import java.util.StringJoiner;
 
 public class Parameters {
     private final Parameter<?>[] params;
@@ -98,7 +99,10 @@ public class Parameters {
 
     @Override
     public String toString() {
-        return Arrays.toString(params);
+        StringJoiner str = new StringJoiner(", ", "{ ", " }");
+        for (Parameter<?> p : params)
+            str.add(p.toString());
+        return str.toString();
     }
 
     @Override

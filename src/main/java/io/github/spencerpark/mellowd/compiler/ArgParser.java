@@ -12,7 +12,8 @@ public class ArgParser {
     private static final String USAGE_MESSAGE = "" +
             "usage: mellowd [-h] [-p] [-ts numerator denominator] [-t tempo]\n" +
             "               [-o output_dir] [-s source_dir]... [-sf font]...\n" +
-            "               [-wav] [-mid] [--silent] [source_file]           ";
+            "               [-pl plugin] [-wav] [-mid] [--silent]           \n" +
+            "               [source_file]";
 
     private static final String OPT_DESC_HELP = "" +
             "    -h: display help about the usage of the mellowd command. Any\n" +
@@ -44,6 +45,10 @@ public class ArgParser {
             "                      paths to be loaded during MIDI playback.  \n" +
             "      font: path to the sound font (conventionally *.sf2, *.dls)\n" +
             "            Absolute path or relative to the calling directory.  ";
+    private static final String OPT_DESC_PLUGIN = "" +
+            "    -pl, --plugin: add a plugin id to the list of plugins to    \n" +
+            "                   apply during execution.                      \n" +
+            "      plugin: the plugin id to apply";
     private static final String OPT_DESC_WAV = "" +
             "    -wav, --wave: set the output to include a .wav file. If no  \n" +
             "                  output modifier is given (-p, -wav, -mid) the \n" +
@@ -150,6 +155,12 @@ public class ArgParser {
                     if (!showHelp) i = parseSoundFont(options, args, i + 1);
                     else i++;
                     break;
+                case "-pl":
+                case "--plugin":
+                    help.append('\n').append(OPT_DESC_PLUGIN);
+                    if (!showHelp) i = parsePlugin(options, args, i + 1);
+                    else i++;
+                    break;
                 case "-p":
                 case "--play":
                     help.append('\n').append(OPT_DESC_PLAY);
@@ -193,6 +204,7 @@ public class ArgParser {
                 help.append('\n').append(OPT_DESC_OUTDIR);
                 help.append('\n').append(OPT_DESC_SRCDIR);
                 help.append('\n').append(OPT_DESC_SOUNDFONT);
+                help.append('\n').append(OPT_DESC_PLUGIN);
                 help.append('\n').append(OPT_DESC_PLAY);
                 help.append('\n').append(OPT_DESC_WAV);
                 help.append('\n').append(OPT_DESC_MID);
@@ -271,6 +283,17 @@ public class ArgParser {
         String soundFont = args[pos];
 
         options.addSoundFont(soundFont);
+
+        return pos + 1;
+    }
+
+    private static int parsePlugin(CompilerOptions.Builder options, String[] args, int pos) throws Help {
+        if (args.length < pos + 1)
+            throw new Help("[Parse Error]: Expected plugin id to follow " + args[pos - 1]);
+
+        String pluginId = args[pos];
+
+        options.addPlugin(pluginId);
 
         return pos + 1;
     }

@@ -5,13 +5,17 @@ package io.github.spencerpark.mellowd.compiler;
 
 import io.github.spencerpark.mellowd.midi.TimingEnvironment;
 import io.github.spencerpark.mellowd.parser.*;
-import org.antlr.v4.runtime.*;
+import io.github.spencerpark.mellowd.plugin.PluginManager;
+import org.antlr.v4.runtime.ANTLRFileStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.TokenStream;
 
 import javax.sound.midi.*;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -75,11 +79,7 @@ public class Compiler {
         Sequence compilationResult = null;
         try {
             //Compile the input file with the given timing arguments.
-            compilationResult = compile(toCompile,
-                    (byte) options.getTimeSignatureTop(),
-                    (byte) options.getTimeSignatureBottom(),
-                    options.getTempo(),
-                    options.wantsVerbose());
+            compilationResult = compile(toCompile, options);
 
             //Display the duration of the compiled song in seconds.
             if (options.wantsVerbose()) {
@@ -279,41 +279,37 @@ public class Compiler {
         };
     }
 
-    public static Sequence compile(File src, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {
+    public static Sequence compile(File src, CompilerOptions options) throws Exception {
+        return compile(src, options, null);
+    }
+
+    public static Sequence compile(File src, CompilerOptions options, PluginManager plugins) throws Exception {
         return compile(new ANTLRFileStream(src.getAbsolutePath()),
-                new CompositeSourceFinder(
-                        new DirectorySourceFinder(src.getAbsoluteFile().getParentFile(), FILE_EXTENSION),
-                        new ResourceSourceFinder(FILE_EXTENSION)
-                ),
-                numerator,
-                denominator,
-                tempo,
-                verbose);
+                new DirectorySourceFinder(src.getAbsoluteFile().getParentFile(), FILE_EXTENSION),
+                options,
+                plugins);
     }
 
-    public static Sequence compile(Reader src, SourceFinder srcFinder, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {
-        return compile(new ANTLRInputStream(src), srcFinder, numerator, denominator, tempo, verbose);
+    public static Sequence compile(CharStream inStream, SourceFinder srcFinder, CompilerOptions options) throws Exception {
+        return compile(inStream, srcFinder, options, null);
     }
 
-    public static Sequence compile(InputStream src, SourceFinder srcFinder, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {
-        return compile(new ANTLRInputStream(src), srcFinder, numerator, denominator, tempo, verbose);
-    }
+    public static Sequence compile(CharStream inStream, SourceFinder srcFinder, CompilerOptions options, PluginManager plugins) throws Exception {
+        List<SourceFinder> sourceFinders = new LinkedList<>();
+        //First priority is the given finder
+        if (srcFinder != null) sourceFinders.add(srcFinder);
+        //Second is the user requested additional directories
+        options.getSourceDirs().forEach(dir ->
+                    sourceFinders.add(new DirectorySourceFinder(new File(dir).getAbsoluteFile(), FILE_EXTENSION)));
+        //Last priority is to look in the classpath
+        sourceFinders.add(new ResourceSourceFinder(FILE_EXTENSION));
+        srcFinder = new CompositeSourceFinder(sourceFinders.toArray(new SourceFinder[sourceFinders.size()]));
 
-    public static Sequence compile(String src, SourceFinder srcFinder, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {
-        return compile(new ANTLRInputStream(src), srcFinder, numerator, denominator, tempo, verbose);
-    }
-
-    public static Sequence compile(char[] src, int numCharsInSrc, SourceFinder srcFinder, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {
-        return compile(new ANTLRInputStream(src, numCharsInSrc), srcFinder, numerator, denominator, tempo, verbose);
-    }
-
-    //`compile` is the method that actually runs the compiler.
-    public static Sequence compile(CharStream inStream, SourceFinder srcFinder, byte numerator, byte denominator, int tempo, boolean verbose) throws Exception {
         //First we will display the inputs being used so they can double check everything
         //is as expected.
-        if (verbose) {
-            System.out.printf("Time Signature: %d / %d\n", numerator, denominator);
-            System.out.printf("Tempo: %d bpm\n", tempo);
+        if (options.wantsVerbose()) {
+            System.out.printf("Time Signature: %d / %d\n", options.getTimeSignatureTop(), options.getTimeSignatureBottom());
+            System.out.printf("Tempo: %d bpm\n", options.getTempo());
             System.out.printf("Compiling: %s\n", inStream.getSourceName());
         }
 
@@ -331,7 +327,7 @@ public class Compiler {
         lexer.addErrorListener(errorListener);
         parser.addErrorListener(errorListener);
 
-        TimingEnvironment timingEnvironment = new TimingEnvironment(numerator, denominator, tempo);
+        TimingEnvironment timingEnvironment = new TimingEnvironment(options.getTimeSignatureTop(), options.getTimeSignatureBottom(), options.getTempo());
 
         //Parse the input!
         long parseStart = System.nanoTime();
@@ -339,43 +335,59 @@ public class Compiler {
         if (errorListener.encounteredError())
             throw new ParseException(errorListener.getErrors());
 
-        if (verbose) {
+        if (options.wantsVerbose()) {
             long parseTime = System.nanoTime() - parseStart;
             System.out.printf("Parsing took %.4f s\n",
                     parseTime / NS_PER_SEC);
         }
 
-        MellowD compilationResult = new MellowD(srcFinder, timingEnvironment);
-        MellowDCompiler walker = new MellowDCompiler(compilationResult);
+        //If a plugin manager is not given, make a new one. If a new one is made it
+        //should be cleaned up in the end.
+        boolean freshPluginManager = false;
+        if (plugins == null) {
+            plugins = new PluginManager();
+            freshPluginManager = true;
+        }
 
-        if (!parseTree.importStatement().isEmpty()) {
-            //Compile the dependencies
-            long dependencyCompStart = System.nanoTime();
-            parseTree.importStatement().forEach(walker::visitImportStatement);
-            if (verbose) {
-                long dependencyCompTime = System.nanoTime() - dependencyCompStart;
-                System.out.printf("Dependency compilation took %.4f s\n",
-                        dependencyCompTime / NS_PER_SEC);
+        MellowD mellowD = new MellowD(srcFinder, timingEnvironment);
+
+        plugins.applySome(mellowD, options.getPlugins());
+
+        try {
+            MellowDCompiler walker = new MellowDCompiler(mellowD);
+
+            if (!parseTree.importStatement().isEmpty()) {
+                //Compile the dependencies
+                long dependencyCompStart = System.nanoTime();
+                parseTree.importStatement().forEach(walker::visitImportStatement);
+                if (options.wantsVerbose()) {
+                    long dependencyCompTime = System.nanoTime() - dependencyCompStart;
+                    System.out.printf("Dependency compilation took %.4f s\n",
+                            dependencyCompTime / NS_PER_SEC);
+                }
             }
-        }
 
-        //Compile the body
-        long compileStart = System.nanoTime();
-        walker.visitSong(parseTree);
-        if (verbose) {
-            long compileTime = System.nanoTime() - compileStart;
-            System.out.printf("Compilation took %.4f s\n",
-                    compileTime / NS_PER_SEC);
-        }
+            //Compile the body
+            long compileStart = System.nanoTime();
+            walker.visitSong(parseTree);
+            if (options.wantsVerbose()) {
+                long compileTime = System.nanoTime() - compileStart;
+                System.out.printf("Compilation took %.4f s\n",
+                        compileTime / NS_PER_SEC);
+            }
 
-        //Execute all of the compiled statements to build the output
-        long executionStart = System.nanoTime();
-        Sequence result = compilationResult.execute();
-        if (verbose) {
-            long executionTime = System.nanoTime() - executionStart;
-            System.out.printf("Execution took %.4f s\n",
-                    executionTime / NS_PER_SEC);
+            //Execute all of the compiled statements to build the output
+            long executionStart = System.nanoTime();
+            Sequence result = mellowD.execute();
+            if (options.wantsVerbose()) {
+                long executionTime = System.nanoTime() - executionStart;
+                System.out.printf("Execution took %.4f s\n",
+                        executionTime / NS_PER_SEC);
+            }
+            return result;
+        } finally {
+            //No matter what we need to clean up the plugin manager
+            if (freshPluginManager) plugins.unloadAll();
         }
-        return result;
     }
 }
