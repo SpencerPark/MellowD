@@ -3,6 +3,7 @@ package io.github.spencerpark.mellowd.intermediate.executable;
 import io.github.spencerpark.mellowd.parser.CompilationException;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class SourceLink {
@@ -17,7 +18,7 @@ public class SourceLink {
         this.line = info.getStart().getLine();
         this.startPosInLine = info.getStart().getCharPositionInLine();
         this.stop = info.getStop().getStopIndex();
-        this.text = info.getText();
+        this.text = info.start.getInputStream().getText(Interval.of(this.start, this.stop));
     }
 
     public SourceLink(TerminalNode node) {

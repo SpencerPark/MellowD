@@ -33,6 +33,7 @@ public class AssignmentStatement implements Statement {
         }
 
         Memory memory = environment.getMemory(qualifier);
+        if (memory == null) memory = environment.createScope(qualifier);
         Object toStore = this.delayResolution
                 ? (DelayedResolution) mem -> value.evaluate(env)
                 : value.evaluate(env);

@@ -3,6 +3,7 @@ package io.github.spencerpark.mellowd.parser;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -47,7 +48,7 @@ public class CompilationException extends RuntimeException {
         this.line = problem.start.getLine();
         this.startPosInLine = problem.start.getCharPositionInLine();
         this.stop = problem.stop.getStopIndex();
-        this.text = problem.getText();
+        this.text = problem.start.getInputStream().getText(Interval.of(this.start, this.stop));
     }
 
     public CompilationException(ParseTree problem, Throwable cause) {
