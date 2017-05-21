@@ -49,5 +49,26 @@ public enum Articulation {
     //next note to take.
     //A gliscando on a chord will be performed as a *roll*. A quick melody made up of each note in
     //the chord in order.
-    GLISCANDO
+    GLISCANDO;
+
+    @Override
+    public String toString() {
+        switch (this) {
+            case STACCATO:
+                return ".";
+            case STACCATISSIMO:
+                return "!";
+            case MARCATO:
+                return "^";
+            case ACCENT:
+                return "`";
+            case TENUTO:
+                return "_";
+            case GLISCANDO:
+                return "~";
+            case NONE:
+            default:
+                return "";
+        }
+    }
 }

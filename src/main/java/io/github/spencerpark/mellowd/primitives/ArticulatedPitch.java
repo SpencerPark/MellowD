@@ -45,4 +45,9 @@ public class ArticulatedPitch implements Articulated {
     public Articulated articulate(Articulation articulation) {
         return new ArticulatedPitch(this.pitch, articulation);
     }
+
+    @Override
+    public String toString() {
+        return this.pitch.toString() + this.articulation.toString();
+    }
 }

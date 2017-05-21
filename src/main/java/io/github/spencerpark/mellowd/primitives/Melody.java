@@ -9,6 +9,7 @@ import io.github.spencerpark.mellowd.intermediate.functions.operations.OctaveShi
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 
 //A melody is a sequence of pitches played one after the other. Melodies are
 //described in Mellow D source files as pitch descriptions between `[` and `]`.
@@ -120,5 +121,12 @@ public class Melody implements Indexable<Articulated, Melody>, OctaveShiftable<M
         Indexable.forEachInRange(lower, upper, i -> newElements.add(sounds.get(Indexable.calcIndex(i, size))));
 
         return new Melody(newElements);
+    }
+
+    @Override
+    public String toString() {
+        StringJoiner str = new StringJoiner(", ", "[", "]");
+        this.sounds.forEach(sound -> str.add(sound.toString()));
+        return str.toString();
     }
 }

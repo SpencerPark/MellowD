@@ -8,10 +8,7 @@ import io.github.spencerpark.mellowd.intermediate.functions.operations.Indexable
 import io.github.spencerpark.mellowd.intermediate.functions.operations.OctaveShiftable;
 import io.github.spencerpark.mellowd.intermediate.functions.operations.Transposable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -218,15 +215,10 @@ public class Chord implements Transposable<Chord>, Articulatable, Indexable<Pitc
     //as it would appear in a source file.
     @Override
     public String toString() {
-        if (this.pitches.length == 0) return "()";
-
-        StringBuilder sb = new StringBuilder("(");
-        for (Pitch p : this.pitches) {
-            sb.append(p.toString()).append(", ");
-        }
-        sb.setLength(sb.length()-2);
-        sb.append(")");
-        return sb.toString();
+        StringJoiner str = new StringJoiner(", ", "(", ")");
+        for (Pitch pitch : this.pitches)
+            str.add(pitch.toString());
+        return str.toString();
     }
 
     //Triads

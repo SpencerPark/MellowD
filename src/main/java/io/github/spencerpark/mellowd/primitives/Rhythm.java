@@ -97,16 +97,8 @@ public class Rhythm implements Slurrable, Indexable<Beat, Rhythm> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("<");
-
-        for (Beat b : this.beats)
-            sb.append(b).append(", ");
-
-        if (sb.length() > 1)
-            sb.setLength(sb.length() - 2);
-
-        sb.append('>');
-
-        return sb.toString();
+        StringJoiner str = new StringJoiner(", ", "<", ">");
+        this.beats.forEach(beat -> str.add(beat.toString()));
+        return str.toString();
     }
 }

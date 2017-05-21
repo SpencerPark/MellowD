@@ -45,4 +45,9 @@ public class ArticulatedChord implements Articulated {
     public Articulated articulate(Articulation articulation) {
         return new ArticulatedChord(this.chord, articulation);
     }
+
+    @Override
+    public String toString() {
+        return this.chord.toString() + this.articulation.toString();
+    }
 }
