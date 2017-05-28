@@ -10,8 +10,8 @@ options {
 
 //Declare all of the imports needed. These go in the class header
 @header {
-import io.github.spencerpark.mellowd.primitives.*;
-import io.github.spencerpark.mellowd.intermediate.functions.operations.Comparable;
+import org.mellowd.primitives.*;
+import org.mellowd.intermediate.functions.operations.Comparable;
 import java.util.LinkedList;
 }
 

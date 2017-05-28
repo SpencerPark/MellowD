@@ -1,7 +1,7 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
-group 'io.github.spencerpark'
-version '2.3.2'
+group 'org.mellowd'
+version '2.3.3'
 
 apply plugin: 'java'
 apply plugin: 'antlr'
@@ -42,7 +42,7 @@ dependencies {
 //The manifest attribute makes the jar executable.
 jar {
     manifest {
-        attributes 'Main-Class': 'io.github.spencerpark.mellowd.compiler.Compiler'
+        attributes 'Main-Class': 'org.mellowd.compiler.Compiler'
     }
     //Include all shaded dependencies in the jar
     from configurations.shade
@@ -99,12 +99,12 @@ task docco {
 }
 
 test {
-    reports.html.destination = file("${project.docsDir}\\docco\\tests")
+    reports.html.destination = file("$project.docsDir\\docco\\tests")
 }
 
 generateGrammarSource {
-    outputDirectory = file("${outputDirectory}/io/github/spencerpark/mellowd/parser")
-    arguments += ['-package', 'io.github.spencerpark.mellowd.parser']
+    outputDirectory = file("$outputDirectory/org/mellowd/parser")
+    arguments += ['-package', 'org.mellowd.parser']
     arguments += ['-visitor']
     arguments += ['-no-listener']
 }
