@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mellowd.intermediate.executable.expressions.Expression;
-import org.mellowd.parser.MellowDParser;
+import org.mellowd.compiler.MellowDParser;
 import org.mellowd.testutil.CompilerTestFrame;
 import org.mellowd.testutil.DummyEnvironment;
 

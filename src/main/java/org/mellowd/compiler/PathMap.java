@@ -1,4 +1,4 @@
-package org.mellowd.parser;
+package org.mellowd.compiler;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

@@ -3,11 +3,11 @@
 
 package org.mellowd;
 
-import org.mellowd.compiler.Compiler;
-import org.mellowd.compiler.CompilerOptions;
-import org.mellowd.parser.CompilationException;
-import org.mellowd.parser.ParseException;
-import org.mellowd.parser.SyntaxErrorReport;
+import org.mellowd.io.Compiler;
+import org.mellowd.io.CompilerOptions;
+import org.mellowd.compiler.CompilationException;
+import org.mellowd.compiler.ParseException;
+import org.mellowd.compiler.SyntaxErrorReport;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.junit.Test;

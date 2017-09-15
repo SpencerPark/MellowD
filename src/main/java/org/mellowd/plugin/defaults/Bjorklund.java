@@ -2,7 +2,7 @@ package org.mellowd.plugin.defaults;
 
 import org.mellowd.intermediate.functions.*;
 import org.mellowd.intermediate.variables.Memory;
-import org.mellowd.parser.MellowD;
+import org.mellowd.compiler.MellowD;
 import org.mellowd.plugin.MellowDPlugin;
 import org.mellowd.primitives.Melody;
 import org.mellowd.primitives.Pitch;

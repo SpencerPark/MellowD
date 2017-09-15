@@ -1,12 +1,12 @@
 package org.mellowd.testutil;
 
-import org.mellowd.compiler.Compiler;
-import org.mellowd.compiler.DirectorySourceFinder;
-import org.mellowd.compiler.ResourceSourceFinder;
-import org.mellowd.compiler.SourceFinder;
+import org.mellowd.io.Compiler;
+import org.mellowd.io.DirectorySourceFinder;
+import org.mellowd.io.ResourceSourceFinder;
+import org.mellowd.io.SourceFinder;
 import org.mellowd.midi.TimingEnvironment;
-import org.mellowd.parser.MellowD;
-import org.mellowd.parser.MellowDCompiler;
+import org.mellowd.compiler.MellowD;
+import org.mellowd.compiler.MellowDCompiler;
 import org.antlr.v4.runtime.ANTLRInputStream;
 
 import java.io.File;

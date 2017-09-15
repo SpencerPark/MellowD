@@ -3,7 +3,7 @@ package org.mellowd.intermediate.executable.statements;
 import org.mellowd.intermediate.Output;
 import org.mellowd.intermediate.executable.expressions.Expression;
 import org.mellowd.intermediate.variables.Memory;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 public class RepeatedCodeBlock extends CodeBlock {
     public static final String IMPLICIT_LOOP_COUNTER_ID = "it";

@@ -3,7 +3,7 @@ package org.mellowd.intermediate.executable.statements;
 import org.mellowd.intermediate.Output;
 import org.mellowd.intermediate.Playable;
 import org.mellowd.intermediate.executable.SourceLink;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 public class ContextFreeStatement implements Statement {
     private final Playable playable;

@@ -1,6 +1,6 @@
 package org.mellowd.intermediate.executable.expressions;
 
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 import org.mellowd.intermediate.functions.operations.Articulatable;
 import org.mellowd.primitives.Articulated;
 import org.mellowd.primitives.Articulation;

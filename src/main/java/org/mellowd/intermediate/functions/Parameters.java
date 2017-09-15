@@ -4,7 +4,7 @@ import org.mellowd.intermediate.variables.IncorrectTypeException;
 import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.intermediate.variables.Reference;
 import org.mellowd.intermediate.variables.SymbolTable;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 import java.util.Arrays;
 import java.util.StringJoiner;

@@ -2,7 +2,7 @@ package org.mellowd.intermediate.executable.expressions;
 
 import org.mellowd.intermediate.executable.SourceLink;
 import org.mellowd.intermediate.variables.IncorrectTypeException;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 public class RuntimeTypeCheck<T> implements Expression<T> {
     private final Class<T> type;

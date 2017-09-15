@@ -17,8 +17,8 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mellowd.parser.MellowDLexer;
-import org.mellowd.parser.MellowDParser;
+import org.mellowd.compiler.MellowDLexer;
+import org.mellowd.compiler.MellowDParser;
 
 import java.io.*;
 import java.lang.reflect.Method;

@@ -1,6 +1,6 @@
 package org.mellowd.intermediate.functions;
 
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 public class FunctionResolutionException extends RuntimeException {
     private final String message;

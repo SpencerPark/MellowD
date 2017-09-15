@@ -1,10 +1,10 @@
 //Compiler
 //========
 
-package org.mellowd.compiler;
+package org.mellowd.io;
 
 import org.mellowd.midi.TimingEnvironment;
-import org.mellowd.parser.*;
+import org.mellowd.compiler.*;
 import org.mellowd.plugin.PluginManager;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;

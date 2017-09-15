@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public final class MIDIControl<T> {
+public final class MIDIControl<T extends MIDIController> {
     private static final Map<String, MIDIControl> lookupByName = new HashMap<>();
 
     public static final MIDIControl<Knob>  PORTAMENTO_TIME  = new MIDIControl<>("PORTAMENTO_TIME", GeneralMidiConstants.PORTAMENTO_TIME_KNOB_CC, Knob.class, Knob::new);

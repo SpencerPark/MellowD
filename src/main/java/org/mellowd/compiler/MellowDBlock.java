@@ -1,4 +1,4 @@
-package org.mellowd.parser;
+package org.mellowd.compiler;
 
 import org.mellowd.intermediate.*;
 import org.mellowd.midi.TimingEnvironment;
@@ -40,6 +40,10 @@ public class MellowDBlock implements Output, ExecutionEnvironment {
 
     public CodeExecutor createExecutor() {
         return new CodeExecutor(name, this, this, code);
+    }
+
+    protected MIDIChannel getMIDIChannel() {
+        return this.channel;
     }
 
     @Override
@@ -87,6 +91,10 @@ public class MellowDBlock implements Output, ExecutionEnvironment {
             durationSinceGradualStart = new Beat(phrase.getDuration().getNumQuarters() + durationSinceGradualStart.getNumQuarters());
         }
         phrase.play(channel);
+    }
+
+    public void clearCode() {
+        this.code.clear();
     }
 
     @Override

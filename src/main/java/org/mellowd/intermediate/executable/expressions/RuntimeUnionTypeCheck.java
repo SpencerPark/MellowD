@@ -2,7 +2,7 @@ package org.mellowd.intermediate.executable.expressions;
 
 import org.mellowd.intermediate.executable.SourceLink;
 import org.mellowd.intermediate.variables.IncorrectTypeException;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 /**
  * Preforms a type check but due to the lack of a union type it implements and

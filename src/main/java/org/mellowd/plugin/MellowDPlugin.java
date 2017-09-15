@@ -1,6 +1,6 @@
 package org.mellowd.plugin;
 
-import org.mellowd.parser.MellowD;
+import org.mellowd.compiler.MellowD;
 
 @FunctionalInterface
 public interface MellowDPlugin {

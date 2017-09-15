@@ -1,6 +1,5 @@
-package org.mellowd.parser;
+package org.mellowd.compiler;
 
-import org.mellowd.compiler.SourceFinder;
 import org.mellowd.intermediate.executable.CodeExecutor;
 import org.mellowd.intermediate.executable.statements.PercussionToggledEnvironment;
 import org.mellowd.intermediate.functions.DefaultFunctions;
@@ -8,25 +7,28 @@ import org.mellowd.intermediate.functions.FunctionBank;
 import org.mellowd.intermediate.variables.AlreadyDefinedException;
 import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.intermediate.variables.SymbolTable;
+import org.mellowd.io.CompositeSourceFinder;
+import org.mellowd.io.SourceFinder;
 import org.mellowd.midi.GeneralMidiConstants;
 import org.mellowd.midi.MIDIChannel;
 import org.mellowd.midi.TimingEnvironment;
 
 import javax.sound.midi.Sequence;
+import javax.sound.midi.Track;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
 public class MellowD implements ExecutionEnvironment {
-    private final SourceFinder srcFinder;
+    private SourceFinder srcFinder;
 
     private final PathMap<Memory> memory;
     private final Map<String, MellowDBlock> blocks;
     private final TimingEnvironment timingEnvironment;
     private final PathMap<FunctionBank> functions;
 
-    private final Sequence master;
+    private Sequence master;
     private final Queue<Integer> channelsAvailable;
     private final Queue<Integer> drumChannelsAvailable;
 
@@ -106,6 +108,10 @@ public class MellowD implements ExecutionEnvironment {
         return this.srcFinder;
     }
 
+    public void addSrcFinder(SourceFinder finder) {
+        this.srcFinder = new CompositeSourceFinder(this.srcFinder, finder);
+    }
+
     public TimingEnvironment getTimingEnvironment() {
         return timingEnvironment;
     }
@@ -126,6 +132,11 @@ public class MellowD implements ExecutionEnvironment {
     }
 
     public synchronized Sequence execute() throws Exception {
+        this.blocks.values().forEach(block -> {
+            Track oldTrack = block.getMIDIChannel().replaceTrack(this.master.createTrack());
+            this.master.deleteTrack(oldTrack);
+        });
+
         Queue<CodeExecutor> executors = new LinkedList<>();
         for (MellowDBlock block : this.blocks.values()) {
             CodeExecutor executor = block.createExecutor();
@@ -140,6 +151,8 @@ public class MellowD implements ExecutionEnvironment {
                 throw executor.getExecutionError();
             }
         }
+
+        this.blocks.values().forEach(MellowDBlock::clearCode);
 
         return master;
     }

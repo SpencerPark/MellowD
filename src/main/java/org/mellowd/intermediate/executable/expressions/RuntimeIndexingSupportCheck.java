@@ -2,8 +2,8 @@ package org.mellowd.intermediate.executable.expressions;
 
 import org.mellowd.intermediate.executable.SourceLink;
 import org.mellowd.intermediate.functions.operations.Indexable;
-import org.mellowd.parser.ExecutionEnvironment;
-import org.mellowd.parser.IndexingNotSupportedException;
+import org.mellowd.compiler.ExecutionEnvironment;
+import org.mellowd.compiler.IndexingNotSupportedException;
 
 public class RuntimeIndexingSupportCheck implements Expression<Indexable<?, ?>> {
     protected final Expression<?> expression;

@@ -1,4 +1,4 @@
-package org.mellowd.parser;
+package org.mellowd.compiler;
 
 import org.antlr.v4.runtime.*;
 

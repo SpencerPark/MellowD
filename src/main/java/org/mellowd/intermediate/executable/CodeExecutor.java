@@ -2,7 +2,7 @@ package org.mellowd.intermediate.executable;
 
 import org.mellowd.intermediate.Output;
 import org.mellowd.intermediate.executable.statements.Statement;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;

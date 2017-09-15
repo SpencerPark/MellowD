@@ -1,4 +1,4 @@
-package org.mellowd.compiler;
+package org.mellowd.io;
 
 import javax.sound.midi.Sequence;
 import java.io.File;

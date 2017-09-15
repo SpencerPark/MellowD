@@ -4,9 +4,9 @@ import org.mellowd.intermediate.variables.SymbolTable;
 import org.mellowd.midi.TimingEnvironment;
 import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.intermediate.variables.NullMemory;
-import org.mellowd.parser.ExecutionEnvironment;
-import org.mellowd.parser.MellowD;
-import org.mellowd.parser.PathMap;
+import org.mellowd.compiler.ExecutionEnvironment;
+import org.mellowd.compiler.MellowD;
+import org.mellowd.compiler.PathMap;
 
 public class FunctionExecutionEnvironment implements ExecutionEnvironment {
     public static final String RETURN_QUALIFIER = "return";

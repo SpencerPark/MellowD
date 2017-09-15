@@ -1,6 +1,6 @@
 package org.mellowd.midi;
 
-import org.mellowd.compiler.Compiler;
+import org.mellowd.io.Compiler;
 import org.mellowd.primitives.Beat;
 import org.mellowd.primitives.Dynamic;
 import org.mellowd.primitives.Pitch;
@@ -78,11 +78,11 @@ public class MIDIChannel {
 
     public static final int DEFAULT_OFF_VELOCITY = 96;
 
-    private final Track midiTrack;
+    private Track midiTrack;
     private final boolean isPercussion;
     private final int channelNum;
     private final TimingEnvironment timingEnvironment;
-    private final SortedMap<Long, ScheduledAction> scheduledActions;
+    private SortedMap<Long, ScheduledAction> scheduledActions;
     private final PitchIndexedArray<MidiEvent> noteOffEvents;
     private final PitchIndexedArray<NoteState> noteStates;
 
@@ -91,13 +91,11 @@ public class MIDIChannel {
     private Dynamic dynamic = Dynamic.mf; //The dynamic is mf by default
     private long stateTime = 0L;
     private int pitchBend = GeneralMidiConstants.NO_PITCH_BEND;
-    private final Map<MIDIControl<?>, Object> controllers;
+    private final Map<MIDIControl<? extends MIDIController>, MIDIController> controllers;
     private int octaveShift = 0;
     private int transposeShift = 0;
     private boolean muted = false;
 
-    //This is a counter keeping track of the times that the slurred flag has been set
-    //so that 2 calls to slurred require another 2 calls to un-slur.
     private boolean slurred = false;
 
     public MIDIChannel(Track midiTrack, boolean isPercussion, int channelNum, TimingEnvironment timingEnvironment) {
@@ -110,6 +108,58 @@ public class MIDIChannel {
 
         this.noteStates = new PitchIndexedArray<>(NoteState.OFF);
         this.noteOffEvents = new PitchIndexedArray<>();
+    }
+
+    public Track replaceTrack(Track newTrack) {
+        Track oldTrack = this.midiTrack;
+        long timeDiff = this.stateTime;
+
+        this.stateTime = 0L;
+        this.midiTrack = newTrack;
+
+        // Reschedule all of the actions to be relative to the new reset time
+        SortedMap<Long, ScheduledAction> rolledBackActions = new TreeMap<>(Long::compare);
+        this.scheduledActions.values().forEach(action -> {
+            long rolledBackTime = action.stateTime - timeDiff;
+            ScheduledAction rolledBackAction = new ScheduledAction(action.action, rolledBackTime);
+            rolledBackActions.put(rolledBackTime, rolledBackAction);
+        });
+        this.scheduledActions = rolledBackActions;
+
+        // Clear the note off events because they don't exist on the new track
+        this.noteOffEvents.setAll(null);
+
+        // Turn on all notes that should be on at the average velocity
+        // TODO this velocity should not be arbitrary. Consider even excluding this and leaving the notes off
+        this.noteStates.forEach((pitch, state) -> {
+            if (state.isOn) {
+                this.noteOn(pitch, Dynamic.mf.getVelocity());
+            }
+        });
+
+        // Forcefully set the instrument. Set to -1 to disable the optimization that skips
+        // setting the instrument when it is the same as the channel's state
+        int soundBank = this.soundBank;
+        this.soundBank = -1;
+        int instrument = this.instrument;
+        this.instrument = -1;
+        this.setSoundBank(soundBank);
+        this.setInstrument(instrument);
+
+        if (this.pitchBend != GeneralMidiConstants.NO_PITCH_BEND) {
+            int pitchBend = this.pitchBend;
+            this.pitchBend = -1;
+            this.setPitchBend(pitchBend);
+        }
+
+        this.controllers.values().forEach(MIDIController::reapply);
+
+        if (this.muted) {
+            this.muted = false;
+            this.setMuted(true);
+        }
+
+        return oldTrack;
     }
 
     public boolean isPercussion() {
@@ -147,7 +197,8 @@ public class MIDIChannel {
     }
 
     public Dynamic changeDynamic(int velocityMod) {
-        return this.dynamic.louder(velocityMod);
+        this.dynamic = this.dynamic.louder(velocityMod);
+        return this.dynamic;
     }
 
     public void setDynamic(Dynamic dynamic) {
@@ -221,7 +272,7 @@ public class MIDIChannel {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getController(MIDIControl<T> controlType) {
+    public <T extends MIDIController> T getController(MIDIControl<T> controlType) {
         T controller = (T) this.controllers.get(controlType);
 
         if (controller == null) {

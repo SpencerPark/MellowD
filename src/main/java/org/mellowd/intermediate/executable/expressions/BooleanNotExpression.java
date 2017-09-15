@@ -1,6 +1,6 @@
 package org.mellowd.intermediate.executable.expressions;
 
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 public class BooleanNotExpression implements Expression<Boolean> {
     private final Expression<Boolean> expr;

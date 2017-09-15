@@ -1,6 +1,6 @@
 package org.mellowd.intermediate.executable.expressions;
 
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 import org.mellowd.primitives.ConcatenationDelegate;
 
 import java.util.LinkedList;

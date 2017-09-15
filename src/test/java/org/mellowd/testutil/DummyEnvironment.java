@@ -3,7 +3,7 @@ package org.mellowd.testutil;
 import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.intermediate.variables.NullMemory;
 import org.mellowd.midi.TimingEnvironment;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 public class DummyEnvironment implements ExecutionEnvironment {
     private static final DummyEnvironment env = new DummyEnvironment(false);

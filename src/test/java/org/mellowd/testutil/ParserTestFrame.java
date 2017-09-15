@@ -3,8 +3,8 @@ package org.mellowd.testutil;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.mellowd.TestErrorListener;
-import org.mellowd.parser.MellowDLexer;
-import org.mellowd.parser.MellowDParser;
+import org.mellowd.compiler.MellowDLexer;
+import org.mellowd.compiler.MellowDParser;
 
 import java.io.IOException;
 import java.io.InputStream;

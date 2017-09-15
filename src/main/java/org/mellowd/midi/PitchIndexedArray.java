@@ -2,6 +2,8 @@ package org.mellowd.midi;
 
 import org.mellowd.primitives.Pitch;
 
+import java.util.function.BiConsumer;
+
 public class PitchIndexedArray<T> {
     private static final int REST_INDEX = 128;
     private final T[] data;
@@ -12,8 +14,7 @@ public class PitchIndexedArray<T> {
 
     public PitchIndexedArray(T defaultValue) {
         this.data = (T[]) new Object[129];
-        for (int i = 0; i < 129; i++)
-            this.data[i] = defaultValue;
+        this.setAll(defaultValue);
     }
 
     public T get(Pitch index) {
@@ -27,5 +28,16 @@ public class PitchIndexedArray<T> {
             data[REST_INDEX] = value;
         else
             data[index.getMidiNum()] = value;
+    }
+
+    public void setAll(T value) {
+        for (int i = 0; i < 129; i++)
+            this.data[i] = value;
+    }
+
+    public void forEach(BiConsumer<Pitch, T> consumer) {
+        for (int i = 0; i < 128; i++)
+            consumer.accept(Pitch.getPitch(i), data[i]);
+        consumer.accept(Pitch.REST, data[REST_INDEX]);
     }
 }

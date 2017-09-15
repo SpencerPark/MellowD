@@ -1,7 +1,7 @@
 package org.mellowd.intermediate.executable.expressions;
 
 import org.mellowd.intermediate.functions.operations.Indexable;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 public class IndexExpression implements Expression<Object> {
     private final Expression<? extends Indexable<?, ?>> expression;

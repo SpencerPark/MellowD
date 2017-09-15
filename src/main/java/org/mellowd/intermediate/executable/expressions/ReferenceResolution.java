@@ -2,7 +2,7 @@ package org.mellowd.intermediate.executable.expressions;
 
 import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.midi.GeneralMidiPercussion;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 public class ReferenceResolution implements Expression<Object> {
     private final String[] qualifier;

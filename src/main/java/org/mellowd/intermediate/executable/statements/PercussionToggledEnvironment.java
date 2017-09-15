@@ -2,7 +2,7 @@ package org.mellowd.intermediate.executable.statements;
 
 import org.mellowd.midi.TimingEnvironment;
 import org.mellowd.intermediate.variables.Memory;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 public class PercussionToggledEnvironment implements ExecutionEnvironment {
     private final ExecutionEnvironment wrapped;

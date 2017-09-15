@@ -1,4 +1,4 @@
-package org.mellowd.compiler;
+package org.mellowd.io;
 
 import java.io.InputStream;
 import java.util.ArrayList;

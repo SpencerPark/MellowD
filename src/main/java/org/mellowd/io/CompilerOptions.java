@@ -1,4 +1,4 @@
-package org.mellowd.compiler;
+package org.mellowd.io;
 
 import org.mellowd.plugin.PluginMetaData;
 

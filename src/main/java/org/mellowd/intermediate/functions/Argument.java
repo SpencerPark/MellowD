@@ -1,7 +1,7 @@
 package org.mellowd.intermediate.functions;
 
 import org.mellowd.intermediate.executable.expressions.Expression;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 public class Argument<T> {
     private static final Argument<?> EMPTY_ARG_INSTANCE = new Argument<>(null, null);

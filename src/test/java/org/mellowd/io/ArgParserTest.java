@@ -1,4 +1,4 @@
-package org.mellowd.compiler;
+package org.mellowd.io;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

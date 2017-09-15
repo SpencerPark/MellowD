@@ -3,8 +3,8 @@ package org.mellowd.intermediate.functions;
 import org.mellowd.intermediate.Output;
 import org.mellowd.intermediate.executable.statements.Statement;
 import org.mellowd.intermediate.variables.Memory;
-import org.mellowd.parser.ExecutionEnvironment;
-import org.mellowd.parser.MellowD;
+import org.mellowd.compiler.ExecutionEnvironment;
+import org.mellowd.compiler.MellowD;
 
 public class Function {
     private final FunctionSignature signature;

@@ -1,6 +1,6 @@
 package org.mellowd.intermediate.executable;
 
-import org.mellowd.parser.CompilationException;
+import org.mellowd.compiler.CompilationException;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Interval;

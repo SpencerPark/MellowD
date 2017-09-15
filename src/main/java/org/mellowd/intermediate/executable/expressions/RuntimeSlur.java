@@ -1,7 +1,7 @@
 package org.mellowd.intermediate.executable.expressions;
 
 import org.mellowd.intermediate.functions.operations.Slurrable;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 public class RuntimeSlur<T extends Slurrable> implements Expression<T> {
     private final Expression<T> toSlur;

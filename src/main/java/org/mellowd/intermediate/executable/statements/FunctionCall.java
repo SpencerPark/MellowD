@@ -5,8 +5,8 @@ import org.mellowd.intermediate.executable.SourceLink;
 import org.mellowd.intermediate.functions.Argument;
 import org.mellowd.intermediate.functions.FunctionBank;
 import org.mellowd.intermediate.functions.FunctionResolutionException;
-import org.mellowd.parser.ExecutionEnvironment;
-import org.mellowd.parser.MellowD;
+import org.mellowd.compiler.ExecutionEnvironment;
+import org.mellowd.compiler.MellowD;
 
 public class FunctionCall implements Statement {
     private final SourceLink sourceLink;

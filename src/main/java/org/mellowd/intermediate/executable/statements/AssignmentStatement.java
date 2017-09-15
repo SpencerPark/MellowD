@@ -4,7 +4,7 @@ import org.mellowd.intermediate.Output;
 import org.mellowd.intermediate.executable.expressions.Expression;
 import org.mellowd.intermediate.variables.DelayedResolution;
 import org.mellowd.intermediate.variables.Memory;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 public class AssignmentStatement implements Statement {
     private final String[] qualifier;

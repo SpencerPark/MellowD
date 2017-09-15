@@ -1,7 +1,7 @@
 package org.mellowd.intermediate.executable.expressions;
 
 import org.mellowd.intermediate.functions.operations.Comparable;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 import org.mellowd.primitives.*;
 
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package org.mellowd.parser;
+package org.mellowd.compiler;
 
 public class SyntaxErrorReport {
     public enum ErrorType {

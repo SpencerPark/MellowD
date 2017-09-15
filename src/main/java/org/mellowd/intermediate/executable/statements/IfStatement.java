@@ -2,7 +2,7 @@ package org.mellowd.intermediate.executable.statements;
 
 import org.mellowd.intermediate.Output;
 import org.mellowd.intermediate.executable.expressions.Expression;
-import org.mellowd.parser.ExecutionEnvironment;
+import org.mellowd.compiler.ExecutionEnvironment;
 
 import java.util.LinkedList;
 import java.util.List;

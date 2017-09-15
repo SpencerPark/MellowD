@@ -1,4 +1,4 @@
-package org.mellowd.compiler;
+package org.mellowd.io;
 
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Receiver;

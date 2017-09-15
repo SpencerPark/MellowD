@@ -3,7 +3,7 @@ package org.mellowd.midi;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.ShortMessage;
 
-public class Pedal {
+public class Pedal implements MIDIController {
     private final MIDIChannel midiChannel;
     private final MIDIControl<Pedal> type;
     private boolean isPressed = false;
@@ -25,22 +25,27 @@ public class Pedal {
         if (isPressed) return;
         this.isPressed = true;
 
-        try {
-            this.midiChannel.addMessage(new ShortMessage(ShortMessage.CONTROL_CHANGE, midiChannel.getChannelNum(), type.getControlNumber(), GeneralMidiConstants.CONTROLLER_VAL_ON), true);
-        } catch (InvalidMidiDataException e) {
-            throw new MidiRuntimeException("Cannot turn " + type.getName() + " pedal (cc=" + type.getControlNumber() + ") to on.", e);
-        }
+        this.addMessage();
     }
 
     public void release() {
         if (!isPressed) return;
         this.isPressed = false;
 
+        this.addMessage();
+    }
+
+    private void addMessage() {
         try {
-            this.midiChannel.addMessage(new ShortMessage(ShortMessage.CONTROL_CHANGE, midiChannel.getChannelNum(), type.getControlNumber(), GeneralMidiConstants.CONTROLLER_VAL_OFF), true);
+            ShortMessage message = new ShortMessage(ShortMessage.CONTROL_CHANGE, midiChannel.getChannelNum(), type.getControlNumber(), this.isPressed ? GeneralMidiConstants.CONTROLLER_VAL_OFF : GeneralMidiConstants.CONTROLLER_VAL_ON);
+            this.midiChannel.addMessage(message, true);
         } catch (InvalidMidiDataException e) {
-            throw new MidiRuntimeException("Cannot turn " + type.getName() + " pedal (cc=" + type.getControlNumber() + ") to on.", e);
+            throw new MidiRuntimeException("Cannot turn " + type.getName() + " pedal (cc=" + type.getControlNumber() + ") to " + (this.isPressed ? "on" : "off") + ".", e);
         }
     }
 
+    @Override
+    public void reapply() {
+        this.addMessage();
+    }
 }

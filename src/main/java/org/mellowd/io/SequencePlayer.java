@@ -1,7 +1,7 @@
 //Sequence Player
 //===============
 
-package org.mellowd.compiler;
+package org.mellowd.io;
 
 import javax.sound.midi.*;
 import java.io.Closeable;
