@@ -108,14 +108,12 @@ public class MellowDKernel implements Closeable {
         if (errorListener.encounteredError())
             throw new ParseException(errorListener.getErrors());
 
-        MellowDCompiler walker = new MellowDCompiler(mellowD);
-
         if (!parseTree.importStatement().isEmpty()) {
             //Compile the dependencies
-            parseTree.importStatement().forEach(walker::visitImportStatement);
+            parseTree.importStatement().forEach(this.compiler::visitImportStatement);
         }
 
-        walker.visitSong(parseTree);
+        this.compiler.visitSong(parseTree);
 
         try {
             return mellowD.execute();

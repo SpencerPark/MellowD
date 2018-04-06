@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class WavIODelegate implements SequenceIODelegate {
-    private static final float SAMPLE_RATE = 96000; //Hz
+    private static final float SAMPLE_RATE = 44100; //Hz
     private static final int SAMPLE_SIZE = 24; //bits per sample
     private static final int CHANNELS_MONO = 1;
     private static final int CHANNELS_STEREO = 2;
@@ -26,15 +26,31 @@ public class WavIODelegate implements SequenceIODelegate {
 
     private final Function<Synthesizer, Synthesizer> soundfontLoader;
 
+    private int channels = CHANNELS_STEREO;
+    private float sampleRate = SAMPLE_RATE;
+    private int sampleSize = SAMPLE_SIZE;
+
     public WavIODelegate(Function<Synthesizer, Synthesizer> soundfontLoader) {
         this.soundfontLoader = soundfontLoader;
+    }
+
+    public void setChannels(int channels) {
+        this.channels = channels;
+    }
+
+    public void setSampleRate(float sampleRate) {
+        this.sampleRate = sampleRate;
+    }
+
+    public void setSampleSize(int sampleSize) {
+        this.sampleSize = sampleSize;
     }
 
     @Override
     public void save(Sequence sequence, OutputStream out) throws IOException {
         VirtualMIDIPlayer player = new VirtualMIDIPlayer(sequence);
 
-        AudioFormat format = new AudioFormat(SAMPLE_RATE, SAMPLE_SIZE, CHANNELS_STEREO, true, false);
+        AudioFormat format = new AudioFormat(this.sampleRate, this.sampleSize, this.channels, true, false);
         AudioSynthesizer synth;
         AudioInputStream stream;
         try {

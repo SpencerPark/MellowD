@@ -42,7 +42,7 @@ dependencies {
 //The manifest attribute makes the jar executable.
 jar {
     manifest {
-        attributes 'Main-Class': 'org.mellowd.compiler.Compiler'
+        attributes 'Main-Class': 'org.mellowd.io.Compiler'
     }
     //Include all shaded dependencies in the jar
     from configurations.shade
@@ -103,8 +103,8 @@ test {
 }
 
 generateGrammarSource {
-    outputDirectory = file("$outputDirectory/org/mellowd/parser")
-    arguments += ['-package', 'org.mellowd.parser']
+    outputDirectory = file("$outputDirectory/org/mellowd/compiler")
+    arguments += ['-package', 'org.mellowd.compiler']
     arguments += ['-visitor']
     arguments += ['-no-listener']
 }

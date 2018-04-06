@@ -79,11 +79,11 @@ public interface Indexable<T, U> {
     static void forEachInRange(int lower, int upper, IntConsumer apply) {
         if (upper == lower) {
             apply.accept(lower);
-        } else if (upper > lower) {
+        } else if (lower < upper) {
             for (int i = lower; i <= upper; i++)
                 apply.accept(i);
         } else {
-            for (int i = upper; i >= lower; i--)
+            for (int i = lower; i >= upper; i--)
                 apply.accept(i);
         }
     }

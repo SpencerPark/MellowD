@@ -79,7 +79,7 @@ public class MIDIChannel {
     public static final int DEFAULT_OFF_VELOCITY = 96;
 
     private Track midiTrack;
-    private final boolean isPercussion;
+    private final boolean percussion;
     private final int channelNum;
     private final TimingEnvironment timingEnvironment;
     private SortedMap<Long, ScheduledAction> scheduledActions;
@@ -98,9 +98,9 @@ public class MIDIChannel {
 
     private boolean slurred = false;
 
-    public MIDIChannel(Track midiTrack, boolean isPercussion, int channelNum, TimingEnvironment timingEnvironment) {
+    public MIDIChannel(Track midiTrack, boolean percussion, int channelNum, TimingEnvironment timingEnvironment) {
         this.midiTrack = midiTrack;
-        this.isPercussion = isPercussion;
+        this.percussion = percussion;
         this.channelNum = channelNum;
         this.timingEnvironment = timingEnvironment;
         this.scheduledActions = new TreeMap<>(Long::compare);
@@ -137,14 +137,17 @@ public class MIDIChannel {
             }
         });
 
-        // Forcefully set the instrument. Set to -1 to disable the optimization that skips
-        // setting the instrument when it is the same as the channel's state
-        int soundBank = this.soundBank;
-        this.soundBank = -1;
-        int instrument = this.instrument;
-        this.instrument = -1;
-        this.setSoundBank(soundBank);
-        this.setInstrument(instrument);
+        // If not a percussion block make sure to reapply the last instrument change
+        if (!this.percussion) {
+            // Forcefully set the instrument. Set to -1 to disable the optimization that skips
+            // setting the instrument when it is the same as the channel's state
+            int soundBank = this.soundBank;
+            this.soundBank = -1;
+            int instrument = this.instrument;
+            this.instrument = -1;
+            this.setSoundBank(soundBank);
+            this.setInstrument(instrument);
+        }
 
         if (this.pitchBend != GeneralMidiConstants.NO_PITCH_BEND) {
             int pitchBend = this.pitchBend;
@@ -152,7 +155,8 @@ public class MIDIChannel {
             this.setPitchBend(pitchBend);
         }
 
-        this.controllers.values().forEach(MIDIController::reapply);
+        //TODO this results in some weird effects, try to only reapply the ones that actually need it
+        //this.controllers.values().forEach(MIDIController::reapply);
 
         if (this.muted) {
             this.muted = false;
@@ -163,7 +167,7 @@ public class MIDIChannel {
     }
 
     public boolean isPercussion() {
-        return isPercussion;
+        return percussion;
     }
 
     protected int getChannelNum() {

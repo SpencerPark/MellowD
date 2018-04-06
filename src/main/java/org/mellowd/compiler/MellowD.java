@@ -144,15 +144,17 @@ public class MellowD implements ExecutionEnvironment {
             executor.start();
         }
 
-        while (!executors.isEmpty()) {
-            CodeExecutor executor = executors.poll();
-            executor.join(3000L); //Wait for the thread to finish
-            if (executor.errorWhileExecuting()) {
-                throw executor.getExecutionError();
+        try {
+            while (!executors.isEmpty()) {
+                CodeExecutor executor = executors.poll();
+                executor.join(3000L); //Wait for the thread to finish
+                if (executor.errorWhileExecuting()) {
+                    throw executor.getExecutionError();
+                }
             }
+        } finally {
+            this.blocks.values().forEach(MellowDBlock::clearCode);
         }
-
-        this.blocks.values().forEach(MellowDBlock::clearCode);
 
         return master;
     }
