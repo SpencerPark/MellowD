@@ -186,19 +186,28 @@ returns[Comparable.Operator op]
     | KEYWORD_NEQ { $op = Comparable.Operator.NEQ; }
     ;
 
+exprPredTail
+    : ( KEYWORD_OR
+      | KEYWORD_AND
+      | comparisonOperator
+      )
+      expr
+    ;
+
 expr
-    : ( name | CHORD_IDENTIFIER ) index?
+    : BRACE_OPEN expr BRACE_CLOSE
+    | KEYWORD_TRUE
+    | KEYWORD_FALSE
+    | STRING
+    | note
+    | beat
+    | number
     | chord
     | melody
     | rhythm
-    | beat
-    | number
-    | STRING
-    | KEYWORD_TRUE
-    | KEYWORD_FALSE
     | KEYWORD_NOT expr
-    | expr ( KEYWORD_OR | KEYWORD_AND | comparisonOperator ) expr
-    | BRACE_OPEN expr BRACE_CLOSE
+    | expr exprPredTail+
+    | ( name | CHORD_IDENTIFIER ) index?
     | funcDecl
     | procDecl
     ;

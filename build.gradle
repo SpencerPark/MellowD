@@ -8,6 +8,11 @@ apply plugin: 'antlr'
 apply plugin: 'maven-publish'
 apply plugin: 'jacoco'
 
+wrapper {
+    gradleVersion = '4.10.2'
+    distributionType = Wrapper.DistributionType.ALL
+}
+
 //Use java 8 source and class files
 compileJava {
     sourceCompatibility = '1.8'
@@ -108,6 +113,9 @@ generateGrammarSource {
     arguments += ['-visitor']
     arguments += ['-no-listener']
 
+    // Don't generate parsers for these intermediate files but consider
+    // the task out of date if they change.
+    inputs.files(source.files)
     exclude 'MellowDAbstractionParser.g4'
     exclude 'MellowDExpressionParser.g4'
 }
