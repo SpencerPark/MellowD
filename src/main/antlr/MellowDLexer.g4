@@ -10,7 +10,8 @@ channels {
 KEYWORD_PERCUSSION : 'percussion' ;
 KEYWORD_DEF : 'def' ;
 KEYWORD_BLOCK : 'block' ;
-KEYWORD_FUNCTION : 'function' ;
+KEYWORD_FUNCTION : 'func' ;
+KEYWORD_PROCEDURE : 'proc' ;
 KEYWORD_SAVE : 'save' ;
 KEYWORD_IMPORT : 'import' ;
 KEYWORD_FROM : 'from' ;
@@ -21,6 +22,7 @@ KEYWORD_MELODY : 'melody' ;
 KEYWORD_PHRASE : 'phrase' ;
 KEYWORD_DO : 'do' ;
 KEYWORD_IF : 'if' ;
+KEYWORD_PERFORM : 'perform' ;
 KEYWORD_ELSE : 'else' ;
 KEYWORD_TRUE : 'true' | 'on' ;
 KEYWORD_FALSE : 'false' | 'off' ;
@@ -144,8 +146,9 @@ COLON : ':';
 SHARP : '#';
 FLAT : '$';
 //`ASSIGNMENT` maps an identifier to a musical descriptor
-ASSIGNMENT : '->';
-INTO : '=>' ;
+ASSIGN_R : '->';
+INTO_L : '<=' ;
+INTO_R : '=>' ;
 OPTIONAL : '?' ;
 
 //**Definition Boundaries**: The following definitions are for tokens that mark the
