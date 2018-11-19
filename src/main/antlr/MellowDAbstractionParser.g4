@@ -4,14 +4,14 @@
 */
 parser grammar MellowDAbstractionParser;
 
-parameter [boolean percussion]
+parameter
     : type?
       IDENTIFIER
       ( OPTIONAL ( ASSIGN_R expr )? )?
     ;
 
-parameterList [boolean percussion]
-    : parameter[$percussion] ( COMMA parameter[$percussion] )*
+parameterList
+    : parameter ( COMMA parameter )*
     ;
 
 argument
@@ -30,7 +30,7 @@ call
 funcDecl
     : KEYWORD_FUNCTION
       KEYWORD_PERCUSSION?
-      parameterList[$KEYWORD_PERCUSSION != null]?
+      parameterList?
       INTO_R
       stmtList
     ;
@@ -38,7 +38,7 @@ funcDecl
 procDecl
     : KEYWORD_PROCEDURE
       KEYWORD_PERCUSSION?
-      parameterList[$KEYWORD_PERCUSSION != null]?
+      parameterList?
       INTO_R
       stmtList
     ;

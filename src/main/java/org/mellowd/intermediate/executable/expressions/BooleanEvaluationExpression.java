@@ -1,13 +1,21 @@
 package org.mellowd.intermediate.executable.expressions;
 
 import org.mellowd.compiler.ExecutionEnvironment;
+import org.mellowd.intermediate.QualifiedName;
 import org.mellowd.primitives.Pitch;
+
+import java.util.Set;
 
 public class BooleanEvaluationExpression implements Expression<Boolean> {
     private final Expression<?> expression;
 
     public BooleanEvaluationExpression(Expression<?> expression) {
         this.expression = expression;
+    }
+
+    @Override
+    public Set<QualifiedName> getFreeVariables() {
+        return this.expression.getFreeVariables();
     }
 
     @Override

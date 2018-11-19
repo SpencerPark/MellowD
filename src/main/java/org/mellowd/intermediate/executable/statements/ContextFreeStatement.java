@@ -1,9 +1,13 @@
 package org.mellowd.intermediate.executable.statements;
 
+import org.mellowd.compiler.ExecutionEnvironment;
 import org.mellowd.intermediate.Output;
 import org.mellowd.intermediate.Playable;
+import org.mellowd.intermediate.QualifiedName;
 import org.mellowd.intermediate.executable.SourceLink;
-import org.mellowd.compiler.ExecutionEnvironment;
+
+import java.util.Collections;
+import java.util.Set;
 
 public class ContextFreeStatement implements Statement {
     private final Playable playable;
@@ -16,6 +20,11 @@ public class ContextFreeStatement implements Statement {
 
     public Playable getPlayable() {
         return playable;
+    }
+
+    @Override
+    public Set<QualifiedName> getFreeVariables() {
+        return Collections.emptySet();
     }
 
     @Override

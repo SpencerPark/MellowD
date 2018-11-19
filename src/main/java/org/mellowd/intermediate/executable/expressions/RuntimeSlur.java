@@ -1,24 +1,27 @@
 package org.mellowd.intermediate.executable.expressions;
 
-import org.mellowd.intermediate.functions.operations.Slurrable;
 import org.mellowd.compiler.ExecutionEnvironment;
+import org.mellowd.intermediate.QualifiedName;
+import org.mellowd.intermediate.functions.operations.Slurrable;
 
-public class RuntimeSlur<T extends Slurrable> implements Expression<T> {
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+public class RuntimeSlur<T extends Slurrable<U>, U> implements Expression<U> {
     private final Expression<T> toSlur;
-    private final Expression<Boolean> slur;
 
-    public RuntimeSlur(Expression<T> toSlur, Expression<Boolean> slur) {
+    public RuntimeSlur(Expression<T> toSlur) {
         this.toSlur = toSlur;
-        this.slur = slur;
     }
 
     @Override
-    public T evaluate(ExecutionEnvironment environment) {
+    public Set<QualifiedName> getFreeVariables() {
+        return new LinkedHashSet<>(this.toSlur.getFreeVariables());
+    }
+
+    @Override
+    public U evaluate(ExecutionEnvironment environment) {
         T toSlur = this.toSlur.evaluate(environment);
-        Boolean slur = this.slur.evaluate(environment);
-
-        toSlur.setSlurred(slur);
-
-        return toSlur;
+        return toSlur.toggleSlur();
     }
 }

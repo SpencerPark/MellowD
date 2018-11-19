@@ -2,6 +2,9 @@ package org.mellowd.compiler;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class PathMap<T> {
@@ -24,14 +27,14 @@ public class PathMap<T> {
 
             return this.data;
         } else {
-            //The data needs to be placed in a child node
+            // The data needs to be placed in a child node
             PathMap<T> child = children.get(path[index]);
             if (child == null) {
-                //Add the child because it doesn't exist yet
+                // Add the child because it doesn't exist yet
                 child = new PathMap<>(null);
                 children.put(path[0], child);
             }
-            //Put the data in the child
+            // Put the data in the child
             return child.putIfAbsentInternal(dataCreator, path, index + 1);
         }
     }
@@ -77,5 +80,18 @@ public class PathMap<T> {
             //Ask the child for the data
             return child.getInternal(path, index + 1);
         }
+    }
+
+    public void forEach(Consumer<T> consumer) {
+        consumer.accept(this.data);
+        this.children.values().forEach(child -> child.forEach(consumer));
+    }
+
+    public <U> U reduce(Function<T, U> map, BinaryOperator<U> combine) {
+        U current = map.apply(this.data);
+
+        return this.children.values().stream()
+                .map(childMap -> childMap.reduce(map, combine))
+                .reduce(current, combine);
     }
 }

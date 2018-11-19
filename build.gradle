@@ -13,38 +13,37 @@ wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
-//Use java 8 source and class files
 compileJava {
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
+    sourceCompatibility = '1.9'
+    targetCompatibility = '1.9'
 }
 
-//All required libs are on the maven central repo
+// All required libs are on the maven central repo
 repositories {
     mavenCentral()
 }
 
-//Define a shade configuration. Dependencies in this configuration
-//are available at compile time and are shaded into the jar.
+// Define a shade configuration. Dependencies in this configuration
+// are available at compile time and are shaded into the jar.
 configurations {
     shade
     shade.transitive = false
     compile.extendsFrom(shade)
 }
 
-//The compiler needs junit and gson to run the tests, antlr to generate
-//the parser.
+// The compiler needs junit and gson to run the tests, antlr to generate
+// the parser.
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'com.google.code.gson', name: 'gson', version: '2.6.2'
 
-    //Only shade the runtime because we don't need the generator after things are compiled
+    // Only shade the runtime because we don't need the generator after things are compiled
     antlr group: 'org.antlr', name: 'antlr4', version: '4.7.1'
     shade group: 'org.antlr', name: 'antlr4-runtime', version: '4.7'
 }
 
-//Add a manifest attribute, the shaded dependencies and antlr to the built jar.
-//The manifest attribute makes the jar executable.
+// Add a manifest attribute, the shaded dependencies and antlr to the built jar.
+// The manifest attribute makes the jar executable.
 jar {
     manifest {
         attributes 'Main-Class': 'org.mellowd.io.Compiler'
@@ -55,9 +54,9 @@ jar {
 }
 
 processResources {
-    //Register the version as a property because the ot of date checks
-    //will see the metadata file as UP-TO-DATE since it only stores
-    //the @version@ token
+    // Register the version as a property because the ot of date checks
+    // will see the metadata file as UP-TO-DATE since it only stores
+    // the @version@ token
     inputs.property('version-meta', rootProject.version)
     filter ReplaceTokens, tokens: [
             "version": rootProject.version

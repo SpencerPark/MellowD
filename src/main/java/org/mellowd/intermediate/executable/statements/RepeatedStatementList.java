@@ -1,18 +1,30 @@
 package org.mellowd.intermediate.executable.statements;
 
 import org.mellowd.intermediate.Output;
+import org.mellowd.intermediate.QualifiedName;
 import org.mellowd.intermediate.executable.expressions.Expression;
 import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.compiler.ExecutionEnvironment;
 
-public class RepeatedCodeBlock extends CodeBlock {
-    public static final String IMPLICIT_LOOP_COUNTER_ID = "it";
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+public class RepeatedStatementList extends StatementList {
+    public static final QualifiedName IMPLICIT_LOOP_COUNTER_ID = QualifiedName.ofUnqualified("it");
 
     protected final Expression<Number> repetitions;
 
-    public RepeatedCodeBlock(Expression<Number> repetitions) {
+    public RepeatedStatementList(Expression<Number> repetitions) {
         super();
         this.repetitions = repetitions;
+    }
+
+    @Override
+    public Set<QualifiedName> getFreeVariables() {
+        Set<QualifiedName> names = new LinkedHashSet<>(super.getFreeVariables());
+        names.remove(IMPLICIT_LOOP_COUNTER_ID);
+        names.addAll(this.repetitions.getFreeVariables());
+        return names;
     }
 
     @Override

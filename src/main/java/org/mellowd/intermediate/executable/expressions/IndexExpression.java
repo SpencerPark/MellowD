@@ -1,7 +1,11 @@
 package org.mellowd.intermediate.executable.expressions;
 
-import org.mellowd.intermediate.functions.operations.Indexable;
 import org.mellowd.compiler.ExecutionEnvironment;
+import org.mellowd.intermediate.QualifiedName;
+import org.mellowd.intermediate.functions.operations.Indexable;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class IndexExpression implements Expression<Object> {
     private final Expression<? extends Indexable<?, ?>> expression;
@@ -18,6 +22,18 @@ public class IndexExpression implements Expression<Object> {
         this.expression = expression;
         this.index = index;
         this.upperIndex = upperIndex;
+    }
+
+    @Override
+    public Set<QualifiedName> getFreeVariables() {
+        Set<QualifiedName> free = new LinkedHashSet<>();
+
+        free.addAll(this.expression.getFreeVariables());
+        free.addAll(this.index.getFreeVariables());
+        if (this.upperIndex != null)
+            free.addAll(this.upperIndex.getFreeVariables());
+
+        return free;
     }
 
     @Override

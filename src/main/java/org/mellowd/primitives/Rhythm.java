@@ -6,14 +6,18 @@ package org.mellowd.primitives;
 import org.mellowd.intermediate.functions.operations.Indexable;
 import org.mellowd.intermediate.functions.operations.Slurrable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 //The `Rhythm` is responsible for the timing considerations in playable sounds. It specifies
 //the duration in the form of a [Beat](../Beat.html). In a Mellow D source file a rhythm is
 //a comma separated list of beats wrapped in `<` and `>`. Each beat is referred to by the first
 //letter in it's name. Additionally beats can be slurred together. This results in the durations
 //overlapping and the notes connecting more smoothly.
-public class Rhythm implements Slurrable, Indexable<Beat, Rhythm> {
+public class Rhythm implements Slurrable<Rhythm>, Indexable<Beat, Rhythm> {
+    // TODO make Rhythms immutable
 
     public static int compare(Rhythm left, Rhythm right) {
         for (int i = 0; i < left.size(); i++) {
@@ -37,7 +41,11 @@ public class Rhythm implements Slurrable, Indexable<Beat, Rhythm> {
 
     //Creating a rhythm is done by specifying zero or more beats that make up the rhythm.
     public Rhythm() {
-        this.beats = new ArrayList<>();
+        this(new ArrayList<>());
+    }
+
+    private Rhythm(List<Beat> beats) {
+        this.beats = beats;
     }
 
     public boolean isSlurred(int index) {
@@ -54,17 +62,13 @@ public class Rhythm implements Slurrable, Indexable<Beat, Rhythm> {
         this.beats.addAll(other.beats);
     }
 
-    public void setSlurred(int index, boolean slurred) {
-        getAtIndex(Indexable.calcIndex(index, size())).setSlurred(slurred);
-    }
-
     @Override
-    public void setSlurred(boolean slur) {
-        slurAll();
-    }
+    public Rhythm toggleSlur() {
+        List<Beat> slurred = this.beats.stream()
+                .map(Slurrable::toggleSlur)
+                .collect(Collectors.toList());
 
-    public void slurAll() {
-        this.beats.forEach(Beat::flipSlur);
+        return new Rhythm(slurred);
     }
 
     public int size() {

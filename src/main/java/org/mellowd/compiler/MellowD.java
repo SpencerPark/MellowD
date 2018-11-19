@@ -112,6 +112,7 @@ public class MellowD implements ExecutionEnvironment {
         this.srcFinder = new CompositeSourceFinder(this.srcFinder, finder);
     }
 
+    @Override
     public TimingEnvironment getTimingEnvironment() {
         return timingEnvironment;
     }

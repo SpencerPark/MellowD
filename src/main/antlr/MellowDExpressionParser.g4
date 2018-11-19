@@ -167,9 +167,9 @@ tuplet
 rhythmParam
     : beat
     | tuplet
-    | name index?
     | rhythm
     | slurredRhythm
+    | name index?
     ;
 
 ///////////////////////////////////////////////////////////////////////////////

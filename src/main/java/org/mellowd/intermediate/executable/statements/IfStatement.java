@@ -1,11 +1,11 @@
 package org.mellowd.intermediate.executable.statements;
 
-import org.mellowd.intermediate.Output;
-import org.mellowd.intermediate.executable.expressions.Expression;
 import org.mellowd.compiler.ExecutionEnvironment;
+import org.mellowd.intermediate.Output;
+import org.mellowd.intermediate.QualifiedName;
+import org.mellowd.intermediate.executable.expressions.Expression;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class IfStatement implements Statement {
     private static class Branch {
@@ -25,6 +25,7 @@ public class IfStatement implements Statement {
             return statement;
         }
     }
+
     public static class Builder {
         private final List<Branch> branches;
         private Statement elseBranch;
@@ -72,6 +73,15 @@ public class IfStatement implements Statement {
 
     public boolean hasElseBranch() {
         return this.elseStatement != EmptyStatement.getInstance();
+    }
+
+    @Override
+    public Set<QualifiedName> getFreeVariables() {
+        Set<QualifiedName> names = new LinkedHashSet<>();
+        Arrays.asList(this.conditions).forEach(e -> names.addAll(e.getFreeVariables()));
+        Arrays.asList(this.branches).forEach(s -> names.addAll(s.getFreeVariables()));
+        names.addAll(this.elseStatement.getFreeVariables());
+        return names;
     }
 
     @Override

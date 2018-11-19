@@ -9,7 +9,7 @@ import org.mellowd.intermediate.functions.operations.Slurrable;
 //Each beat has the number of quarter notes it is equivalent to (possibly a fraction),
 //for converting from `PPQN` (ticks per quarter note) to a duration in ticks that the
 //beat should be held for.
-public class Beat implements Slurrable {
+public class Beat implements Slurrable<Beat> {
     //All beats must start out as one of the following durations which can then
     //later on be manipulated via dots to extend the duration or wrapping inside a tuplet.
     public static Beat WHOLE()          { return new Beat(4d);   }
@@ -96,12 +96,8 @@ public class Beat implements Slurrable {
     }
 
     @Override
-    public void setSlurred(boolean slurred) {
-        this.slurred = slurred;
-    }
-
-    public void flipSlur() {
-        this.slurred = !this.slurred;
+    public Beat toggleSlur() {
+        return new Beat(this.numQuarters, !this.slurred);
     }
 
     @Override

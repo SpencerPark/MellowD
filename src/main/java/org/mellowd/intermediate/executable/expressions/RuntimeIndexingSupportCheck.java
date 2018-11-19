@@ -1,9 +1,12 @@
 package org.mellowd.intermediate.executable.expressions;
 
-import org.mellowd.intermediate.executable.SourceLink;
-import org.mellowd.intermediate.functions.operations.Indexable;
 import org.mellowd.compiler.ExecutionEnvironment;
 import org.mellowd.compiler.IndexingNotSupportedException;
+import org.mellowd.intermediate.QualifiedName;
+import org.mellowd.intermediate.executable.SourceLink;
+import org.mellowd.intermediate.functions.operations.Indexable;
+
+import java.util.Set;
 
 public class RuntimeIndexingSupportCheck implements Expression<Indexable<?, ?>> {
     protected final Expression<?> expression;
@@ -12,6 +15,11 @@ public class RuntimeIndexingSupportCheck implements Expression<Indexable<?, ?>> 
     public RuntimeIndexingSupportCheck(Expression<?> expression, SourceLink sourceLink) {
         this.expression = expression;
         this.sourceLink = sourceLink;
+    }
+
+    @Override
+    public Set<QualifiedName> getFreeVariables() {
+        return this.expression.getFreeVariables();
     }
 
     @Override

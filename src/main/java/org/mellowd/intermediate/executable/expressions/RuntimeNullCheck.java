@@ -1,18 +1,26 @@
 package org.mellowd.intermediate.executable.expressions;
 
+import org.mellowd.compiler.ExecutionEnvironment;
+import org.mellowd.intermediate.QualifiedName;
 import org.mellowd.intermediate.executable.SourceLink;
 import org.mellowd.intermediate.variables.UndefinedReferenceException;
-import org.mellowd.compiler.ExecutionEnvironment;
+
+import java.util.Set;
 
 public class RuntimeNullCheck<T> implements Expression<T> {
-    private final String referenceName;
+    private final QualifiedName referenceName;
     private final Expression<T> expression;
     private final SourceLink sourceLink;
 
-    public RuntimeNullCheck(String referenceName, Expression<T> expression, SourceLink sourceLink) {
+    public RuntimeNullCheck(QualifiedName referenceName, Expression<T> expression, SourceLink sourceLink) {
         this.referenceName = referenceName;
         this.expression = expression;
         this.sourceLink = sourceLink;
+    }
+
+    @Override
+    public Set<QualifiedName> getFreeVariables() {
+        return this.expression.getFreeVariables();
     }
 
     @Override

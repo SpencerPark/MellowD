@@ -1,8 +1,11 @@
 package org.mellowd.intermediate.executable.expressions;
 
+import org.mellowd.compiler.ExecutionEnvironment;
+import org.mellowd.intermediate.QualifiedName;
 import org.mellowd.intermediate.executable.SourceLink;
 import org.mellowd.intermediate.variables.IncorrectTypeException;
-import org.mellowd.compiler.ExecutionEnvironment;
+
+import java.util.Set;
 
 /**
  * Preforms a type check but due to the lack of a union type it implements and
@@ -22,6 +25,11 @@ public class RuntimeUnionTypeCheck implements Expression<Object> {
     }
 
     @Override
+    public Set<QualifiedName> getFreeVariables() {
+        return this.expression.getFreeVariables();
+    }
+
+    @Override
     public Object evaluate(ExecutionEnvironment environment) {
         Object value = expression.evaluate(environment);
         if (value == null) return null;
@@ -31,6 +39,7 @@ public class RuntimeUnionTypeCheck implements Expression<Object> {
             if (type.isAssignableFrom(valueType)) return value;
         }
 
-        throw sourceLink.toCompilationException(new IncorrectTypeException(sourceLink.text, value.getClass(), types));
+        // TODO qualified name is not the right type for this exception...
+        throw sourceLink.toCompilationException(new IncorrectTypeException(QualifiedName.ofUnqualified(sourceLink.text), value.getClass(), types));
     }
 }

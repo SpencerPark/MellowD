@@ -1,11 +1,11 @@
 package org.mellowd.intermediate.executable.expressions;
 
+import org.mellowd.intermediate.QualifiedName;
 import org.mellowd.intermediate.functions.operations.Comparable;
 import org.mellowd.compiler.ExecutionEnvironment;
 import org.mellowd.primitives.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 
 public class Comparison implements Expression<Boolean> {
@@ -17,6 +17,13 @@ public class Comparison implements Expression<Boolean> {
         this.left = left;
         this.operator = operator;
         this.right = right;
+    }
+
+    @Override
+    public Set<QualifiedName> getFreeVariables() {
+        Set<QualifiedName> free = new LinkedHashSet<>(this.left.getFreeVariables());
+        free.addAll(this.right.getFreeVariables());
+        return free;
     }
 
     @Override

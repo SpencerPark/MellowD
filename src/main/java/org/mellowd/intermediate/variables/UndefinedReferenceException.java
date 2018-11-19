@@ -1,23 +1,25 @@
 package org.mellowd.intermediate.variables;
 
-public class UndefinedReferenceException extends RuntimeException {
-    private final String identifier;
+import org.mellowd.intermediate.QualifiedName;
 
-    public UndefinedReferenceException(String identifier) {
+public class UndefinedReferenceException extends RuntimeException {
+    private final QualifiedName identifier;
+
+    public UndefinedReferenceException(QualifiedName identifier) {
         super(buildMessage(identifier));
         this.identifier = identifier;
     }
 
-    public UndefinedReferenceException(String identifier, Throwable cause) {
+    public UndefinedReferenceException(QualifiedName identifier, Throwable cause) {
         super(buildMessage(identifier), cause);
         this.identifier = identifier;
     }
 
-    private static String buildMessage(String identifier) {
+    private static String buildMessage(QualifiedName identifier) {
         return String.format("Identifier (%s) is undefined.", identifier);
     }
 
-    public String getIdentifier() {
+    public QualifiedName getIdentifier() {
         return identifier;
     }
 }

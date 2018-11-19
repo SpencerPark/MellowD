@@ -1,26 +1,32 @@
 package org.mellowd.intermediate.executable.statements;
 
+import org.mellowd.compiler.ExecutionEnvironment;
 import org.mellowd.intermediate.Output;
+import org.mellowd.intermediate.QualifiedName;
 import org.mellowd.intermediate.executable.expressions.Expression;
 import org.mellowd.intermediate.variables.DelayedResolution;
 import org.mellowd.intermediate.variables.Memory;
-import org.mellowd.compiler.ExecutionEnvironment;
+
+import java.util.Set;
 
 public class AssignmentStatement implements Statement {
-    private final String[] qualifier;
-    private final String name;
+    private final QualifiedName name;
     private final Expression<?> value;
     private final boolean isFinal;
     private final boolean delayResolution;
     private final boolean percussionToggle;
 
-    public AssignmentStatement(String[] qualifier, String name, Expression<?> value, boolean isFinal, boolean delayResolution, boolean percussionToggle) {
-        this.qualifier = qualifier;
+    public AssignmentStatement(QualifiedName name, Expression<?> value, boolean isFinal, boolean delayResolution, boolean percussionToggle) {
         this.name = name;
         this.value = value;
         this.isFinal = isFinal;
         this.delayResolution = delayResolution;
         this.percussionToggle = percussionToggle;
+    }
+
+    @Override
+    public Set<QualifiedName> getFreeVariables() {
+        return this.value.getFreeVariables();
     }
 
     @Override
@@ -32,8 +38,7 @@ public class AssignmentStatement implements Statement {
             env = environment;
         }
 
-        Memory memory = environment.getMemory(qualifier);
-        if (memory == null) memory = environment.createScope(qualifier);
+        Memory memory = environment.getMemory();
         Object toStore = this.delayResolution
                 ? (DelayedResolution) mem -> value.evaluate(env)
                 : value.evaluate(env);
