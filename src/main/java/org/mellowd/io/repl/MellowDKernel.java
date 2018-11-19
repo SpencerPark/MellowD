@@ -1,12 +1,12 @@
 package org.mellowd.io.repl;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.mellowd.compiler.*;
 import org.mellowd.io.Compiler;
-import org.mellowd.io.*;
+import org.mellowd.io.DirectorySourceFinder;
 
 import javax.sound.midi.*;
 import java.io.Closeable;
@@ -88,11 +88,11 @@ public class MellowDKernel implements Closeable {
         boolean allLoaded = synth.loadAllInstruments(soundbank);
 
         System.out.printf("Loaded %s instruments from sound font %s\n",
-                    allLoaded ? "all" : "some", formatPath(path));
+                allLoaded ? "all" : "some", formatPath(path));
     }
 
     public Sequence eval(String code) throws ParseException, CompilationException {
-        CharStream input = new ANTLRInputStream(code);
+        CharStream input = CharStreams.fromString(code);
         MellowDLexer lexer = new MellowDLexer(input);
 
         TokenStream tokens = new CommonTokenStream(lexer);
@@ -108,9 +108,9 @@ public class MellowDKernel implements Closeable {
         if (errorListener.encounteredError())
             throw new ParseException(errorListener.getErrors());
 
-        if (!parseTree.importStatement().isEmpty()) {
-            //Compile the dependencies
-            parseTree.importStatement().forEach(this.compiler::visitImportStatement);
+        if (!parseTree.importStmt().isEmpty()) {
+            // Compile the dependencies
+            parseTree.importStmt().forEach(this.compiler::visitImportStmt);
         }
 
         this.compiler.visitSong(parseTree);

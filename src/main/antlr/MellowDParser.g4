@@ -8,6 +8,7 @@ options {
 
 @header {
 import org.mellowd.primitives.*;
+import org.mellowd.intermediate.QualifiedName;
 import org.mellowd.intermediate.functions.operations.Comparable;
 import java.util.LinkedList;
 }
@@ -28,7 +29,9 @@ ifStmt
       )?
     ;
 
+// TODO perform this type assertion
 assignStmt
+locals [QualifiedName id]
     : KEYWORD_DEF? type? name ASSIGN_R STAR? expr
     ;
 
@@ -82,25 +85,14 @@ stmt
     ;
 
 importStmt
-locals [
-    List<String> funcNames = new LinkedList<>(),
-    List<String> path = new LinkedList<>(),
-    List<String> as = new LinkedList<>()
-]
     : KEYWORD_IMPORT
-      ( IDENTIFIER { $funcNames.add($IDENTIFIER.text); }
-        ( COMMA IDENTIFIER { $funcNames.add($IDENTIFIER.text); } )*
+      ( funcs += name ( COMMA funcs += name )*
       | STAR
       )
 
-      KEYWORD_FROM
-      IDENTIFIER { $path.add($IDENTIFIER.text); }
-      ( DOT IDENTIFIER { $path.add($IDENTIFIER.text); } )*
+      KEYWORD_FROM path = name
 
-      ( KEYWORD_AS
-        IDENTIFIER { $as.add($IDENTIFIER.text); }
-        ( DOT IDENTIFIER { $as.add($IDENTIFIER.text); } )*
-      )?
+      ( KEYWORD_AS as = name )?
     ;
 
 block

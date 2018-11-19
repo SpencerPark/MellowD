@@ -1,7 +1,7 @@
 package org.mellowd.intermediate.executable.expressions;
 
 import org.mellowd.compiler.ExecutionEnvironment;
-import org.mellowd.compiler.IndexingNotSupportedException;
+import org.mellowd.intermediate.executable.IndexingNotSupportedException;
 import org.mellowd.intermediate.QualifiedName;
 import org.mellowd.intermediate.executable.SourceLink;
 import org.mellowd.intermediate.functions.operations.Indexable;

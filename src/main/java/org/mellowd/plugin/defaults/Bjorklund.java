@@ -1,8 +1,13 @@
 package org.mellowd.plugin.defaults;
 
-import org.mellowd.intermediate.functions.*;
-import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.compiler.MellowD;
+import org.mellowd.intermediate.Closure;
+import org.mellowd.intermediate.QualifiedName;
+import org.mellowd.intermediate.executable.expressions.Abstraction;
+import org.mellowd.intermediate.executable.statements.Statement;
+import org.mellowd.intermediate.functions.Parameter;
+import org.mellowd.intermediate.functions.Parameters;
+import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.plugin.MellowDPlugin;
 import org.mellowd.primitives.Melody;
 import org.mellowd.primitives.Pitch;
@@ -15,25 +20,27 @@ public class Bjorklund implements MellowDPlugin {
     private final Parameter<Number> pulsesParam;
     private final Parameter<Number> stepsParam;
 
-    private final Function bjorklundFunction;
+    private final QualifiedName bjorklundFunctionName;
+    private final Abstraction bjorklundFunction;
 
     public Bjorklund() {
         this.melodyParam = Parameter.newRequiredParameter("melody", Melody.class);
         this.pulsesParam = Parameter.newRequiredParameter("pulses", Number.class);
         this.stepsParam = Parameter.newRequiredParameter("steps", Number.class);
 
-        FunctionSignature signature = new FunctionSignature("euclid",
-                melodyParam, pulsesParam, stepsParam);
-        this.bjorklundFunction = new Function(signature, false, (env, out) -> {
-            Memory locals = env.getMemory();
-            Memory returnStorage  = env.getMemory(FunctionExecutionEnvironment.RETURN_QUALIFIER);
+        this.bjorklundFunctionName = QualifiedName.fromString("mellowd.euclid");
+        this.bjorklundFunction = new Abstraction(
+                new Parameters(this.melodyParam, this.pulsesParam, this.stepsParam), false,
+                Statement.lift((env, out) -> {
+                    Memory locals = env.getMemory();
 
-            Melody melodyMap = melodyParam.getReference().dereference(locals);
-            int pulses = pulsesParam.getReference().dereference(locals).intValue();
-            int steps = stepsParam.getReference().dereference(locals).intValue();
+                    Melody melodyMap = melodyParam.dereference(locals);
+                    int pulses = pulsesParam.dereference(locals).intValue();
+                    int steps = stepsParam.dereference(locals).intValue();
 
-            returnStorage.set("default", bjorklundAlgorithm(melodyMap, pulses, steps));
-        });
+                    locals.set(Closure.RETURN_NAME, bjorklundAlgorithm(melodyMap, pulses, steps));
+                })
+        );
     }
 
     private Melody bjorklundAlgorithm(Melody melodyMap, int pulses, int steps) {
@@ -63,13 +70,13 @@ public class Bjorklund implements MellowDPlugin {
         for (int i = 0; i < numChunks; i++) {
             for (boolean play : chunk) {
                 if (play) melody.append(melodyMap.getAtIndex(mapIndex++));
-                else      melody.append(Pitch.REST);
+                else melody.append(Pitch.REST);
             }
         }
         for (int i = 0; i < numRemainder; i++)
             for (boolean play : remainder) {
                 if (play) melody.append(melodyMap.getAtIndex(mapIndex++));
-                else      melody.append(Pitch.REST);
+                else melody.append(Pitch.REST);
             }
 
         return melody;
@@ -77,7 +84,7 @@ public class Bjorklund implements MellowDPlugin {
 
     @Override
     public void apply(MellowD mellowD) {
-        FunctionBank functions = mellowD.getOrCreateFunctionBank("mellowd");
-        functions.addFunction(this.bjorklundFunction);
+        Memory globals = mellowD.getGlobals();
+        globals.set(this.bjorklundFunctionName, this.bjorklundFunction);
     }
 }

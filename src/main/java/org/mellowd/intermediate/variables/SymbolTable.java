@@ -15,7 +15,6 @@ import java.util.Set;
 // and exception handling functionality. The `@SuppressWarnings("unchecked")` stops the compiler
 // from incorrectly warning about unchecked casts as the check is done via reflection and the
 // compiler isn't convinced that it has been checked.
-@SuppressWarnings("unchecked")
 public class SymbolTable implements Memory {
     private final Memory parentScope;
     private final PathMap<Map<String, Object>> data;

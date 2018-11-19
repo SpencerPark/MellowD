@@ -3,7 +3,7 @@ package org.mellowd.intermediate.executable.expressions;
 import org.mellowd.compiler.ExecutionEnvironment;
 import org.mellowd.intermediate.Closure;
 import org.mellowd.intermediate.QualifiedName;
-import org.mellowd.intermediate.executable.statements.PercussionToggledEnvironment;
+import org.mellowd.intermediate.PercussionToggledEnvironment;
 import org.mellowd.intermediate.executable.statements.Statement;
 import org.mellowd.intermediate.functions.Parameters;
 import org.mellowd.intermediate.variables.Memory;
@@ -42,7 +42,7 @@ public class Abstraction implements Expression<Closure> {
 
         // Remove the free variables that are captured by the parameters.
         freeVars.removeIf(name ->
-                !name.hasQualifier() && this.getParameters().getParam(name.getName()) != null);
+                name.isUnqualified() && this.getParameters().getParam(name.getName()) != null);
 
         return freeVars;
     }

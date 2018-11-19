@@ -9,8 +9,5 @@ public interface ExecutionEnvironment {
 
     Memory getMemory();
 
-    // TODO not necessary?
-    Memory createScope(String... qualifier);
-
     TimingEnvironment getTimingEnvironment();
 }

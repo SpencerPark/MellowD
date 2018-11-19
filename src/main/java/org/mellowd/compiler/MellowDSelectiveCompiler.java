@@ -1,40 +1,48 @@
 package org.mellowd.compiler;
 
-import org.mellowd.intermediate.functions.FunctionBank;
+import org.mellowd.intermediate.NullOutput;
+import org.mellowd.intermediate.QualifiedName;
+import org.mellowd.intermediate.Qualifier;
 
 import java.util.Set;
 
 public class MellowDSelectiveCompiler extends MellowDCompiler {
-    private final String[] qualifier;
-    private final String[] givenName;
-    private final Set<String> functionNames;
-    private final boolean importAll;
+    private final Qualifier from;
+    private final Qualifier as;
+    private final Set<QualifiedName> includedNames;
 
-    public MellowDSelectiveCompiler(MellowD mellowD, String[] qualifier, String[] givenName, Set<String> functionNames) {
+    /**
+     * Imported names are qualified with {@code as} if given, otherwise names are qualified with
+     * {@code from} (their module name).
+     *
+     * @param mellowD
+     * @param from
+     * @param as
+     * @param includedNames
+     */
+    public MellowDSelectiveCompiler(MellowD mellowD, Qualifier from, Qualifier as, Set<QualifiedName> includedNames) {
         super(mellowD);
-        this.qualifier = qualifier;
-        this.givenName = givenName;
-        this.functionNames = functionNames;
-        this.importAll = functionNames.isEmpty();
+        this.from = from;
+        this.as = as;
+        this.includedNames = includedNames;
     }
 
     @Override
     public Void visitSong(MellowDParser.SongContext ctx) {
-        //Import everything that is needed
-        ctx.importStatement().forEach(super::visitImportStatement);
+        // Import everything that is needed
+        ctx.importStmt().forEach(super::visitImportStmt);
 
-        //Add the functions
-        FunctionBank fullyQualifiedBank = super.mellowD.getOrCreateFunctionBank(qualifier);
-        FunctionBank givenNameBank = givenName == null ? null : super.mellowD.getOrCreateFunctionBank(givenName);
+        ctx.assignStmt().stream()
+                .filter(assignCtx -> this.includedNames == null || this.includedNames.contains(super.visitName(assignCtx.name())))
+                .map(stmt -> {
+                    if (this.as != null)
+                        stmt.id = this.as.qualify(visitName(stmt.name()));
+                    else
+                        stmt.id = this.from.qualify(visitName(stmt.name()));
 
-        ctx.functionDefinition().stream()
-                .filter(funCtx -> importAll || functionNames.contains(funCtx.IDENTIFIER().getText()))
-                .map(super::visitFunctionDefinition)
-                .forEach(function -> {
-                    fullyQualifiedBank.addFunction(function);
-                    if (givenNameBank != null)
-                        givenNameBank.addFunction(function);
-                });
+                    return super.visitAssignStmt(stmt, true);
+                })
+                .forEach(s -> s.execute(super.mellowD, NullOutput.getInstance()));
 
         return null;
     }

@@ -1,9 +1,7 @@
 package org.mellowd.compiler;
 
 import org.mellowd.intermediate.executable.CodeExecutor;
-import org.mellowd.intermediate.executable.statements.PercussionToggledEnvironment;
 import org.mellowd.intermediate.functions.DefaultFunctions;
-import org.mellowd.intermediate.functions.FunctionBank;
 import org.mellowd.intermediate.variables.AlreadyDefinedException;
 import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.intermediate.variables.SymbolTable;
@@ -23,26 +21,21 @@ import java.util.Queue;
 public class MellowD implements ExecutionEnvironment {
     private SourceFinder srcFinder;
 
-    private final PathMap<Memory> memory;
+    private final Memory globals;
     private final Map<String, MellowDBlock> blocks;
     private final TimingEnvironment timingEnvironment;
-    private final PathMap<FunctionBank> functions;
 
     private Sequence master;
     private final Queue<Integer> channelsAvailable;
     private final Queue<Integer> drumChannelsAvailable;
 
-    public final ExecutionEnvironment PERCUSSION_TOGGLED_WRAPPER = new PercussionToggledEnvironment(this);
-
     public MellowD(SourceFinder finder, TimingEnvironment timingEnvironment) {
         this.srcFinder = finder;
 
-        Memory globalMemory = new SymbolTable();
-        this.memory = new PathMap<>(globalMemory);
+        this.globals = new SymbolTable();
         this.blocks = new HashMap<>();
         this.timingEnvironment = timingEnvironment;
-        this.functions = new PathMap<>(new FunctionBank());
-        addDefaultFunctionsToBank();
+        addDefaultsToGlobals();
 
         this.master = timingEnvironment.createSequence();
         this.channelsAvailable = new LinkedList<>();
@@ -51,9 +44,8 @@ public class MellowD implements ExecutionEnvironment {
         this.drumChannelsAvailable.addAll(GeneralMidiConstants.DRUM_CHANNELS);
     }
 
-    private void addDefaultFunctionsToBank() {
-        FunctionBank bank = this.functions.get();
-        DefaultFunctions.addAllToFunctionBank(bank);
+    private void addDefaultsToGlobals() {
+        DefaultFunctions.addAllToScope(this.globals);
     }
 
     public MellowDBlock defineBlock(String name, boolean percussion) {
@@ -68,14 +60,14 @@ public class MellowD implements ExecutionEnvironment {
             } else {
                 channelNum = channelsAvailable.poll();
                 if (channelNum == null)
-                    throw new IllegalStateException("Block definition "+name+" requires a channel but there are none left. Too many channels used.");
+                    throw new IllegalStateException("Block definition " + name + " requires a channel but there are none left. Too many channels used.");
             }
 
             MIDIChannel channel = new MIDIChannel(this.master.createTrack(), percussion, channelNum, timingEnvironment);
-            block = new MellowDBlock(this.memory.get(), name, channel);
+            block = new MellowDBlock(this.globals, name, channel);
             this.blocks.put(name, block);
         } else {
-            throw new AlreadyDefinedException("A block with the name "+name+" is already defined.");
+            throw new AlreadyDefinedException("A block with the name " + name + " is already defined.");
         }
 
         return block;
@@ -85,8 +77,8 @@ public class MellowD implements ExecutionEnvironment {
         return this.blocks.get(name);
     }
 
-    public Memory getGlobalMemory() {
-        return this.memory.get();
+    public Memory getGlobals() {
+        return this.globals;
     }
 
     @Override
@@ -95,13 +87,8 @@ public class MellowD implements ExecutionEnvironment {
     }
 
     @Override
-    public Memory getMemory(String... qualifier) {
-        return this.memory.get(qualifier);
-    }
-
-    @Override
-    public Memory createScope(String... qualifier) {
-        return this.memory.putIfAbsent(SymbolTable::new, qualifier);
+    public Memory getMemory() {
+        return this.getGlobals();
     }
 
     public SourceFinder getSrcFinder() {
@@ -115,21 +102,6 @@ public class MellowD implements ExecutionEnvironment {
     @Override
     public TimingEnvironment getTimingEnvironment() {
         return timingEnvironment;
-    }
-
-    public FunctionBank getFunctionBank(String... qualifier) {
-        return this.functions.get(qualifier);
-    }
-
-    public FunctionBank getOrCreateFunctionBank(String... qualifier) {
-        FunctionBank bank = this.functions.get(qualifier);
-
-        if (bank == null) {
-            bank = new FunctionBank();
-            this.functions.put(bank, qualifier);
-        }
-
-        return bank;
     }
 
     public synchronized Sequence execute() throws Exception {

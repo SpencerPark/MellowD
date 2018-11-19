@@ -22,7 +22,7 @@ public class ReferenceResolution implements Expression<Object> {
 
     @Override
     public Object evaluate(ExecutionEnvironment environment) {
-        if (environment.isPercussion() && !this.name.hasQualifier()) {
+        if (environment.isPercussion() && this.name.isUnqualified()) {
             GeneralMidiPercussion drumSound = GeneralMidiPercussion.lookup(this.name.getName());
             if (drumSound != null)
                 return drumSound.getAsPitch();

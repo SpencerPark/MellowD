@@ -14,8 +14,8 @@ wrapper {
 }
 
 compileJava {
-    sourceCompatibility = '1.9'
-    targetCompatibility = '1.9'
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
 }
 
 // All required libs are on the maven central repo

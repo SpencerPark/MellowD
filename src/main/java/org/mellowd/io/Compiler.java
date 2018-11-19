@@ -3,13 +3,13 @@
 
 package org.mellowd.io;
 
-import org.mellowd.midi.TimingEnvironment;
-import org.mellowd.compiler.*;
-import org.mellowd.plugin.PluginManager;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
+import org.mellowd.compiler.*;
+import org.mellowd.midi.TimingEnvironment;
+import org.mellowd.plugin.PluginManager;
 
 import javax.sound.midi.*;
 import java.io.File;
@@ -46,6 +46,7 @@ public class Compiler {
     public static final String FILE_EXTENSION = ".mlod";
 
     public static final String VERSION;
+
     static {
         Properties metadata = new Properties();
         try {
@@ -57,6 +58,7 @@ public class Compiler {
 
     private static final Pattern CURRENT_DIRECTORY_PREFIX =
             Pattern.compile("^" + Pattern.quote(new File("").getAbsolutePath() + File.separator));
+
     private static String formatPath(File file) {
         String absPath = file.getAbsolutePath();
         Matcher m = CURRENT_DIRECTORY_PREFIX.matcher(absPath);
@@ -99,7 +101,7 @@ public class Compiler {
             System.exit(1);
         } catch (ParseException e) {
             for (SyntaxErrorReport errorReport : e.getProblems()) {
-                System.err.println(errorReport.getErrorType().toString()+": "+errorReport.getMessage());
+                System.err.println(errorReport.getErrorType().toString() + ": " + errorReport.getMessage());
             }
             System.exit(1);
         }
@@ -201,8 +203,8 @@ public class Compiler {
             //the user know we made a new directory on their machine.
             if (options.wantsVerbose())
                 System.out.printf("Created directory %s\n", formatPath(outDir));
-        //If the path exists but is not a directory then we can't put the compilation result
-        //anywhere. Let the user know they gave us a path to an existing file and close the program.
+            //If the path exists but is not a directory then we can't put the compilation result
+            //anywhere. Let the user know they gave us a path to an existing file and close the program.
         } else if (!outDir.isDirectory()) {
             System.err.printf("outdir (%s) is not a directory\n", formatPath(outDir));
             System.exit(1);
@@ -300,7 +302,7 @@ public class Compiler {
         if (srcFinder != null) sourceFinders.add(srcFinder);
         //Second is the user requested additional directories
         options.getSourceDirs().forEach(dir ->
-                    sourceFinders.add(new DirectorySourceFinder(new File(dir).getAbsoluteFile(), FILE_EXTENSION)));
+                sourceFinders.add(new DirectorySourceFinder(new File(dir).getAbsoluteFile(), FILE_EXTENSION)));
         //Last priority is to look in the classpath
         sourceFinders.add(new ResourceSourceFinder(FILE_EXTENSION));
         srcFinder = new CompositeSourceFinder(sourceFinders.toArray(new SourceFinder[sourceFinders.size()]));
@@ -356,10 +358,10 @@ public class Compiler {
         try {
             MellowDCompiler walker = new MellowDCompiler(mellowD);
 
-            if (!parseTree.importStatement().isEmpty()) {
-                //Compile the dependencies
+            if (!parseTree.importStmt().isEmpty()) {
+                // Compile the dependencies
                 long dependencyCompStart = System.nanoTime();
-                parseTree.importStatement().forEach(walker::visitImportStatement);
+                parseTree.importStmt().forEach(walker::visitImportStmt);
                 if (options.wantsVerbose()) {
                     long dependencyCompTime = System.nanoTime() - dependencyCompStart;
                     System.out.printf("Dependency compilation took %.4f s\n",

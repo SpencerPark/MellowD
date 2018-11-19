@@ -2,6 +2,7 @@ package org.mellowd.intermediate.executable.expressions;
 
 import org.mellowd.compiler.ExecutionEnvironment;
 import org.mellowd.intermediate.Closure;
+import org.mellowd.intermediate.NullOutput;
 import org.mellowd.intermediate.QualifiedName;
 import org.mellowd.intermediate.executable.ScopeDependent;
 import org.mellowd.intermediate.functions.Argument;
@@ -36,6 +37,6 @@ public class FunctionCall implements Expression<Object> {
     @Override
     public Object evaluate(ExecutionEnvironment environment) {
         Closure closure = this.function.evaluate(environment);
-        return closure.call(environment, null, this.args);
+        return closure.call(environment, NullOutput.getInstance(), this.args);
     }
 }

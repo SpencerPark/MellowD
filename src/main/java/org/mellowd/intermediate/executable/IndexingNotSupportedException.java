@@ -1,4 +1,4 @@
-package org.mellowd.compiler;
+package org.mellowd.intermediate.executable;
 
 public class IndexingNotSupportedException extends RuntimeException {
     public IndexingNotSupportedException(String message) {

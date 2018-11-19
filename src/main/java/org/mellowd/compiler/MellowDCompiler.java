@@ -7,7 +7,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.mellowd.intermediate.*;
 import org.mellowd.intermediate.executable.SourceLink;
 import org.mellowd.intermediate.executable.expressions.*;
-import org.mellowd.intermediate.executable.expressions.FunctionCall;
 import org.mellowd.intermediate.executable.statements.*;
 import org.mellowd.intermediate.functions.Argument;
 import org.mellowd.intermediate.functions.Parameter;
@@ -28,6 +27,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class MellowDCompiler extends MellowDParserBaseVisitor {
     private static String getText(ParserRuleContext rule) {
@@ -92,7 +92,11 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
         String name = getText(fullyQualifiedID.get(fullyQualifiedID.size() - 1));
 
-        return new QualifiedName(qualifier, name);
+        return QualifiedName.of(qualifier, name);
+    }
+
+    public Qualifier compileQualifier(MellowDParser.NameContext ctx) {
+        return Qualifier.of(ctx.IDENTIFIER().stream().map(MellowDCompiler::getText).toArray(String[]::new));
     }
 
     private <T> Expression<T> lookupName(MellowDParser.NameContext ctx, Class<T> desiredType) {
@@ -350,7 +354,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     }
 
     @Override
-    public Expression<? extends Slurrable<?>> visitRhythmParam(MellowDParser.RhythmParamContext ctx) {
+    public Expression<?> visitRhythmParam(MellowDParser.RhythmParamContext ctx) {
         MellowDParser.BeatContext beat = ctx.beat();
         if (beat != null)
             return new Constant<>(visitBeat(beat));
@@ -381,7 +385,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
             idExpr = new RuntimeNullCheck<>(visitName(identifier), idExpr, link);
         }
 
-        return new RuntimeTypeCheck<>((Class<? extends Slurrable<?>>) Slurrable.class, idExpr, link);
+        return new RuntimeTypeCheck<>(Slurrable.class, idExpr, link);
     }
 
     @Override
@@ -570,11 +574,12 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         if (isField && !isConstant)
             throw new CompilationException(ctx, new IllegalStateException("All variable definitions outside of a block must be constant ('def' keyword)"));
 
-        QualifiedName identifier = visitName(ctx.name());
+        if (ctx.id == null)
+            ctx.id = visitName(ctx.name());
 
         Expression<?> valueExpr = visitExpr(ctx.expr());
 
-        return new AssignmentStatement(identifier, valueExpr,
+        return new AssignmentStatement(ctx.id, valueExpr,
                 isConstant, isField, percussionToggle);
     }
 
@@ -751,19 +756,21 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
     @Override
     public Void visitImportStmt(MellowDParser.ImportStmtContext ctx) {
-        Set<String> functions;
+        Set<QualifiedName> functions;
         if (ctx.STAR() != null)
-            functions = Collections.emptySet();
+            functions = null;
         else
-            functions = new HashSet<>(ctx.funcNames);
+            functions = ctx.funcs.stream()
+                    .map(this::visitName)
+                    .collect(Collectors.toSet());
 
-        String[] path = ctx.path.toArray(new String[0]);
-        String[] as = ctx.as.isEmpty() ? null : ctx.as.toArray(new String[0]);
+        Qualifier path = compileQualifier(ctx.name);
+        Qualifier as = ctx.as == null ? null : compileQualifier(ctx.as);
 
         MellowDCompiler importCompiler = new MellowDSelectiveCompiler(this.mellowD, path, as, functions);
 
         try {
-            InputStream referencedSrc = this.mellowD.getSrcFinder().resolve(path);
+            InputStream referencedSrc = this.mellowD.getSrcFinder().resolve(path.getPath());
 
             CharStream inStream = CharStreams.fromStream(referencedSrc);
             MellowDLexer lexer = new MellowDLexer(inStream);
@@ -932,7 +939,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
         //The output is null because in the global scope an output doesn't exist
         ctx.assignStmt().forEach(varCtx ->
-                visitAssignStmt(varCtx, true).execute(this.mellowD, null));
+                visitAssignStmt(varCtx, true).execute(this.mellowD, NullOutput.getInstance()));
 
         ctx.block().forEach(this::visitBlock);
 

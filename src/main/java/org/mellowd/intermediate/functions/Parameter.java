@@ -3,6 +3,7 @@ package org.mellowd.intermediate.functions;
 import org.mellowd.intermediate.QualifiedName;
 import org.mellowd.intermediate.executable.expressions.Expression;
 import org.mellowd.intermediate.variables.IncorrectTypeException;
+import org.mellowd.intermediate.variables.Memory;
 
 import java.util.Objects;
 
@@ -83,6 +84,13 @@ public class Parameter<T> {
             return;
 
         throw new IncorrectTypeException(this.getNameAsQualified(), value.getClass(), this.getType());
+    }
+
+    public T dereference(Memory memory) {
+        if (this.isDynamicallyTyped())
+            return (T) memory.get(this.getNameAsQualified());
+        else
+            return memory.get(this.getNameAsQualified(), this.getType());
     }
 
     @Override

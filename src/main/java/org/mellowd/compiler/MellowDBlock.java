@@ -1,19 +1,19 @@
 package org.mellowd.compiler;
 
 import org.mellowd.intermediate.*;
-import org.mellowd.midi.TimingEnvironment;
 import org.mellowd.intermediate.executable.CodeExecutor;
 import org.mellowd.intermediate.executable.statements.Statement;
 import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.intermediate.variables.SymbolTable;
 import org.mellowd.midi.MIDIChannel;
+import org.mellowd.midi.TimingEnvironment;
 import org.mellowd.primitives.Beat;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class MellowDBlock implements Output, ExecutionEnvironment {
-    private final PathMap<Memory> memory;
+    private final Memory blockLocals;
     private final String name;
     private final MIDIChannel channel;
     private final List<Statement> code;
@@ -22,9 +22,9 @@ public class MellowDBlock implements Output, ExecutionEnvironment {
     private GradualDynamicChange gradualStart = null;
 
     public MellowDBlock(Memory globalMemory, String name, MIDIChannel channel) {
-        Memory localMemory = new SymbolTable(globalMemory);
-        this.memory = new PathMap<>(localMemory);
-        this.memory.put(globalMemory, "this");
+        this.blockLocals = new SymbolTable(globalMemory);
+        // TODO support adding memory sections to others
+        // this.blockLocals.set(QualifiedName.ofUnqualified("this"), globalMemory);
         this.name = name;
         this.channel = channel;
         this.code = new LinkedList<>();
@@ -46,19 +46,18 @@ public class MellowDBlock implements Output, ExecutionEnvironment {
         return this.channel;
     }
 
+    public Memory getLocals() {
+        return this.blockLocals;
+    }
+
     @Override
     public boolean isPercussion() {
         return channel.isPercussion();
     }
 
     @Override
-    public Memory getMemory(String... qualifier) {
-        return this.memory.get(qualifier);
-    }
-
-    @Override
-    public Memory createScope(String... qualifier) {
-        return this.memory.putIfAbsent(SymbolTable::new, qualifier);
+    public Memory getMemory() {
+        return this.getLocals();
     }
 
     @Override

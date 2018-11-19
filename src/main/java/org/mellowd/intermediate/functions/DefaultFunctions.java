@@ -1,10 +1,9 @@
 package org.mellowd.intermediate.functions;
 
-import org.mellowd.intermediate.ChannelMute;
-import org.mellowd.intermediate.InstrumentChange;
-import org.mellowd.intermediate.OctaveShift;
-import org.mellowd.intermediate.TransposeChange;
+import org.mellowd.intermediate.*;
+import org.mellowd.intermediate.executable.expressions.Abstraction;
 import org.mellowd.intermediate.executable.statements.Statement;
+import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.midi.GeneralMidiInstrument;
 
 public class DefaultFunctions {
@@ -12,16 +11,16 @@ public class DefaultFunctions {
      *                   Instrument Change
      * ===========================================================
      */
-    private static final Function instrumentChangeInstance;
-    private static final Function instrumentChangePercussionInstance;
+    private static final QualifiedName INSTRUMENT_CHANGE_NAME = QualifiedName.ofUnqualified("instrument");
+    private static final Abstraction INSTRUMENT_CHANGE;
 
     static {
         final Parameter<?> instrumentParam = Parameter.newRequiredParameter("instrument");
         final Parameter<Number> soundbankParam = Parameter.newOptionalParameter("soundbank", Number.class);
 
-        Statement instrumentChangeBody = (env, out) -> {
-            Object instrumentArg = instrumentParam.getReference().dereference(env.getMemory());
-            Number soundbankArg = soundbankParam.getReference().dereference(env.getMemory());
+        Statement instrumentChangeBody = Statement.lift((env, out) -> {
+            Object instrumentArg = instrumentParam.dereference(env.getMemory());
+            Number soundbankArg = soundbankParam.dereference(env.getMemory());
 
             int instrument;
             if (instrumentArg instanceof Number) {
@@ -36,106 +35,71 @@ public class DefaultFunctions {
             if (soundbankArg != null) soundbank = soundbankArg.intValue();
 
             out.put(new InstrumentChange(instrument, soundbank));
-        };
-        FunctionSignature instrumentChangeSignature = new FunctionSignature("instrument", instrumentParam, soundbankParam);
+        });
 
-        instrumentChangeInstance = new Function(instrumentChangeSignature, false, instrumentChangeBody);
-        instrumentChangePercussionInstance = new Function(instrumentChangeSignature, true, instrumentChangeBody);
-    }
-
-    public static Function getInstrumentChangeInstance(boolean percussion) {
-        if (percussion) return instrumentChangePercussionInstance;
-        return instrumentChangeInstance;
+        INSTRUMENT_CHANGE = new Abstraction(new Parameters(instrumentParam, soundbankParam), false, instrumentChangeBody);
     }
 
     /* ===========================================================
      *                           Mute
      * ===========================================================
      */
-    private static final Function muteInstance;
-    private static final Function mutePercussionInstance;
+    private static final QualifiedName MUTE_NAME = QualifiedName.ofUnqualified("mute");
+    private static final Abstraction MUTE;
 
     static {
         final Parameter<Boolean> muteParam = Parameter.newRequiredParameter("mute", Boolean.class);
 
-        Statement muteBody = (env, out) -> {
-            Boolean mute = muteParam.getReference().dereference(env.getMemory());
+        Statement muteBody = Statement.lift((env, out) -> {
+            Boolean mute = muteParam.dereference(env.getMemory());
+
             out.put(ChannelMute.getInstance(mute));
-        };
-        FunctionSignature muteSignature = new FunctionSignature("mute", muteParam);
+        });
 
-        muteInstance = new Function(muteSignature, false, muteBody);
-        mutePercussionInstance = new Function(muteSignature, true, muteBody);
-    }
-
-    public static Function getMuteInstance(boolean percussion) {
-        if (percussion) return mutePercussionInstance;
-        return muteInstance;
+        MUTE = new Abstraction(new Parameters(muteParam), false, muteBody);
     }
 
     /* ===========================================================
      *                      Octave Shift
      * ===========================================================
      */
-    private static final Function octaveShiftInstance;
-    private static final Function octaveShiftPercussionInstance;
+    private static final QualifiedName OCTAVE_SHIFT_NAME = QualifiedName.ofUnqualified("octave");
+    private static final Abstraction OCTAVE_SHIFT;
 
     static {
         final Parameter<Number> shiftAmtParam = Parameter.newRequiredParameter("shiftAmt", Number.class);
 
-        FunctionSignature octaveShiftSignature = new FunctionSignature("octave", shiftAmtParam);
-
-        octaveShiftInstance = new Function(octaveShiftSignature, false, (env, out) -> {
-            Number shiftAmt = shiftAmtParam.getReference().dereference(env.getMemory());
+        Statement octaveShiftBody = Statement.lift((env, out) -> {
+            Number shiftAmt = shiftAmtParam.dereference(env.getMemory());
             out.put(new OctaveShift(shiftAmt.intValue()));
         });
-        octaveShiftPercussionInstance = new Function(octaveShiftSignature, true, (env, out) -> {
-            throw new IllegalStateException("Cannot shift the octave of a percussion sound.");
-        });
-    }
+        // TODO throw exception if env is percussion? Calls automatically toggle to correct type
 
-    public static Function getOctaveShiftInstance(boolean percussion) {
-        if (percussion) return octaveShiftPercussionInstance;
-        return octaveShiftInstance;
+        OCTAVE_SHIFT = new Abstraction(new Parameters(shiftAmtParam), false, octaveShiftBody);
     }
 
     /* ===========================================================
      *                         Transpose
      * ===========================================================
      */
-    private static final Function transposeInstance;
-    private static final Function transposePercussionInstance;
+    private static final QualifiedName TRANSPOSE_NAME = QualifiedName.ofUnqualified("transpose");
+    private static final Abstraction TRANSPOSE;
 
     static {
         final Parameter<Number> numSemiTones = Parameter.newRequiredParameter("transposeAmt", Number.class);
 
-        FunctionSignature transposeSignature = new FunctionSignature("transpose", numSemiTones);
-
-        transposeInstance = new Function(transposeSignature, false, (env, out) -> {
-            Number shiftAmt = numSemiTones.getReference().dereference(env.getMemory());
+        Statement transposeBody = Statement.lift((env, out) -> {
+            Number shiftAmt = numSemiTones.dereference(env.getMemory());
             out.put(new TransposeChange(shiftAmt.intValue()));
         });
-        transposePercussionInstance = new Function(transposeSignature, true, (env, out) -> {
-            throw new IllegalStateException("Cannot transpose a percussion sound.");
-        });
+
+        TRANSPOSE = new Abstraction(new Parameters(numSemiTones), false, transposeBody);
     }
 
-    public static Function getTransposeInstance(boolean percussion) {
-        if (percussion) return transposePercussionInstance;
-        return transposeInstance;
-    }
-
-    public static void addAllToFunctionBank(FunctionBank bank) {
-        bank.addFunction(getInstrumentChangeInstance(true));
-        bank.addFunction(getInstrumentChangeInstance(false));
-
-        bank.addFunction(getMuteInstance(true));
-        bank.addFunction(getMuteInstance(false));
-
-        bank.addFunction(getOctaveShiftInstance(true));
-        bank.addFunction(getOctaveShiftInstance(false));
-
-        bank.addFunction(getTransposeInstance(true));
-        bank.addFunction(getTransposeInstance(false));
+    public static void addAllToScope(Memory scope) {
+        scope.set(INSTRUMENT_CHANGE_NAME, INSTRUMENT_CHANGE);
+        scope.set(MUTE_NAME, MUTE);
+        scope.set(OCTAVE_SHIFT_NAME, OCTAVE_SHIFT);
+        scope.set(TRANSPOSE_NAME, TRANSPOSE);
     }
 }

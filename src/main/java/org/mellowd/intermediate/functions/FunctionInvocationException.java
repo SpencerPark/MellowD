@@ -1,8 +1,5 @@
 package org.mellowd.intermediate.functions;
 
-/**
- * Created on 2016-06-17.
- */
 public class FunctionInvocationException extends RuntimeException {
     public FunctionInvocationException() {
     }

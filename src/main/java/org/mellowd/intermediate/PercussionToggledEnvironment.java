@@ -1,8 +1,8 @@
-package org.mellowd.intermediate.executable.statements;
+package org.mellowd.intermediate;
 
-import org.mellowd.midi.TimingEnvironment;
-import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.compiler.ExecutionEnvironment;
+import org.mellowd.intermediate.variables.Memory;
+import org.mellowd.midi.TimingEnvironment;
 
 public class PercussionToggledEnvironment implements ExecutionEnvironment {
     private final ExecutionEnvironment wrapped;
@@ -17,13 +17,8 @@ public class PercussionToggledEnvironment implements ExecutionEnvironment {
     }
 
     @Override
-    public Memory getMemory(String... qualifier) {
-        return wrapped.getMemory(qualifier);
-    }
-
-    @Override
-    public Memory createScope(String... qualifier) {
-        return wrapped.createScope(qualifier);
+    public Memory getMemory() {
+        return wrapped.getMemory();
     }
 
     @Override
