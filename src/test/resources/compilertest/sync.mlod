@@ -5,7 +5,7 @@ blockA {
 }
 
 blockB {
-    { 3 } => octave
+    do { 3 => octave }
 }
 
 blockA, blockB {

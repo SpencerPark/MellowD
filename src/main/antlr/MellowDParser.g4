@@ -301,7 +301,7 @@ locals [Dynamic dynamic]
     ;
 
 performStmt
-    : KEYWORD_PERFORM BRACE_OPEN call BRACE_CLOSE
+    : KEYWORD_DO BRACE_OPEN call BRACE_CLOSE
     | ( melody | melodyRef = name )
       STAR
       ( rhythm | rhythmRef = name )

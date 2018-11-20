@@ -549,10 +549,12 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
     @Override
     public Statement visitPerformStmt(MellowDParser.PerformStmtContext ctx) {
-        if (ctx.KEYWORD_PERFORM() != null) {
+        if (ctx.KEYWORD_DO() != null) {
             MellowDParser.CallContext call = ctx.call();
+            MellowDParser.NameContext name = call.name();
 
-            Expression<Closure> procedure = lookupName(call.name(), Closure.class);
+            Expression<Closure> procedure = lookupName(name, Closure.class);
+            procedure = new RuntimeNullCheck<>(visitName(name), procedure, new SourceLink(call));
             Argument<?>[] arguments = visitArgumentList(call.argumentList());
 
             return new PerformProcedureStatement(procedure, arguments);

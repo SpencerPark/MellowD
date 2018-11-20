@@ -1,6 +1,6 @@
 def block sample
 sample {
-    { "acousticguitar" } => instrument
-    { 3 } => octave
+    do { "acousticguitar" => instrument }
+    do { 3 => octave }
     [(c, e, g)]*<w> [a, b, c, d, e, f, g]*<q>
 }

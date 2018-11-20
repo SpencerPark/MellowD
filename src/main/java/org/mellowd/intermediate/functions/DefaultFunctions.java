@@ -4,6 +4,7 @@ import org.mellowd.intermediate.*;
 import org.mellowd.intermediate.executable.expressions.Abstraction;
 import org.mellowd.intermediate.executable.statements.Statement;
 import org.mellowd.intermediate.variables.Memory;
+import org.mellowd.intermediate.variables.NullMemory;
 import org.mellowd.midi.GeneralMidiInstrument;
 
 public class DefaultFunctions {
@@ -97,9 +98,9 @@ public class DefaultFunctions {
     }
 
     public static void addAllToScope(Memory scope) {
-        scope.set(INSTRUMENT_CHANGE_NAME, INSTRUMENT_CHANGE);
-        scope.set(MUTE_NAME, MUTE);
-        scope.set(OCTAVE_SHIFT_NAME, OCTAVE_SHIFT);
-        scope.set(TRANSPOSE_NAME, TRANSPOSE);
+        scope.set(INSTRUMENT_CHANGE_NAME, new Closure(NullMemory.getInstance(), INSTRUMENT_CHANGE));
+        scope.set(MUTE_NAME, new Closure(NullMemory.getInstance(), MUTE));
+        scope.set(OCTAVE_SHIFT_NAME, new Closure(NullMemory.getInstance(), OCTAVE_SHIFT));
+        scope.set(TRANSPOSE_NAME, new Closure(NullMemory.getInstance(), TRANSPOSE));
     }
 }

@@ -6,10 +6,9 @@ ifStmt {
     GOOD -> c
     BAD -> b
 
-    do {
+    if a lt b do {
         [GOOD]*<e>
-    } if a lt b
-    else do {
+    } else do {
         [BAD]*<e>
     }
 }

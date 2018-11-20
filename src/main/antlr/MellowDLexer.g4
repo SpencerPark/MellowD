@@ -22,7 +22,6 @@ KEYWORD_MELODY : 'melody' ;
 KEYWORD_PHRASE : 'phrase' ;
 KEYWORD_DO : 'do' ;
 KEYWORD_IF : 'if' ;
-KEYWORD_PERFORM : 'perform' ;
 KEYWORD_ELSE : 'else' ;
 KEYWORD_TRUE : 'true' | 'on' ;
 KEYWORD_FALSE : 'false' | 'off' ;

@@ -81,8 +81,8 @@ public class QualifiedName {
 
     @Override
     public String toString() {
-        return Arrays.stream(this.qualifier)
-                .collect(Collectors.joining(".", "", "."))
+        return (this.isUnqualified() ? "" : Arrays.stream(this.qualifier)
+                .collect(Collectors.joining(".", "", ".")))
                 + this.name;
     }
 }

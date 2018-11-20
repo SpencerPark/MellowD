@@ -42,7 +42,7 @@ public class SymbolTable implements Memory {
         if (this.finalNames.contains(identifier))
             throw new AlreadyDefinedException("Cannot set value for constant value " + identifier);
 
-        this.getQualifiedSegment(identifier.getName())
+        this.getQualifiedSegment(identifier.getQualifier())
                 .put(identifier.getName(), value);
     }
 
@@ -63,9 +63,10 @@ public class SymbolTable implements Memory {
     public boolean isDefined(QualifiedName identifier) {
         Map<String, Object> segment = this.data.get(identifier.getQualifier());
         if (segment == null)
-            return false;
+            return this.parentScope != null && this.parentScope.isDefined(identifier);
 
-        return segment.get(identifier.getName()) != null;
+        return segment.get(identifier.getName()) != null
+                || (this.parentScope != null && this.parentScope.isDefined(identifier));
     }
 
     // `get` is the based data output method for this class. It takes
