@@ -3,13 +3,14 @@ package org.mellowd;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mellowd.intermediate.executable.expressions.Expression;
 import org.mellowd.compiler.MellowDParser;
+import org.mellowd.intermediate.executable.SourceLink;
+import org.mellowd.intermediate.executable.expressions.Expression;
+import org.mellowd.intermediate.executable.expressions.RuntimeTypeCheck;
 import org.mellowd.testutil.CompilerTestFrame;
 import org.mellowd.testutil.DummyEnvironment;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
 public class BooleanTest extends CompilerTestFrame {
@@ -22,21 +23,15 @@ public class BooleanTest extends CompilerTestFrame {
             this.expected = expected;
         }
 
-        public void print(Boolean result) {
+        public boolean print(Boolean result) {
             System.out.printf("%s Expecting: %-5b Actual: %-5b Source: %s\n",
                     expected == result ? "[SUCCESS]" : "[FAILURE]", expected, result, src);
+            return expected == result;
         }
     }
 
     public BooleanTest() {
         super("BooleanTest");
-    }
-
-    private Boolean parseBoolExpr() {
-        MellowDParser.DisjunctionContext parsedExpr = parser.disjunction();
-        Expression<Boolean> expr = compiler.visitDisjunction(parsedExpr);
-
-        return expr.evaluate(DummyEnvironment.getInstance());
     }
 
     private void printTest(String classifier) {
@@ -48,7 +43,11 @@ public class BooleanTest extends CompilerTestFrame {
         for (TestCase testCase : cases) {
             super.init(testCase.src);
 
-            Boolean val = parseBoolExpr();
+            MellowDParser.ExprContext ctx = parser.expr();
+            Expression<?> expr = compiler.visitExpr(ctx);
+            Expression<Boolean> boolExpr = new RuntimeTypeCheck<>(Boolean.class, expr, new SourceLink(ctx));
+
+            Boolean val = boolExpr.evaluate(DummyEnvironment.getInstance());
 
             if (super.errorListener.encounteredError()) {
                 System.out.println("[ERROR]   Parse errors: " + super.errorListener.getErrors().size());
@@ -58,9 +57,10 @@ public class BooleanTest extends CompilerTestFrame {
                 fail("Error while parsing \"" + testCase.src + "\"");
             } else {
                 testCase.print(val);
+                    System.out.println("\t" + ctx.toStringTree(parser));
             }
 
-            assertTrue(testCase.src, val == testCase.expected);
+            assertEquals(testCase.src, val, testCase.expected);
         }
     }
 

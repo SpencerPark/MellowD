@@ -25,8 +25,6 @@ import org.mellowd.primitives.*;
 
 import java.io.InputStream;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class MellowDCompiler extends MellowDParserBaseVisitor {
@@ -203,7 +201,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     }
 
     @Override
-    public Expression<Pitch> visitNote(MellowDParser.NoteContext ctx) {
+    public Pitch visitNote(MellowDParser.NoteContext ctx) {
         Pitch root = visitPitchRoot(ctx.pitchRoot());
         if (ctx.SHARP() != null) {
             root = root.sharp();
@@ -214,7 +212,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         if (ctx.octaveShift != null)
             root = root.shiftOctave(visitDirectedNumber(ctx.octaveShift));
 
-        return new Constant<>(root);
+        return root;
     }
 
     @Override
@@ -237,7 +235,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     public Expression<?> visitChordParam(MellowDParser.ChordParamContext ctx) {
         MellowDParser.NoteContext note = ctx.note();
         if (note != null)
-            return visitNote(note);
+            return new Constant<>(visitNote(note));
 
         MellowDParser.ChordContext chord = ctx.chord();
         if (chord != null)
@@ -276,7 +274,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
         MellowDParser.NoteContext note = ctx.note();
         if (note != null)
-            return new Articulate(visitNote(note), articulationExpr);
+            return new Articulate(new Constant<>(visitNote(note)), articulationExpr);
 
         Expression<?> paramExpr;
         MellowDParser.ChordContext chord = ctx.chord();
@@ -393,80 +391,8 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         return ctx.op;
     }
 
-    private Expression<Boolean> compileTail(MellowDParser.ExprContext left, List<MellowDParser.ExprPredTailContext> tails,
-                                            Predicate<MellowDParser.ExprPredTailContext> split,
-                                            BiFunction<MellowDParser.ExprContext, List<MellowDParser.ExprPredTailContext>, Expression<Boolean>> compileOperand,
-                                            java.util.function.Function<List<Expression<Boolean>>, Expression<Boolean>> join) {
-        if (tails.isEmpty())
-            return new BooleanEvaluationExpression(visitExpr(left));
-
-        ArrayList<Expression<Boolean>> operands = new ArrayList<>();
-
-        List<MellowDParser.ExprPredTailContext> currentOpParts = new LinkedList<>();
-
-        for (MellowDParser.ExprPredTailContext tail : tails) {
-            if (split.test(tail)) {
-                // Right is combined with the split op, compile the left pieces
-                Expression<Boolean> operand = compileOperand.apply(left, currentOpParts);
-                operands.add(operand);
-
-                left = tail.expr();
-                currentOpParts.clear();
-            } else {
-                // Right is combined with higher precedence operators, keep collecting
-                currentOpParts.add(tail);
-            }
-        }
-
-        if (operands.size() == 1)
-            return operands.get(0);
-
-        operands.trimToSize();
-        return join.apply(operands);
-
-    }
-
-    private Expression<Boolean> compileDisjunction(MellowDParser.ExprContext left, List<MellowDParser.ExprPredTailContext> tails) {
-        return compileTail(left, tails,
-                t -> t.KEYWORD_OR() != null,
-                this::compileConjunction,
-                BooleanORChain::new
-        );
-    }
-
-    private Expression<Boolean> compileConjunction(MellowDParser.ExprContext left, List<MellowDParser.ExprPredTailContext> tails) {
-        return compileTail(left, tails,
-                t -> t.KEYWORD_AND() != null,
-                this::compileComparison,
-                BooleanANDChain::new
-        );
-    }
-
-    private Expression<Boolean> compileComparison(MellowDParser.ExprContext first, List<MellowDParser.ExprPredTailContext> tails) {
-        Expression<Boolean> left = new BooleanEvaluationExpression(visitExpr(first));
-
-        if (tails.isEmpty())
-            return left;
-
-        // a lt b lt c -> a lt b AND b lt c
-        List<Expression<Boolean>> comparisons = new ArrayList<>(tails.size());
-        for (MellowDParser.ExprPredTailContext rightCtx : tails) {
-            Comparable.Operator op = visitComparisonOperator(rightCtx.comparisonOperator());
-            Expression<Boolean> right = new BooleanEvaluationExpression(visitExpr(rightCtx.expr()));
-
-            comparisons.add(new Comparison(left, op, right));
-
-            left = right;
-        }
-
-        return new BooleanANDChain(comparisons);
-    }
-
     @Override
-    public Expression<?> visitExpr(MellowDParser.ExprContext ctx) {
-        if (ctx.BRACE_OPEN() != null)
-            return visitExpr(ctx.expr());
-
+    public Expression<?> visitAtom(MellowDParser.AtomContext ctx) {
         if (ctx.KEYWORD_TRUE() != null)
             return TRUE;
 
@@ -481,7 +407,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
         MellowDParser.NoteContext note = ctx.note();
         if (note != null)
-            return visitNote(note);
+            return new Constant<>(visitNote(note));
 
         MellowDParser.BeatContext beat = ctx.beat();
         if (beat != null)
@@ -503,31 +429,10 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         if (rhythm != null)
             return visitRhythm(rhythm);
 
-        if (ctx.KEYWORD_NOT() != null)
-            return new BooleanNotExpression(new BooleanEvaluationExpression(visitExpr(ctx.expr())));
-
-        List<MellowDParser.ExprPredTailContext> exprPredTails = ctx.exprPredTail();
-        if (!exprPredTails.isEmpty())
-            return compileDisjunction(ctx.expr(), exprPredTails);
-
         TerminalNode chordID = ctx.CHORD_IDENTIFIER();
         MellowDParser.NameContext name = ctx.name();
-        if (chordID != null || name != null) {
-            Expression<?> value = chordID != null
-                    ? new Constant<>(Chord.resolve(getText(chordID)))
-                    : lookupName(name);
-
-            MellowDParser.IndexContext index = ctx.index();
-
-            SourceLink link = new SourceLink(ctx);
-            value = new RuntimeNullCheck<>(visitName(name), value, link);
-            if (index != null) {
-                value = possiblyIndex(link, value, index);
-                value = new RuntimeNullCheck<>(QualifiedName.ofUnqualified(getText(ctx)), value, link);
-            }
-
-            return value;
-        }
+        if (chordID != null || name != null)
+            return compileIndexedNameOrChordLiteral(name, chordID, ctx.index());
 
         MellowDParser.FuncDeclContext funcDecl = ctx.funcDecl();
         if (funcDecl != null)
@@ -537,7 +442,50 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         if (procDecl != null)
             return visitProcDecl(procDecl);
 
-        throw new AssertionError("visitExpr compiler not updated after expr changed");
+        if (ctx.BRACE_OPEN() != null)
+            return visitExpr(ctx.expr());
+
+        throw new AssertionError("visitAtom compiler not updated after atom changed");
+    }
+
+    @Override
+    public Expression<?> visitExpr(MellowDParser.ExprContext ctx) {
+        if (ctx.KEYWORD_NOT() != null)
+            return new BooleanNotExpression(new BooleanEvaluationExpression(visitExpr(ctx.expr(0))));
+
+        List<MellowDParser.ComparisonOperatorContext> operators = ctx.comparisonOperator();
+        if (!operators.isEmpty()) {
+            List<MellowDParser.AtomContext> operands = ctx.atom();
+
+            List<Expression<Boolean>> comparisons = new ArrayList<>(operators.size());
+
+            Comparable.Operator op;
+            Expression<?> left, right;
+            // a lt b lt c -> a lt b AND b lt c
+            for (int i = 0; i < operators.size(); i++) {
+                left = visitAtom(operands.get(i));
+                op = visitComparisonOperator(operators.get(i));
+                right = visitAtom(operands.get(i + 1));
+
+                comparisons.add(new Comparison(left, op, right));
+            }
+
+            return new BooleanANDChain(comparisons);
+        }
+
+        if (ctx.KEYWORD_AND() != null)
+            return new BooleanANDChain(ctx.expr().stream()
+                    .map(this::visitExpr)
+                    .map(BooleanEvaluationExpression::new)
+                    .collect(Collectors.toList()));
+
+        if (ctx.KEYWORD_OR() != null)
+            return new BooleanORChain(ctx.expr().stream()
+                    .map(this::visitExpr)
+                    .map(BooleanEvaluationExpression::new)
+                    .collect(Collectors.toList()));
+
+        return visitAtom(ctx.atom(0));
     }
 
     @Override

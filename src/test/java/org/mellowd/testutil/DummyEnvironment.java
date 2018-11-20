@@ -1,9 +1,9 @@
 package org.mellowd.testutil;
 
+import org.mellowd.compiler.ExecutionEnvironment;
 import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.intermediate.variables.NullMemory;
 import org.mellowd.midi.TimingEnvironment;
-import org.mellowd.compiler.ExecutionEnvironment;
 
 public class DummyEnvironment implements ExecutionEnvironment {
     private static final DummyEnvironment env = new DummyEnvironment(false);
@@ -31,12 +31,7 @@ public class DummyEnvironment implements ExecutionEnvironment {
     }
 
     @Override
-    public Memory getMemory(String... qualifier) {
-        return this.memory;
-    }
-
-    @Override
-    public Memory createScope(String... qualifier) {
+    public Memory getMemory() {
         return this.memory;
     }
 
