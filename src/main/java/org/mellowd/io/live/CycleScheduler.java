@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 public class CycleScheduler extends Thread {
     // TODO add option to make blocks that are not a multiple of a measure a compile error for
@@ -151,9 +152,11 @@ public class CycleScheduler extends Thread {
 //        }
 //    }
 
-    private long getNextMeasureStart() {
-        long nextFrame = this.stateTime.get();
-        return nextFrame + (measureDurationTicks - (nextFrame % measureDurationTicks));
+    private long getNextMeasureStart(long after) {
+        if (after < 0)
+            after = this.stateTime.get();
+        after--;
+        return after + (measureDurationTicks - (after % measureDurationTicks));
     }
 
     @Override
@@ -246,19 +249,22 @@ public class CycleScheduler extends Thread {
             }
 
             long activeEnd = active.activeTrack == null ? 0 : active.activeTrack.endTimeStamp();
-            if (activeEnd < stop && active.nextTrack != null) {
+            if (active.nextTrack != null) {
+                // TODO this currently merges the tracks?
                 // There is a replacement and this one finished mid frame
-                active.nextTrack.forEachInRange(activeEnd, stop, (msg, time) -> {
+                active.nextTrack.forEachInRange(start/*activeEnd*/, stop, (msg, time) -> {
                     if (MIDITrack.isNotMeta(msg)) {
                         //System.out.println(time + " @ " + DatatypeConverter.printHexBinary(msg.getMessage()));
                         this.out.send(msg, this.timingEnvironment.ticksToUs(time) + synthOffset);
                     }
                 });
-                this.activeBlocks.updateAndGet(blocks -> {
-                    Map<String, ActiveBlock> newBlocks = new HashMap<>(blocks);
-                    newBlocks.put(active.block.getName(), new ActiveBlock(active.block, active.code, active.nextTrack, null, ActiveState.READY));
-                    return newBlocks;
-                });
+                if (activeEnd < stop && active.nextTrack != null) {
+                    this.activeBlocks.updateAndGet(blocks -> {
+                        Map<String, ActiveBlock> newBlocks = new HashMap<>(blocks);
+                        newBlocks.put(active.block.getName(), new ActiveBlock(active.block, active.code, active.nextTrack, null, ActiveState.READY));
+                        return newBlocks;
+                    });
+                }
             }
 
             if (active.nextTrack == null) {
@@ -270,7 +276,9 @@ public class CycleScheduler extends Thread {
                     });
                 } else {
                     // Recompile the block
-                    this.startExecutingBlock(active, nextMeasureStart);
+                    //this.startExecutingBlock(active, nextMeasureStart);
+                    long nextMeasureStartPrime = this.getNextMeasureStart(active.activeTrack != null ? active.activeTrack.endTimeStamp() : -1);
+                    this.startExecutingBlock(active, nextMeasureStartPrime);
                 }
             }
         });
@@ -301,8 +309,15 @@ public class CycleScheduler extends Thread {
 
             return newBlocks;
         });
-        this.activeBlocks.get().values().forEach(e ->
-                this.startExecutingBlock(e, this.getNextMeasureStart()));
+
+        Set<String> updated = blocks.stream().map(MellowDBlock::getName).collect(Collectors.toSet());
+
+        // TODO this resets all blocks to the next measure, the puller should start at some offset measure
+        this.activeBlocks.get().values().stream()
+                .filter(e -> updated.contains(e.block.getName()))
+                .forEach(e ->
+                        //this.startExecutingBlock(e, this.getNextMeasureStart(e.activeTrack != null ? e.activeTrack.endTimeStamp() : -1)));
+                        this.startExecutingBlock(e, this.getNextMeasureStart(e.activeTrack != null ? e.activeTrack.endTimeStamp() : -1)));
     }
 
 

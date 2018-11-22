@@ -19,10 +19,10 @@ public class Repl {
 
         MellowD mellowD = new MellowD(srcFinder, timingEnvironment);
         MellowDSession session = new MellowDSession(mellowD, workingDir);
-//        session.eval("def block Piano { instrument: \"piano\" } \n");
-//        session.eval("def block Guitar { instrument: \"acoustic guitar\" }\n");
-//        session.eval("Piano { [b]*<e, e, e, e, e, e, e, e> }");
-//        session.eval("Guitar { [C~, *, *, *]*<q> }");
+        session.eval("def block Piano { instrument: \"piano\" } \n");
+        session.eval("def block Guitar { instrument: \"acoustic guitar\" }\n");
+        session.eval("Piano { [b]*<e, e, e, e, e, e, e, e> }");
+        session.eval("Guitar { [C~, *, *, *]*<q> }");
 
         Scanner in = new Scanner(System.in);
         System.out.print("mellowd > ");
