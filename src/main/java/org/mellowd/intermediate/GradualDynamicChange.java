@@ -64,7 +64,7 @@ public class GradualDynamicChange extends DynamicChange {
 
         //Using the general equation of a line `y = mx+b` we have a function
         //to get the velocity of each sound in the sequence. `y` is the velocity,
-        //`m` is the `changeSlope`, `x` is the ticks that have passed since the start
+        //`m` is the `changeSlope`, `x` is the endTimeStamp that have passed since the start
         //of the phrase and `b` is the starting velocity.
         long stateTimeStep = totalDuration / Math.abs(velocityChange);
         for (long stateTime = 0; stateTime < totalDuration; stateTime += stateTimeStep) {

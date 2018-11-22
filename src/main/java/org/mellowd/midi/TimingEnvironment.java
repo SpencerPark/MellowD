@@ -22,9 +22,9 @@ public class TimingEnvironment {
     //in calculating the microseconds per beat for a BPM conversion.
     private static final int MICROSECONDS_PER_MINUTE = 60000000;
 
-    //This constant is the number of ticks that need to pass on the MIDI clock for the
+    //This constant is the number of endTimeStamp that need to pass on the MIDI clock for the
     //metronome to click. This clock is independent from the sequencer clock. Redefining
-    //the PPQN should not affect this clock. Therefore we will leave it at the standard 24 ticks
+    //the PPQN should not affect this clock. Therefore we will leave it at the standard 24 endTimeStamp
     //per click.
     private static final byte TICKS_PER_METER_CLICK = 24;
 
@@ -34,7 +34,7 @@ public class TimingEnvironment {
 
     //The `PPQN` is the Pulses Per Quarter Note. It is also referred to as simply `PPQ`.
     //It will be 960 by default for all sequences but reserve the right to change it
-    //if we need a higher resolution. This is the number of clock ticks that pass over
+    //if we need a higher resolution. This is the number of clock endTimeStamp that pass over
     //the duration of a single quarter note.
     private static final int DEFAULT_PPQN = 960;
 
@@ -67,7 +67,7 @@ public class TimingEnvironment {
         }
     }
 
-    //Get the number of ticks per quarter note. This is the resolution of the timing.
+    //Get the number of endTimeStamp per quarter note. This is the resolution of the timing.
     public int getPPQ() {
         return ppqn;
     }
@@ -77,11 +77,30 @@ public class TimingEnvironment {
         return this.bpm;
     }
 
+    public int getBeatsPerMeasure() {
+        return this.timeSigNum;
+    }
+
+    public Beat getBeatValue() {
+        // The value of a "beat" in this time signature. In */4 time this is a quarter note.
+        // In */8 time, an eighth.
+        double numQuarters = 1.0 / (this.timeSigDen / 4.0);
+        return new Beat(numQuarters);
+    }
+
     //The `PPQN` was chosen as to support triplets on an integer number of
-    //ticks but the resolution of other ratios will vary and some precision
+    //endTimeStamp but the resolution of other ratios will vary and some precision
     //may be lost when cast to a long.
     public long ticksInBeat(Beat beat) {
         return (long) (ppqn * beat.getNumQuarters());
+    }
+
+    public long approxDurationOfBeatInUs(Beat beat) {
+        return Math.round((MICROSECONDS_PER_MINUTE * beat.getNumQuarters()) / (double) this.bpm);
+    }
+
+    public long ticksToUs(long ticks) {
+        return (ticks * MICROSECONDS_PER_MINUTE) / (this.ppqn * this.bpm);
     }
 
     //Create a MIDI message that can be sent to set the time signature of

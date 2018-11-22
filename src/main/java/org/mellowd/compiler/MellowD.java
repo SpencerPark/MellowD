@@ -7,12 +7,8 @@ import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.intermediate.variables.SymbolTable;
 import org.mellowd.io.CompositeSourceFinder;
 import org.mellowd.io.SourceFinder;
-import org.mellowd.midi.GeneralMidiConstants;
-import org.mellowd.midi.MIDIChannel;
-import org.mellowd.midi.TimingEnvironment;
+import org.mellowd.midi.*;
 
-import javax.sound.midi.Sequence;
-import javax.sound.midi.Track;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -25,7 +21,6 @@ public class MellowD implements ExecutionEnvironment {
     private final Map<String, MellowDBlock> blocks;
     private final TimingEnvironment timingEnvironment;
 
-    private Sequence master;
     private final Queue<Integer> channelsAvailable;
     private final Queue<Integer> drumChannelsAvailable;
 
@@ -37,7 +32,6 @@ public class MellowD implements ExecutionEnvironment {
         this.timingEnvironment = timingEnvironment;
         addDefaultsToGlobals();
 
-        this.master = timingEnvironment.createSequence();
         this.channelsAvailable = new LinkedList<>();
         this.channelsAvailable.addAll(GeneralMidiConstants.REGULAR_CHANNELS);
         this.drumChannelsAvailable = new LinkedList<>();
@@ -63,7 +57,7 @@ public class MellowD implements ExecutionEnvironment {
                     throw new IllegalStateException("Block definition " + name + " requires a channel but there are none left. Too many channels used.");
             }
 
-            MIDIChannel channel = new MIDIChannel(this.master.createTrack(), percussion, channelNum, timingEnvironment);
+            MIDIChannel channel = new MIDIChannel(new MIDITrack(name), percussion, channelNum, timingEnvironment);
             block = new MellowDBlock(this.globals, name, channel);
             this.blocks.put(name, block);
         } else {
@@ -75,6 +69,10 @@ public class MellowD implements ExecutionEnvironment {
 
     public MellowDBlock getBlock(String name) {
         return this.blocks.get(name);
+    }
+
+    public Iterable<MellowDBlock> listBlocks() {
+        return this.blocks.values();
     }
 
     public Memory getGlobals() {
@@ -104,11 +102,10 @@ public class MellowD implements ExecutionEnvironment {
         return timingEnvironment;
     }
 
-    public synchronized Sequence execute() throws Exception {
-        this.blocks.values().forEach(block -> {
-            Track oldTrack = block.getMIDIChannel().replaceTrack(this.master.createTrack());
-            this.master.deleteTrack(oldTrack);
-        });
+    public synchronized MIDISequence execute() throws Exception {
+        MIDISequence sequence = new MIDISequence(this.timingEnvironment);
+        this.blocks.values().forEach(block ->
+                block.getMIDIChannel().replaceTrack(sequence.getOrCreateTrack(block.getName())));
 
         Queue<CodeExecutor> executors = new LinkedList<>();
         for (MellowDBlock block : this.blocks.values()) {
@@ -129,6 +126,6 @@ public class MellowD implements ExecutionEnvironment {
             this.blocks.values().forEach(MellowDBlock::clearCode);
         }
 
-        return master;
+        return sequence;
     }
 }

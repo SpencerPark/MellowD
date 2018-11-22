@@ -380,7 +380,7 @@ public class Compiler {
 
             //Execute all of the compiled statements to build the output
             long executionStart = System.nanoTime();
-            Sequence result = mellowD.execute();
+            Sequence result = mellowD.execute().toSequence();
             if (options.wantsVerbose()) {
                 long executionTime = System.nanoTime() - executionStart;
                 System.out.printf("Execution took %.4f s\n",

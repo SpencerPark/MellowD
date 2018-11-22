@@ -124,7 +124,7 @@ public class VirtualMIDIPlayer {
             //Update the current time to properly track the new event
             long tick = nextEvent.getTick();
             //The units for the following calculations look like the following:<br>
-            //<sup>&mu;</sup>&fracsl;<sub>beat</sub> &middot; <sup>beat</sup>&fracsl;<sub>ticks</sub> &middot; ticks = &mu;
+            //<sup>&mu;</sup>&fracsl;<sub>beat</sub> &middot; <sup>beat</sup>&fracsl;<sub>endTimeStamp</sub> &middot; endTimeStamp = &mu;
             //This gives us the number of microseconds that has passed since the last tick
             currentTime += ((tick - lastTick) * usPerBeat) / ticksPerBeat;
             //Update the `lastTick` to the current tick

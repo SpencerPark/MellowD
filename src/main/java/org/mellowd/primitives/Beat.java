@@ -7,7 +7,7 @@ import org.mellowd.intermediate.functions.operations.Slurrable;
 
 //A `Beat` represent a classical definition of a note duration.
 //Each beat has the number of quarter notes it is equivalent to (possibly a fraction),
-//for converting from `PPQN` (ticks per quarter note) to a duration in ticks that the
+//for converting from `PPQN` (endTimeStamp per quarter note) to a duration in endTimeStamp that the
 //beat should be held for.
 public class Beat implements Slurrable<Beat> {
     //All beats must start out as one of the following durations which can then
@@ -85,6 +85,14 @@ public class Beat implements Slurrable<Beat> {
         if (num <= 0 || div <= 0)
             throw new IllegalArgumentException("Cannot create a tuplet of "+num+":"+div);
         return new Beat(numQuarters * (div / (double) num));
+    }
+
+    public Beat add(Beat other) {
+        return new Beat(this.numQuarters + other.numQuarters);
+    }
+
+    public Beat times(int amt) {
+        return new Beat(this.numQuarters * amt);
     }
 
     public double getNumQuarters() {

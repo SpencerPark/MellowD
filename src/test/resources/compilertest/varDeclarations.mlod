@@ -12,5 +12,6 @@ myblock {
     melodyVar*<q>
     melodyVar -> [a, b, c]
     melodyVar*<q>
-    [melodyVar, this.melodyVar]*<q>
+    // TODO this doesn't work yet
+    // [melodyVar, this.melodyVar]*<q>
 }

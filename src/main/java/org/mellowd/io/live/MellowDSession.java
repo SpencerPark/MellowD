@@ -1,4 +1,4 @@
-package org.mellowd.io.repl;
+package org.mellowd.io.live;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -7,26 +7,39 @@ import org.antlr.v4.runtime.TokenStream;
 import org.mellowd.compiler.*;
 import org.mellowd.io.Compiler;
 import org.mellowd.io.DirectorySourceFinder;
+import org.mellowd.io.repl.ExecutionException;
 
-import javax.sound.midi.*;
-import java.io.Closeable;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Synthesizer;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
 
-public class MellowDKernel implements Closeable {
+public class MellowDSession {
     private final MellowD mellowD;
-    private MellowDBlock selectedBlock;
     private MellowDCompiler compiler;
     private Path workingDirectory;
-    private Synthesizer synth;
+    private final CycleScheduler scheduler;
 
-    public MellowDKernel(MellowD mellowD, String workingDirectory) throws MidiUnavailableException {
+    public MellowDSession(MellowD mellowD, String workingDirectory) throws MidiUnavailableException, InvalidMidiDataException {
         this.mellowD = mellowD;
         this.compiler = new MellowDCompiler(mellowD);
         this.workingDirectory = Paths.get(workingDirectory);
-        this.synth = MidiSystem.getSynthesizer();
+
+        Synthesizer synth = MidiSystem.getSynthesizer();
+        if (!synth.isOpen()) synth.open();
+
+        this.scheduler = new CycleScheduler(synth, mellowD.getTimingEnvironment(), (block, err) -> {
+            System.out.println("Error executing " + block.getName() + ": " + err.getMessage());
+            err.printStackTrace(System.out);
+        });
+
+        this.scheduler.start();
+
     }
 
     private String formatPath(Path path) {
@@ -49,49 +62,7 @@ public class MellowDKernel implements Closeable {
         this.mellowD.addSrcFinder(new DirectorySourceFinder(dir, Compiler.FILE_EXTENSION));
     }
 
-    public void loadSoundFont(String rawPath) {
-        Path path = Paths.get(rawPath);
-        File soundFontFile;
-        if (path.isAbsolute()) {
-            soundFontFile = path.toFile();
-        } else {
-            path = Paths.get(workingDirectory.toAbsolutePath().toString(), rawPath);
-            soundFontFile = path.toFile();
-        }
-
-        if (!soundFontFile.isFile()) {
-            System.err.printf("Sound font path '%s' cannot be resolved to a file", path.toAbsolutePath().toString());
-            return;
-        }
-
-        System.out.printf("Loading sound font '%s'...\n", formatPath(path));
-
-        Soundbank soundbank;
-        try {
-            soundbank = MidiSystem.getSoundbank(soundFontFile);
-        } catch (InvalidMidiDataException e) {
-            System.err.printf("Invalid sound font '%s'. Problem: %s\n",
-                    soundFontFile.getName(), e.getLocalizedMessage());
-            return;
-        } catch (IOException e) {
-            System.err.printf("Error loading sound font '%s'. Problem: %s\n",
-                    soundFontFile.getName(), e.getLocalizedMessage());
-            return;
-        }
-
-        if (!synth.isSoundbankSupported(soundbank)) {
-            System.err.printf("Sound font '%s' is not supported by the midi system's synthesizer.\n",
-                    soundFontFile.getName());
-            return;
-        }
-
-        boolean allLoaded = synth.loadAllInstruments(soundbank);
-
-        System.out.printf("Loaded %s instruments from sound font %s\n",
-                allLoaded ? "all" : "some", formatPath(path));
-    }
-
-    public Sequence eval(String code) throws ParseException, CompilationException {
+    public synchronized void eval(String code) throws ParseException, CompilationException {
         CharStream input = CharStreams.fromString(code);
         MellowDLexer lexer = new MellowDLexer(input);
 
@@ -116,14 +87,15 @@ public class MellowDKernel implements Closeable {
         this.compiler.visitSong(parseTree);
 
         try {
-            return mellowD.execute().toSequence();
+            List<MellowDBlock> blocks = new LinkedList<>();
+            this.mellowD.listBlocks().forEach(b -> {
+                if (b.getCode().length > 0)
+                    blocks.add(b);
+            });
+
+            this.scheduler.updateBlocks(blocks);
         } catch (Exception e) {
             throw new ExecutionException("Error executing code: " + e.getLocalizedMessage(), e);
         }
-    }
-
-    @Override
-    public void close() throws IOException {
-
     }
 }

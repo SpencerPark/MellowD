@@ -13,7 +13,7 @@ public class CodeExecutor extends Thread {
     private final ExecutionEnvironment environment;
     private final Output output;
     private final List<? extends Statement> code;
-    private Exception problem = null;
+    private volatile Exception problem = null;
 
     public CodeExecutor(String name, ExecutionEnvironment environment, Output output, List<? extends Statement> code) {
         super("CodeExecutor-" + name + "-" + THREAD_ID.getAndIncrement());

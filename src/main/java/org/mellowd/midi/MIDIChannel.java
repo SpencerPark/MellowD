@@ -5,7 +5,10 @@ import org.mellowd.primitives.Beat;
 import org.mellowd.primitives.Dynamic;
 import org.mellowd.primitives.Pitch;
 
-import javax.sound.midi.*;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiEvent;
+import javax.sound.midi.MidiMessage;
+import javax.sound.midi.ShortMessage;
 import java.util.*;
 
 //A MIDIChannel wraps a javax.sound.midi.Track to provide virtual state information.
@@ -78,7 +81,7 @@ public class MIDIChannel {
 
     public static final int DEFAULT_OFF_VELOCITY = 96;
 
-    private Track midiTrack;
+    private volatile MIDITrack midiTrack;
     private final boolean percussion;
     private final int channelNum;
     private final TimingEnvironment timingEnvironment;
@@ -98,7 +101,7 @@ public class MIDIChannel {
 
     private boolean slurred = false;
 
-    public MIDIChannel(Track midiTrack, boolean percussion, int channelNum, TimingEnvironment timingEnvironment) {
+    public MIDIChannel(MIDITrack midiTrack, boolean percussion, int channelNum, TimingEnvironment timingEnvironment) {
         this.midiTrack = midiTrack;
         this.percussion = percussion;
         this.channelNum = channelNum;
@@ -110,8 +113,9 @@ public class MIDIChannel {
         this.noteOffEvents = new PitchIndexedArray<>();
     }
 
-    public Track replaceTrack(Track newTrack) {
-        Track oldTrack = this.midiTrack;
+    public MIDITrack replaceTrack(MIDITrack newTrack) {
+        // TODO simply replay the latest of all configuration messages?
+        MIDITrack oldTrack = this.midiTrack;
         long timeDiff = this.stateTime;
 
         this.stateTime = 0L;
@@ -164,6 +168,14 @@ public class MIDIChannel {
         }
 
         return oldTrack;
+    }
+
+    public void setTrack(MIDITrack midiTrack) {
+        this.midiTrack = midiTrack;
+    }
+
+    public MIDITrack getTrack() {
+        return this.midiTrack;
     }
 
     public boolean isPercussion() {
@@ -306,8 +318,8 @@ public class MIDIChannel {
     //marks the end of the music played on this track. The song stops playback when all of the tracks
     //have finished playing and therefor this message must be properly placed at the end with the invocation
     //of this method.
-    public final void finalizeEOT() {
-        addEvent(new MidiEvent(Compiler.EOT_MESSAGE, this.stateTime + timingEnvironment.getPPQ()), true);
+    public final void finalizeEOT(Beat padding) {
+        addEvent(new MidiEvent(Compiler.EOT_MESSAGE, this.stateTime + this.timingEnvironment.ticksInBeat(padding)), true);
     }
 
     public final void setPitchBend(int bendAmt) {

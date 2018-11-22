@@ -9,14 +9,14 @@ import org.mellowd.midi.MIDIChannel;
 import org.mellowd.midi.TimingEnvironment;
 import org.mellowd.primitives.Beat;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MellowDBlock implements Output, ExecutionEnvironment {
     private final Memory blockLocals;
     private final String name;
     private final MIDIChannel channel;
-    private final List<Statement> code;
+    private final AtomicReference<Statement[]> code;
 
     private Beat durationSinceGradualStart = null;
     private GradualDynamicChange gradualStart = null;
@@ -27,7 +27,7 @@ public class MellowDBlock implements Output, ExecutionEnvironment {
         // this.blockLocals.set(QualifiedName.ofUnqualified("this"), globalMemory);
         this.name = name;
         this.channel = channel;
-        this.code = new LinkedList<>();
+        this.code = new AtomicReference<>(new Statement[0]);
     }
 
     public String getName() {
@@ -35,14 +35,26 @@ public class MellowDBlock implements Output, ExecutionEnvironment {
     }
 
     public void addFragment(Statement block) {
-        this.code.add(block);
+        this.code.updateAndGet(code -> {
+            Statement[] nextCode = Arrays.copyOf(code, code.length + 1);
+            nextCode[code.length] = block;
+            return nextCode;
+        });
+    }
+
+    public Statement[] getCode() {
+        return this.code.get();
+    }
+
+    public void clearCode() {
+        this.code.set(new Statement[0]);
     }
 
     public CodeExecutor createExecutor() {
-        return new CodeExecutor(name, this, this, code);
+        return new CodeExecutor(name, this, this, Arrays.asList(code.get()));
     }
 
-    protected MIDIChannel getMIDIChannel() {
+    public MIDIChannel getMIDIChannel() {
         return this.channel;
     }
 
@@ -92,10 +104,6 @@ public class MellowDBlock implements Output, ExecutionEnvironment {
         phrase.play(channel);
     }
 
-    public void clearCode() {
-        this.code.clear();
-    }
-
     @Override
     public void put(Playable playable) {
         if (playable instanceof Phrase)
@@ -123,6 +131,6 @@ public class MellowDBlock implements Output, ExecutionEnvironment {
                     + " was specified but a target was never given.");
         }
 
-        channel.finalizeEOT();
+        channel.finalizeEOT(Beat.QUARTER());
     }
 }
