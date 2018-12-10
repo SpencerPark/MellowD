@@ -675,6 +675,12 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     }
 
     @Override
+    public Statement visitOnceStmt(MellowDParser.OnceStmtContext ctx) {
+        Statement statement = visitStmtList(ctx.stmtList());
+        return new OnceStatement(statement);
+    }
+
+    @Override
     public Statement visitStmt(MellowDParser.StmtContext ctx) {
         TerminalNode NUMBER = ctx.NUMBER();
         MellowDParser.NameContext identifier = ctx.name();
@@ -685,7 +691,6 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
             else
                 repetitions = lookupName(identifier, Number.class);
 
-            // TODO rename CodeBlock to StatementList
             return visitStmtList(ctx.stmtList(), new RepeatedStatementList(repetitions));
         }
 
@@ -704,6 +709,10 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         MellowDParser.IfStmtContext ifStmt = ctx.ifStmt();
         if (ifStmt != null)
             return visitIfStmt(ifStmt);
+
+        MellowDParser.OnceStmtContext onceStmt = ctx.onceStmt();
+        if (onceStmt != null)
+            return visitOnceStmt(onceStmt);
 
         throw new AssertionError("visitStmt compiler not updated after stmt changed");
     }

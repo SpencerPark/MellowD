@@ -112,11 +112,7 @@ generateGrammarSource {
     arguments += ['-visitor']
     arguments += ['-no-listener']
 
-    // Don't generate parsers for these intermediate files but consider
-    // the task out of date if they change.
     inputs.files(source.files)
-    exclude 'MellowDAbstractionParser.g4'
-    exclude 'MellowDExpressionParser.g4'
 }
 
 publishing {

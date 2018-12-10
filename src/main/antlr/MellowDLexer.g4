@@ -21,6 +21,7 @@ KEYWORD_RHYTHM : 'rhythm' ;
 KEYWORD_MELODY : 'melody' ;
 KEYWORD_PHRASE : 'phrase' ;
 KEYWORD_DO : 'do' ;
+KEYWORD_ONCE : 'once' ;
 KEYWORD_IF : 'if' ;
 KEYWORD_ELSE : 'else' ;
 KEYWORD_TRUE : 'true' | 'on' ;

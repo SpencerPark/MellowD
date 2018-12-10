@@ -325,12 +325,17 @@ blockDeclStmt
       )?
     ;
 
+onceStmt
+    : KEYWORD_ONCE stmtList
+    ;
+
 stmt
     : dynamicChangeStmt
     | performStmt
     | assignStmt
     | ifStmt
     | ( NUMBER | name ) STAR stmtList
+    | onceStmt
     ;
 
 importStmt
