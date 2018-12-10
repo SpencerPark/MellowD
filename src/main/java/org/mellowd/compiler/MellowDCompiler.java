@@ -442,8 +442,12 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         if (procDecl != null)
             return visitProcDecl(procDecl);
 
-        if (ctx.BRACE_OPEN() != null)
+        if (ctx.BRACE_OPEN() != null) {
+            MellowDParser.CallContext call = ctx.call();
+            if (call != null)
+                return visitCall(call);
             return visitExpr(ctx.expr());
+        }
 
         throw new AssertionError("visitAtom compiler not updated after atom changed");
     }

@@ -211,7 +211,7 @@ atom
     | ( name | CHORD_IDENTIFIER ) index?
     | funcDecl
     | procDecl
-    | BRACE_OPEN expr BRACE_CLOSE
+    | BRACE_OPEN ( expr | call ) BRACE_CLOSE
     ;
 
 // In order of highest precedence

@@ -8,6 +8,7 @@ import org.mellowd.intermediate.executable.statements.Statement;
 import org.mellowd.intermediate.functions.Parameter;
 import org.mellowd.intermediate.functions.Parameters;
 import org.mellowd.intermediate.variables.Memory;
+import org.mellowd.intermediate.variables.NullMemory;
 import org.mellowd.plugin.MellowDPlugin;
 import org.mellowd.primitives.Melody;
 import org.mellowd.primitives.Pitch;
@@ -85,6 +86,6 @@ public class Bjorklund implements MellowDPlugin {
     @Override
     public void apply(MellowD mellowD) {
         Memory globals = mellowD.getGlobals();
-        globals.set(this.bjorklundFunctionName, this.bjorklundFunction);
+        globals.set(this.bjorklundFunctionName, new Closure(NullMemory.getInstance(), this.bjorklundFunction));
     }
 }
