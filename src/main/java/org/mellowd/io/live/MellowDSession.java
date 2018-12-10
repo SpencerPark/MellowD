@@ -10,7 +10,6 @@ import org.mellowd.io.DirectorySourceFinder;
 import org.mellowd.io.repl.ExecutionException;
 
 import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Synthesizer;
 import java.io.File;
@@ -25,12 +24,11 @@ public class MellowDSession {
     private Path workingDirectory;
     private final CycleScheduler scheduler;
 
-    public MellowDSession(MellowD mellowD, String workingDirectory) throws MidiUnavailableException, InvalidMidiDataException {
+    public MellowDSession(MellowD mellowD, Synthesizer synth, String workingDirectory) throws MidiUnavailableException, InvalidMidiDataException {
         this.mellowD = mellowD;
         this.compiler = new MellowDCompiler(mellowD);
         this.workingDirectory = Paths.get(workingDirectory);
 
-        Synthesizer synth = MidiSystem.getSynthesizer();
         if (!synth.isOpen()) synth.open();
 
         this.scheduler = new CycleScheduler(synth, mellowD.getTimingEnvironment(), (block, err) -> {

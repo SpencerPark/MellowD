@@ -5,6 +5,7 @@ import org.mellowd.io.Compiler;
 import org.mellowd.io.*;
 import org.mellowd.midi.TimingEnvironment;
 
+import javax.sound.midi.MidiSystem;
 import java.io.File;
 import java.util.Scanner;
 
@@ -18,7 +19,7 @@ public class Repl {
         TimingEnvironment timingEnvironment = new TimingEnvironment(4, 4, 120);
 
         MellowD mellowD = new MellowD(srcFinder, timingEnvironment);
-        MellowDSession session = new MellowDSession(mellowD, workingDir);
+        MellowDSession session = new MellowDSession(mellowD, MidiSystem.getSynthesizer(), workingDir);
         session.eval("def block Piano { instrument: \"piano\" } \n");
         session.eval("def block Guitar { instrument: \"acoustic guitar\" }\n");
         session.eval("Piano { [b]*<e, e, e, e, e, e, e, e> }");

@@ -7,10 +7,7 @@ import org.mellowd.midi.MIDITrack;
 import org.mellowd.midi.TimingEnvironment;
 import org.mellowd.primitives.Beat;
 
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Receiver;
-import javax.sound.midi.Synthesizer;
+import javax.sound.midi.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,6 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
+import java.util.function.ObjLongConsumer;
 import java.util.stream.Collectors;
 
 public class CycleScheduler extends Thread {
@@ -163,7 +161,6 @@ public class CycleScheduler extends Thread {
     public void run() {
         //Beat frameDurationInBeats = timingEnvironment.getBeatValue().times(timingEnvironment.getBeatsPerMeasure());
 
-
         // TODO add drift cancellation if receiver transmits sync messages
 
         long clockStart = TimeUnit.NANOSECONDS.toMicros(System.nanoTime());
@@ -175,11 +172,13 @@ public class CycleScheduler extends Thread {
             try {
                 long start = stateTime.getAndAdd(frameDurationInTicks);
                 long stop = start + frameDurationInTicks;
-                long nextStop = stop + frameDurationInTicks;
-                long nextMeasureStart = stop + (measureDurationTicks - (stop % measureDurationTicks));
+                //long nextStop = stop + frameDurationInTicks;
+                //long nextMeasureStart = stop + (measureDurationTicks - (stop % measureDurationTicks));
                 //System.out.printf("start: %d, stop: %d, nextMeasure: %d%n", start, stop, nextMeasureStart);
 
-                this.flushFrame(start, stop, nextStop, nextMeasureStart, synthOffset);
+                ObjLongConsumer<MidiMessage> send = (msg, time) ->
+                        out.send(msg, time + synthOffset);
+                this.flushFrame(start, stop, send);
 
                 frameStartUs += frameDurationInUs;
 
@@ -237,13 +236,13 @@ public class CycleScheduler extends Thread {
         });
     }
 
-    private void flushFrame(long start, long stop, long nextStop, long nextMeasureStart, long synthOffset) {
+    private void flushFrame(long start, long stop, ObjLongConsumer<MidiMessage> send) {
         this.activeBlocks.get().values().forEach(active -> {
             if (active.activeTrack != null) {
                 active.activeTrack.forEachInRange(start, stop, (msg, time) -> {
                     if (MIDITrack.isNotMeta(msg)) {
                         //System.out.println(time + " @ " + DatatypeConverter.printHexBinary(msg.getMessage()));
-                        this.out.send(msg, this.timingEnvironment.ticksToUs(time) + synthOffset);
+                        send.accept(msg, this.timingEnvironment.ticksToUs(time));
                     }
                 });
             }
@@ -255,7 +254,7 @@ public class CycleScheduler extends Thread {
                 active.nextTrack.forEachInRange(start/*activeEnd*/, stop, (msg, time) -> {
                     if (MIDITrack.isNotMeta(msg)) {
                         //System.out.println(time + " @ " + DatatypeConverter.printHexBinary(msg.getMessage()));
-                        this.out.send(msg, this.timingEnvironment.ticksToUs(time) + synthOffset);
+                        send.accept(msg, this.timingEnvironment.ticksToUs(time));
                     }
                 });
                 if (activeEnd < stop && active.nextTrack != null) {
