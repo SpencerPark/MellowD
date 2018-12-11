@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Qualifier {
+    public static final Qualifier EMPTY = Qualifier.of(new String[0]);
+
     public static Qualifier of(String[] path) {
         return new Qualifier(path);
     }
@@ -23,12 +25,16 @@ public class Qualifier {
         this.path = path;
     }
 
+    public boolean isEmpty() {
+        return this.path.length == 0;
+    }
+
     public String[] getPath() {
         return this.path;
     }
 
     public QualifiedName qualify(String name) {
-        return QualifiedName.of(this.path, name);
+        return QualifiedName.of(this, name);
     }
 
     public QualifiedName qualify(QualifiedName name) {
@@ -60,7 +66,9 @@ public class Qualifier {
 
     @Override
     public String toString() {
-        return Arrays.stream(this.path)
-                .collect(Collectors.joining(".", "", "."));
+        return this.isEmpty()
+                ? ""
+                : Arrays.stream(this.path)
+                        .collect(Collectors.joining(".", "", "."));
     }
 }

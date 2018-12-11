@@ -1,10 +1,4 @@
-//Symbol Table
-//============
-
 package org.mellowd.intermediate.variables;
-
-import org.mellowd.compiler.PathMap;
-import org.mellowd.intermediate.QualifiedName;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,149 +10,99 @@ import java.util.Set;
 // from incorrectly warning about unchecked casts as the check is done via reflection and the
 // compiler isn't convinced that it has been checked.
 public class SymbolTable implements Memory {
-    private final Memory parentScope;
-    private final PathMap<Map<String, Object>> data;
-    private final Set<QualifiedName> finalNames;
+    private final Memory parent;
+
+    private final Map<String, Memory> namespaces;
+
+    private final Map<String, Object> data;
+    private final Set<String> finalNames;
 
     public SymbolTable() {
         this(null);
     }
 
-    public SymbolTable(Memory parentScope) {
-        this.parentScope = parentScope;
-        this.data = new PathMap<>(new HashMap<>());
+    public SymbolTable(Memory parent) {
+        this.parent = parent;
+
+        this.data = new HashMap<>();
         this.finalNames = new HashSet<>();
-    }
 
-    private Map<String, Object> getQualifiedSegment(String... qualifier) {
-        return this.data.putIfAbsent(HashMap::new, qualifier);
-    }
-
-    // `set` is the only data input method for this class. It adds a
-    // new mapping for the `identifier` to the `value`. It will overwrite an existing
-    // data.
-    @Override
-    public void set(QualifiedName identifier, Object value) {
-        if (this.finalNames.contains(identifier))
-            throw new AlreadyDefinedException("Cannot set value for constant value " + identifier);
-
-        this.getQualifiedSegment(identifier.getQualifier())
-                .put(identifier.getName(), value);
+        this.namespaces = new HashMap<>();
     }
 
     @Override
-    public void define(QualifiedName identifier, Object value) {
-        if (this.finalNames.contains(identifier))
-            throw new AlreadyDefinedException("Constant value " + identifier + " already defined");
-
-        Map<String, Object> segment = this.getQualifiedSegment(identifier.getQualifier());
-        if (segment.containsKey(identifier.getName()))
-            throw new AlreadyDefinedException("Identifier " + identifier + " already exists and cannot be made into a constant");
-
-        segment.put(identifier.getName(), value);
-        this.finalNames.add(identifier);
+    public void set(String name, Object value) {
+        if (this.finalNames.contains(name))
+            throw new AlreadyDefinedException("Cannot set value for constant value " + name);
+        this.data.put(name, value);
     }
 
     @Override
-    public boolean isDefined(QualifiedName identifier) {
-        Map<String, Object> segment = this.data.get(identifier.getQualifier());
-        if (segment == null)
-            return this.parentScope != null && this.parentScope.isDefined(identifier);
+    public void define(String name, Object value) {
+        if (this.finalNames.contains(name))
+            throw new AlreadyDefinedException("Constant value " + name + " already defined");
 
-        return segment.get(identifier.getName()) != null
-                || (this.parentScope != null && this.parentScope.isDefined(identifier));
-    }
+        if (this.data.containsKey(name))
+            throw new AlreadyDefinedException("Identifier " + name + " already exists and cannot be made into a constant");
 
-    // `get` is the based data output method for this class. It takes
-    // the name of the `identifier` to lookup and the expected type. If the value
-    // does not exist this method simply returns null. If the value exists but is the wrong type
-    // this method will treat the identifier as non-existent and return null. Otherwise the
-    // value is returned.
-    @Override
-    public <T> T get(QualifiedName identifier, Class<T> type) {
-        Object value = this.get(identifier);
-
-        return type.isInstance(value) ? (T) value : null;
+        this.data.put(name, value);
+        this.finalNames.add(name);
     }
 
     @Override
-    public Object get(QualifiedName identifier) {
-        Map<String, Object> segment = this.data.get(identifier.getQualifier());
+    public Object get(String name) {
+        Object value = this.data.get(name);
 
-        Object value = null;
-        if (segment != null)
-            value = segment.get(identifier.getName());
-
-        if (value == null && this.parentScope != null)
-            return this.parentScope.get(identifier);
+        if (value == null && this.parent != null)
+            return this.parent.get(name);
 
         if (value instanceof DelayedResolution) {
             // We have a variable that is dependent on other data. We will try to resolve it now
             value = ((DelayedResolution) value).resolve(this);
             // If the resolution is successful we will store the resolved value
             if (value != null)
-                segment.put(identifier.getName(), value);
+                this.data.put(name, value);
         }
 
         return value;
     }
 
-    // `getOrThrow` is similar in function to `get` but instead
-    // of returning null, the appropriate exception will be thrown.
-    public <T> T getOrThrow(QualifiedName identifier, Class<T> type) {
-        Object value = this.get(identifier);
-
-        // If the value is still null then there is nothing defined so throw an
-        // [UndefinedReferenceException](UndefinedReferenceException.html).
-        if (value == null)
-            throw new UndefinedReferenceException(identifier);
-
-        // If the type of the value is incorrect then something is defined but it is the wrong type
-        // so throw an [IncorrectTypeException](IncorrectTypeException.html).
-        if (!type.isInstance(value))
-            throw new IncorrectTypeException(identifier, value.getClass(), type);
-
-        // Otherwise all is fine so we can safely cast and return the value
-        return (T) value;
-    }
-
-    // `getType` is a utility method that will return the type of the data. This
-    // will return null if the identifier is not defined.
     @Override
-    public Class<?> getType(QualifiedName identifier) {
-        Object value = this.get(identifier);
-        return value == null ? null : value.getClass();
+    public boolean isDefined(String name) {
+        return this.data.containsKey(name)
+                || (this.parent != null && this.parent.isDefined(name));
     }
 
-    // `identifierTypeIs` preforms a type check on the identifier. It
-    // will return true if the identifier is defined and points to an object
-    // that can safely be cast to `type`
     @Override
-    public boolean identifierTypeIs(QualifiedName identifier, Class<?> type) {
-        Object value = this.get(identifier);
-        return value != null && type.isAssignableFrom(value.getClass());
+    public void setNamespace(String name, Memory namespace) {
+        this.namespaces.put(name, namespace);
     }
 
-    // `checkType` is the equivalent of `identifierTypeIs` throwing an exception
-    // if the type is defined and incorrect (not able to be cast to `type`).
-    public void checkType(QualifiedName identifier, Class<?> type) {
-        Object value = this.get(identifier);
-        if (value != null && !type.isAssignableFrom(value.getClass()))
-            throw new IncorrectTypeException(identifier, value.getClass(), type);
+    @Override
+    public Memory lookupOrCreateNamespace(String name) {
+        Memory namespace = this.lookupNamespace(name);
+
+        if (namespace == null) {
+            namespace = new SymbolTable();
+            this.setNamespace(name, namespace);
+        }
+
+        return namespace;
     }
 
-    // `checkExists` is a utility method that throws an exception if the identifier that
-    // the `token` points to is not defined.
-    public void checkExists(QualifiedName identifier) {
-        Object value = this.get(identifier);
-        if (value == null)
-            throw new UndefinedReferenceException(identifier);
+    @Override
+    public Memory lookupNamespace(String name) {
+        Memory namespace = this.namespaces.get(name);
+
+        return namespace == null && this.parent != null
+                ? this.parent.lookupNamespace(name) : namespace;
     }
 
     @Override
     public int countReferences() {
-        return this.data.reduce(Map::size, (a, b) -> a + b)
-                + (this.parentScope != null ? this.parentScope.countReferences() : 0);
+        return this.data.size()
+                + this.namespaces.values().stream().mapToInt(Memory::countReferences).sum()
+                + (this.parent != null ? this.parent.countReferences() : 0);
     }
 
     @Override
@@ -171,21 +115,29 @@ public class SymbolTable implements Memory {
     }
 
     private void dumpInternal(int indentation, StringBuilder sb) {
-        this.data.forEach(segment ->
-                segment.forEach((id, val) -> {
-                    for (int i = 0; i < indentation; i++)
-                        sb.append('\t');
-                    sb.append(id)
-                            .append("->")
-                            .append(val == null ? null : val.toString())
-                            .append('\n');
-                })
-        );
-        if (this.parentScope != null) {
-            if (this.parentScope instanceof SymbolTable) {
-                ((SymbolTable) this.parentScope).dumpInternal(indentation + 1, sb);
+        this.data.forEach((id, val) -> {
+            for (int i = 0; i < indentation; i++)
+                sb.append('\t');
+            sb.append(id)
+                    .append("->")
+                    .append(val == null ? null : val.toString())
+                    .append('\n');
+        });
+
+        this.namespaces.forEach((name, ns) -> {
+            sb.append(name).append(">\n");
+            if (ns instanceof SymbolTable) {
+                ((SymbolTable) ns).dumpInternal(indentation + 1, sb);
             } else {
-                sb.append(this.parentScope.dump());
+                sb.append(ns.dump());
+            }
+        });
+
+        if (this.parent != null) {
+            if (this.parent instanceof SymbolTable) {
+                ((SymbolTable) this.parent).dumpInternal(indentation + 1, sb);
+            } else {
+                sb.append(this.parent.dump());
             }
         }
     }

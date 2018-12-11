@@ -3,44 +3,46 @@ package org.mellowd.intermediate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class QualifiedName {
-    private static final String[] EMPTY_QUALIFIER = new String[0];
-
     public static QualifiedName of(String[] qualifier, String name) {
-        return new QualifiedName(qualifier, name);
+        return Qualifier.of(qualifier).qualify(name);
     }
 
     public static QualifiedName of(List<String> qualifier, String name) {
-        return new QualifiedName(qualifier.toArray(new String[0]), name);
+        return Qualifier.of(qualifier).qualify(name);
+    }
+
+    public static QualifiedName of(Qualifier qualifier, String name) {
+        return new QualifiedName(qualifier, name);
     }
 
     public static QualifiedName ofUnqualified(String name) {
-        return new QualifiedName(EMPTY_QUALIFIER, name);
+        return new QualifiedName(Qualifier.EMPTY, name);
     }
 
     public static QualifiedName fromString(String name) {
         String[] split = name.split("\\.");
         if (split.length == 1)
-            return new QualifiedName(EMPTY_QUALIFIER, name);
+            return new QualifiedName(Qualifier.EMPTY, name);
 
-        return new QualifiedName(Arrays.copyOf(split, split.length - 1), split[split.length - 1]);
+        return Qualifier.of(Arrays.copyOf(split, split.length - 1))
+                .qualify(split[split.length - 1]);
     }
 
-    private final String[] qualifier;
+    private final Qualifier qualifier;
     private final String name;
 
-    private QualifiedName(String[] qualifier, String name) {
+    private QualifiedName(Qualifier qualifier, String name) {
         this.qualifier = qualifier;
         this.name = name;
     }
 
     public boolean isUnqualified() {
-        return this.qualifier.length == 0;
+        return this.qualifier.isEmpty();
     }
 
-    public String[] getQualifier() {
+    public Qualifier getQualifier() {
         return qualifier;
     }
 
@@ -49,18 +51,18 @@ public class QualifiedName {
     }
 
     public QualifiedName append(QualifiedName other) {
-        String[] qualifier = Arrays.copyOf(this.qualifier, this.qualifier.length + 1 + other.qualifier.length);
-        qualifier[this.qualifier.length] = this.name;
-        System.arraycopy(other.qualifier, 0, qualifier, qualifier.length, other.qualifier.length);
+        String[] qualifier = Arrays.copyOf(this.qualifier.getPath(), this.qualifier.getPath().length + 1 + other.qualifier.getPath().length);
+        qualifier[this.qualifier.getPath().length] = this.name;
+        System.arraycopy(other.qualifier.getPath(), 0, qualifier, qualifier.length, other.qualifier.getPath().length);
 
-        return new QualifiedName(qualifier, other.name);
+        return QualifiedName.of(qualifier, other.name);
     }
 
     public QualifiedName append(String name) {
-        String[] qualifier = Arrays.copyOf(this.qualifier, this.qualifier.length + 1);
-        qualifier[this.qualifier.length] = this.name;
+        String[] qualifier = Arrays.copyOf(this.qualifier.getPath(), this.qualifier.getPath().length + 1);
+        qualifier[this.qualifier.getPath().length] = this.name;
 
-        return new QualifiedName(qualifier, name);
+        return QualifiedName.of(qualifier, name);
     }
 
     @Override
@@ -68,21 +70,17 @@ public class QualifiedName {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         QualifiedName that = (QualifiedName) o;
-        return Arrays.equals(qualifier, that.qualifier) &&
+        return Objects.equals(qualifier, that.qualifier) &&
                 Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(name);
-        result = 31 * result + Arrays.hashCode(qualifier);
-        return result;
+        return Objects.hash(qualifier, name);
     }
 
     @Override
     public String toString() {
-        return (this.isUnqualified() ? "" : Arrays.stream(this.qualifier)
-                .collect(Collectors.joining(".", "", ".")))
-                + this.name;
+        return this.qualifier.toString() + this.name;
     }
 }

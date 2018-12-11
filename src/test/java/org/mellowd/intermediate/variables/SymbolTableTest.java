@@ -147,4 +147,24 @@ public class SymbolTableTest {
 
         assertEquals(30, this.table.get(sample1Name));
     }
+
+    @Test
+    public void testDefineNamespace() {
+        Memory memory = this.table.lookupOrCreateNamespace("this");
+        memory.set("field1", 20);
+
+        assertEquals(20, this.table.get(QualifiedName.fromString("this.field1")));
+    }
+
+    @Test
+    public void testDefineNestedNamespace() {
+        Memory deep = new SymbolTable();
+        deep.set("field1", 30);
+
+        this.table.setNamespace(QualifiedName.fromString("this.field1"), deep);
+        this.table.set(QualifiedName.fromString("this.field1"), 20);
+
+        assertEquals(20, this.table.get(QualifiedName.fromString("this.field1")));
+        assertEquals(30, this.table.get(QualifiedName.fromString("this.field1.field1")));
+    }
 }

@@ -1,7 +1,5 @@
 package org.mellowd.intermediate.variables;
 
-import org.mellowd.intermediate.QualifiedName;
-
 public class NullMemory implements Memory {
     private static NullMemory instance;
 
@@ -11,34 +9,32 @@ public class NullMemory implements Memory {
     }
 
     @Override
-    public void set(QualifiedName identifier, Object value) { }
+    public void set(String name, Object value) { }
 
     @Override
-    public void define(QualifiedName identifier, Object value) { }
+    public void define(String name, Object value) { }
 
     @Override
-    public <T> T get(QualifiedName identifier, Class<T> type) {
+    public Object get(String name) {
         return null;
     }
 
     @Override
-    public Object get(QualifiedName identifier) {
-        return null;
-    }
-
-    @Override
-    public boolean isDefined(QualifiedName identifier) {
+    public boolean isDefined(String name) {
         return false;
     }
 
     @Override
-    public Class<?> getType(QualifiedName identifier) {
-        return null;
+    public void setNamespace(String name, Memory namespace) { }
+
+    @Override
+    public Memory lookupOrCreateNamespace(String name) {
+        return NullMemory.getInstance();
     }
 
     @Override
-    public boolean identifierTypeIs(QualifiedName identifier, Class<?> type) {
-        return false;
+    public Memory lookupNamespace(String name) {
+        return null;
     }
 
     @Override
