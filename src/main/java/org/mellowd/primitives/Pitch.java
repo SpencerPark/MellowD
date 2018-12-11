@@ -7,6 +7,8 @@ import org.mellowd.intermediate.functions.operations.Articulatable;
 import org.mellowd.intermediate.functions.operations.OctaveShiftable;
 import org.mellowd.intermediate.functions.operations.Transposable;
 
+import java.util.Objects;
+
 //Pitch is a key building block in the Mellow D compiler. It specifies the value of the played
 //note. MIDI restricts the note value to 7 bits, hence we have 0-127 to work with. 0 corresponds
 //to the musical note c with each consecutive number adding a semi-tone to the note value.
@@ -14,7 +16,7 @@ public final class Pitch implements Transposable<Pitch>, OctaveShiftable<Pitch>,
     //The `NOTE_NAMES` array maps a midi num in the lowest octave to a note name. Here
     //it is clear to see the mapping from number to note for a total of 12 semi-tones in
     //an octave.
-    private static final String[] NOTE_NAMES = new String[] {
+    private static final String[] NOTE_NAMES = new String[]{
             "c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"
     };
 
@@ -22,6 +24,7 @@ public final class Pitch implements Transposable<Pitch>, OctaveShiftable<Pitch>,
     //represent every possible MIDI pitch with 128 instances. Most songs would easily hit this number of
     //pitch instantiations so we can create them all at once and share them.
     private static final Pitch[] ALL_PITCHES = new Pitch[128];
+
     static {
         for (int i = 0; i < 128; i++) ALL_PITCHES[i] = new Pitch(i);
     }
@@ -30,12 +33,12 @@ public final class Pitch implements Transposable<Pitch>, OctaveShiftable<Pitch>,
 
     //To get started a static reference by name to a whole tone pitch is retrieved. From here
     //the caller would chain calls to the various wrapper methods to obtain the desired pitch.
-    public static final Pitch C = ALL_PITCHES[0  + (DEFAULT_OCTAVE * 12)];
-    public static final Pitch D = ALL_PITCHES[2  + (DEFAULT_OCTAVE * 12)];
-    public static final Pitch E = ALL_PITCHES[4  + (DEFAULT_OCTAVE * 12)];
-    public static final Pitch F = ALL_PITCHES[5  + (DEFAULT_OCTAVE * 12)];
-    public static final Pitch G = ALL_PITCHES[7  + (DEFAULT_OCTAVE * 12)];
-    public static final Pitch A = ALL_PITCHES[9  + (DEFAULT_OCTAVE * 12)];
+    public static final Pitch C = ALL_PITCHES[0 + (DEFAULT_OCTAVE * 12)];
+    public static final Pitch D = ALL_PITCHES[2 + (DEFAULT_OCTAVE * 12)];
+    public static final Pitch E = ALL_PITCHES[4 + (DEFAULT_OCTAVE * 12)];
+    public static final Pitch F = ALL_PITCHES[5 + (DEFAULT_OCTAVE * 12)];
+    public static final Pitch G = ALL_PITCHES[7 + (DEFAULT_OCTAVE * 12)];
+    public static final Pitch A = ALL_PITCHES[9 + (DEFAULT_OCTAVE * 12)];
     public static final Pitch B = ALL_PITCHES[11 + (DEFAULT_OCTAVE * 12)];
 
     //The `REST` is a special instance that will be check for reference equality to insert
@@ -187,12 +190,25 @@ public final class Pitch implements Transposable<Pitch>, OctaveShiftable<Pitch>,
     @Override
     public String toString() {
         if (this == REST) return "REST";
-        return midiNum + ":" + NOTE_NAMES[midiNum%12] + Integer.toString(midiNum/12);
+        return midiNum + ":" + NOTE_NAMES[midiNum % 12] + Integer.toString(midiNum / 12);
     }
 
     @Override
     public Pitch transpose(int numSemiTones) {
         if (this == REST) return REST;
         return Pitch.getPitch(this.midiNum + numSemiTones);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Pitch pitch = (Pitch) o;
+        return midiNum == pitch.midiNum;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(midiNum);
     }
 }

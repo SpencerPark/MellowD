@@ -326,7 +326,10 @@ blockDeclStmt
     ;
 
 onceStmt
-    : KEYWORD_ONCE stmtList
+    : KEYWORD_ONCE
+      ( stmtList
+      | stmt
+      )
     ;
 
 stmt

@@ -1,6 +1,7 @@
 package org.mellowd.testutil;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.mellowd.TestErrorListener;
 import org.mellowd.compiler.MellowDLexer;
@@ -22,18 +23,18 @@ public class ParserTestFrame {
     }
 
     public void init(String input) {
-        init(new ANTLRInputStream(input));
+        init(CharStreams.fromString(input));
     }
 
     public void init(InputStream input) throws IOException {
-        init(new ANTLRInputStream(input));
+        init(CharStreams.fromStream(input));
     }
 
     public void init(Reader input) throws IOException {
-        init(new ANTLRInputStream(input));
+        init(CharStreams.fromReader(input));
     }
 
-    public void init(ANTLRInputStream input) {
+    public void init(CharStream input) {
         MellowDLexer lexer = new MellowDLexer(input);
         CommonTokenStream stream = new CommonTokenStream(lexer);
 

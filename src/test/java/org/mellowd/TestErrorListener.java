@@ -9,6 +9,9 @@ import org.antlr.v4.runtime.Recognizer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.fail;
 
 //This error listener simply remembers the errors that occurred during parsing.
 public class TestErrorListener extends BaseErrorListener {
@@ -29,5 +32,14 @@ public class TestErrorListener extends BaseErrorListener {
 
     public List<String> getErrors() {
         return errors;
+    }
+
+    public void assertNoErrors() {
+        if (this.errors.isEmpty())
+            return;
+
+        fail("Errors encountered while parsing:" +
+                this.errors.stream()
+                        .collect(Collectors.joining("\n- ", "\n- ", "")));
     }
 }

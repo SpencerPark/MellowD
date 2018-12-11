@@ -2,6 +2,8 @@ package org.mellowd.primitives;
 
 import org.mellowd.intermediate.Sound;
 
+import java.util.Objects;
+
 public class ArticulatedPitch implements Articulated {
     private final Pitch pitch;
     private Articulation articulation;
@@ -49,5 +51,19 @@ public class ArticulatedPitch implements Articulated {
     @Override
     public String toString() {
         return this.pitch.toString() + this.articulation.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ArticulatedPitch that = (ArticulatedPitch) o;
+        return Objects.equals(pitch, that.pitch) &&
+                articulation == that.articulation;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pitch, articulation);
     }
 }

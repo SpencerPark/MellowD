@@ -676,7 +676,11 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
     @Override
     public Statement visitOnceStmt(MellowDParser.OnceStmtContext ctx) {
-        Statement statement = visitStmtList(ctx.stmtList());
+        MellowDParser.StmtListContext stmtList = ctx.stmtList();
+        if (stmtList != null)
+            return new OnceStatement(visitStmtList(stmtList));
+
+        Statement statement = visitStmt(ctx.stmt());
         return new OnceStatement(statement);
     }
 
