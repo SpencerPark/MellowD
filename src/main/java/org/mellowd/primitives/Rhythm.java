@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 //letter in it's name. Additionally beats can be slurred together. This results in the durations
 //overlapping and the notes connecting more smoothly.
 public class Rhythm implements Slurrable<Rhythm>, Indexable<Beat, Rhythm> {
-    // TODO make Rhythms immutable
+    // TODO make Rhythms immutable as well as melodies and chords. Create builder classes for construction.
 
     public static int compare(Rhythm left, Rhythm right) {
         for (int i = 0; i < left.size(); i++) {

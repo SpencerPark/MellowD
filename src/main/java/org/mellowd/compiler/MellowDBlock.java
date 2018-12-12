@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class MellowDBlock implements Output, ExecutionEnvironment {
+    public static final QualifiedName GLOBALS_NS = QualifiedName.ofUnqualified("this");
     private final Memory blockLocals;
     private final String name;
     private final MIDIChannel channel;
@@ -23,8 +24,7 @@ public class MellowDBlock implements Output, ExecutionEnvironment {
 
     public MellowDBlock(Memory globalMemory, String name, MIDIChannel channel) {
         this.blockLocals = new SymbolTable(globalMemory);
-        // TODO support adding memory sections to others
-        // this.blockLocals.set(QualifiedName.ofUnqualified("this"), globalMemory);
+        this.blockLocals.setNamespace(GLOBALS_NS, globalMemory);
         this.name = name;
         this.channel = channel;
         this.code = new AtomicReference<>(new Statement[0]);
