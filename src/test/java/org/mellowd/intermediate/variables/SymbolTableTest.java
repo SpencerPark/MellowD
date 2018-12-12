@@ -166,5 +166,45 @@ public class SymbolTableTest {
 
         assertEquals(20, this.table.get(QualifiedName.fromString("this.field1")));
         assertEquals(30, this.table.get(QualifiedName.fromString("this.field1.field1")));
+
+        deep.set("field1", 10);
+        assertEquals(10, this.table.get(QualifiedName.fromString("this.field1.field1")));
+    }
+
+    @Test
+    public void testCreateNested() {
+        QualifiedName id = QualifiedName.fromString("obj1.obj2.field1");
+
+        this.table.set(id, 10);
+
+        assertEquals(10, this.table.get(id));
+    }
+
+    @Test
+    public void testNamespacesAndVariablesAreSeparate() {
+        QualifiedName deepField = QualifiedName.fromString("obj.field_obj.field");
+        QualifiedName shallowField = QualifiedName.fromString("obj.field_obj");
+
+        this.table.set(deepField, 10);
+        this.table.set(shallowField, 20);
+
+        assertEquals(10, this.table.get(deepField));
+        assertEquals(20, this.table.get(shallowField));
+    }
+
+    @Test
+    public void testModifyParentNamespace() {
+        QualifiedName deepField = QualifiedName.fromString("obj.field_obj.field");
+        QualifiedName shallowField = QualifiedName.fromString("obj.field_obj");
+
+        this.superTable.lookupOrCreateNamespace("obj");
+        this.table.set(deepField, 10);
+        this.table.set(shallowField, 20);
+
+        assertEquals(10, this.table.get(deepField));
+        assertEquals(20, this.table.get(shallowField));
+
+        assertEquals(10, this.superTable.get(deepField));
+        assertEquals(20, this.superTable.get(shallowField));
     }
 }

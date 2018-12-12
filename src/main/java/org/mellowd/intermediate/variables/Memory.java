@@ -7,22 +7,16 @@ public interface Memory {
     //`set` is the only data input method for this class. It adds a
     //new mapping for the `identifier` to the `value`. It will overwrite an existing
     //data and will return true if it does so.
-    default void set(QualifiedName identifier, Object value) throws UndefinedQualifierException {
-        Memory memory = this.lookupNamespace(identifier.getQualifier());
-        if (memory == null)
-            throw new UndefinedQualifierException(identifier.getQualifier());
-
-        memory.set(identifier.getName(), value);
+    default void set(QualifiedName identifier, Object value) {
+        this.lookupOrCreateNamespace(identifier.getQualifier())
+                .set(identifier.getName(), value);
     }
 
     void set(String name, Object value);
 
-    default void define(QualifiedName identifier, Object value) throws UndefinedQualifierException {
-        Memory memory = this.lookupNamespace(identifier.getQualifier());
-        if (memory == null)
-            throw new UndefinedQualifierException(identifier.getQualifier());
-
-        memory.define(identifier.getName(), value);
+    default void define(QualifiedName identifier, Object value) {
+        this.lookupOrCreateNamespace(identifier.getQualifier())
+                .define(identifier.getName(), value);
     }
 
     void define(String name, Object value);
@@ -87,6 +81,14 @@ public interface Memory {
     }
 
     void setNamespace(String name, Memory namespace);
+
+    default Memory lookupOrCreateNamespace(Qualifier identifier) {
+        Memory scope = this;
+        for (String name : identifier.getPath())
+            scope = scope.lookupOrCreateNamespace(name);
+
+        return scope;
+    }
 
     Memory lookupOrCreateNamespace(String name);
 
