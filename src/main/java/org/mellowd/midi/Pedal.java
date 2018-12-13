@@ -37,7 +37,7 @@ public class Pedal implements MIDIController {
 
     private void addMessage() {
         try {
-            ShortMessage message = new ShortMessage(ShortMessage.CONTROL_CHANGE, midiChannel.getChannelNum(), type.getControlNumber(), this.isPressed ? GeneralMidiConstants.CONTROLLER_VAL_OFF : GeneralMidiConstants.CONTROLLER_VAL_ON);
+            ShortMessage message = new ShortMessage(ShortMessage.CONTROL_CHANGE, midiChannel.getChannelNum(), type.getControlNumber(), this.isPressed ? GeneralMidiConstants.CONTROLLER_VAL_ON : GeneralMidiConstants.CONTROLLER_VAL_OFF);
             this.midiChannel.addMessage(message, true);
         } catch (InvalidMidiDataException e) {
             throw new MidiRuntimeException("Cannot turn " + type.getName() + " pedal (cc=" + type.getControlNumber() + ") to " + (this.isPressed ? "on" : "off") + ".", e);

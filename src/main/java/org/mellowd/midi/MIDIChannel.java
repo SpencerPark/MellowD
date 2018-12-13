@@ -378,9 +378,10 @@ public class MIDIChannel {
         if (pitch == Pitch.REST) return;
         Pitch toPlay = pitch.shiftOctave(this.getOctaveShift()).transpose(this.getTranspose());
 
-        if (isSlurred() && this.noteStates.get(toPlay).isSlurred) {
+        if (this.isSlurred() && this.noteStates.get(toPlay).isSlurred) {
             MidiEvent offEvent = noteOffEvents.get(toPlay);
-            if (offEvent != null) {
+            // TODO this should make sure that the off event corresponds to the last note played, 1 doesn't properly capture this
+            if (offEvent != null && (this.getStateTime() - offEvent.getTick()) < 1) {
                 //Skipping the last off and play the on softer
                 this.midiTrack.remove(offEvent);
                 noteOffEvents.set(toPlay, null);

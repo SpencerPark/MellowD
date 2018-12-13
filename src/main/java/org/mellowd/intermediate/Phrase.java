@@ -59,6 +59,10 @@ public class Phrase implements Playable {
             //Update the tracker
             lastSlurred = slurred;
         }
+
+        // Always clear slur at the end because the slur cannot cross a phrase boundary.
+        channel.setSlurred(false);
+        sustainPedal.release();
     }
 
     @Override
