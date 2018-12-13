@@ -271,10 +271,10 @@ procDecl
 ///////////////////////////////////////////////////////////////////////////////
 
 ifStmt
-    : KEYWORD_IF expr KEYWORD_DO stmtList
+    : KEYWORD_IF expr doStmt
       ( KEYWORD_ELSE
-        ( KEYWORD_IF expr KEYWORD_ELSE KEYWORD_DO stmtList )*
-        KEYWORD_DO stmtList
+        ( KEYWORD_IF expr KEYWORD_ELSE doStmt )*
+        doStmt
       )?
     ;
 
@@ -301,8 +301,7 @@ locals [Dynamic dynamic]
     ;
 
 performStmt
-    : KEYWORD_DO BRACE_OPEN call BRACE_CLOSE
-    | ( melody | melodyRef = name )
+    : ( melody | melodyRef = name )
       STAR
       ( rhythm | rhythmRef = name )
     ;
@@ -325,6 +324,14 @@ blockDeclStmt
       )?
     ;
 
+doStmt
+    : KEYWORD_DO
+      ( BRACE_OPEN call BRACE_CLOSE
+      | stmtList
+      | stmt
+      )
+    ;
+
 onceStmt
     : KEYWORD_ONCE
       ( stmtList
@@ -338,6 +345,7 @@ stmt
     | assignStmt
     | ifStmt
     | ( NUMBER | name ) STAR stmtList
+    | doStmt
     | onceStmt
     ;
 
@@ -362,11 +370,15 @@ stmtList
       BRACE_CLOSE
     ;
 
+topLevelStmt
+    : assignStmt
+    | doStmt
+    | block
+    ;
+
 song
     : importStmt*
       blockDeclStmt*
-      ( assignStmt
-      | block
-      )*
+      topLevelStmt*
       EOF
     ;

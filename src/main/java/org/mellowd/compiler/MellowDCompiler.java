@@ -495,25 +495,25 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
     @Override
     public Statement visitIfStmt(MellowDParser.IfStmtContext ctx) {
-        List<MellowDParser.StmtListContext> blocks = ctx.stmtList();
+        List<MellowDParser.DoStmtContext> blocks = ctx.doStmt();
         List<MellowDParser.ExprContext> conditions = ctx.expr();
 
         // Initialize the ifStmt builder with the first condition and block
         Expression<Boolean> condition = new BooleanEvaluationExpression(visitExpr(conditions.get(0)));
-        Statement block = visitStmtList(blocks.get(0));
+        Statement block = visitDoStmt(blocks.get(0));
         IfStatement.Builder ifStmt = new IfStatement.Builder(condition, block);
 
         // Else If branches
         for (int branchIdx = 1; branchIdx < conditions.size(); branchIdx++) {
             condition = new BooleanEvaluationExpression(visitExpr(conditions.get(branchIdx)));
-            block = visitStmtList(blocks.get(branchIdx));
+            block = visitDoStmt(blocks.get(branchIdx));
 
             ifStmt.addElseIf(condition, block);
         }
 
         if (conditions.size() < blocks.size()) {
             //Else branch, add last block
-            ifStmt.setElse(visitStmtList(blocks.get(blocks.size() - 1)));
+            ifStmt.setElse(visitDoStmt(blocks.get(blocks.size() - 1)));
         }
 
         return ifStmt.build();
@@ -551,18 +551,6 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
     @Override
     public Statement visitPerformStmt(MellowDParser.PerformStmtContext ctx) {
-        if (ctx.KEYWORD_DO() != null) {
-            MellowDParser.CallContext call = ctx.call();
-            MellowDParser.NameContext name = call.name();
-
-            Expression<Closure> procedure = lookupName(name, Closure.class);
-            procedure = new RuntimeNullCheck<>(visitName(name), procedure, new SourceLink(call));
-            Argument<?>[] arguments = visitArgumentList(call.argumentList());
-
-            return new PerformProcedureStatement(procedure, arguments);
-            // TODO split into side effect free statements for functions and perform for procedures
-        }
-
         SourceLink link = new SourceLink(ctx);
 
         Expression<Melody> lhs;
@@ -673,6 +661,29 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     }
 
     @Override
+    public Statement visitDoStmt(MellowDParser.DoStmtContext ctx) {
+        MellowDParser.CallContext call = ctx.call();
+        if (call != null) {
+            MellowDParser.NameContext name = call.name();
+
+            Expression<Closure> procedure = lookupName(name, Closure.class);
+            procedure = new RuntimeNullCheck<>(visitName(name), procedure, new SourceLink(call));
+            Argument<?>[] arguments = visitArgumentList(call.argumentList());
+
+            return new PerformProcedureStatement(procedure, arguments);
+            // TODO split into side effect free statements for functions and perform for procedures
+        }
+
+        MellowDParser.StmtListContext stmtList = ctx.stmtList();
+        if (stmtList != null) {
+            return visitStmtList(stmtList);
+        }
+
+        MellowDParser.StmtContext stmt = ctx.stmt();
+        return visitStmt(stmt);
+    }
+
+    @Override
     public Statement visitOnceStmt(MellowDParser.OnceStmtContext ctx) {
         MellowDParser.StmtListContext stmtList = ctx.stmtList();
         if (stmtList != null)
@@ -711,6 +722,10 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         MellowDParser.IfStmtContext ifStmt = ctx.ifStmt();
         if (ifStmt != null)
             return visitIfStmt(ifStmt);
+
+        MellowDParser.DoStmtContext doStmt = ctx.doStmt();
+        if (doStmt != null)
+            return visitDoStmt(doStmt);
 
         MellowDParser.OnceStmtContext onceStmt = ctx.onceStmt();
         if (onceStmt != null)
@@ -899,14 +914,30 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     }
 
     @Override
+    public Void visitTopLevelStmt(MellowDParser.TopLevelStmtContext ctx) {
+        MellowDParser.AssignStmtContext assignStmt = ctx.assignStmt();
+        if (assignStmt != null) {
+            visitAssignStmt(assignStmt, true).execute(this.mellowD, NullOutput.getInstance());
+            return null;
+        }
+
+        MellowDParser.DoStmtContext doStmt = ctx.doStmt();
+        if (doStmt != null) {
+            visitDoStmt(doStmt).execute(this.mellowD, NullOutput.getInstance());
+            return null;
+        }
+
+        MellowDParser.BlockContext block = ctx.block();
+        this.visitBlock(block);
+
+        return null;
+    }
+
+    @Override
     public Void visitSong(MellowDParser.SongContext ctx) {
         ctx.blockDeclStmt().forEach(this::visitBlockDeclStmt);
 
-        //The output is null because in the global scope an output doesn't exist
-        ctx.assignStmt().forEach(varCtx ->
-                visitAssignStmt(varCtx, true).execute(this.mellowD, NullOutput.getInstance()));
-
-        ctx.block().forEach(this::visitBlock);
+        ctx.topLevelStmt().forEach(this::visitTopLevelStmt);
 
         return null;
     }

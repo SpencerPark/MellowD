@@ -28,21 +28,27 @@ public class MellowDSelectiveCompiler extends MellowDCompiler {
     }
 
     @Override
-    public Void visitSong(MellowDParser.SongContext ctx) {
-        // Import everything that is needed
-        ctx.importStmt().forEach(super::visitImportStmt);
+    public Void visitTopLevelStmt(MellowDParser.TopLevelStmtContext ctx) {
+        MellowDParser.AssignStmtContext assignStmt = ctx.assignStmt();
+        if (assignStmt != null) {
+            QualifiedName name = super.visitName(assignStmt.name());
+            if (this.includedNames == null || this.includedNames.contains(name)) {
+                if (this.as != null)
+                    assignStmt.id = this.as.qualify(name);
+                else
+                    assignStmt.id = this.from.qualify(name);
 
-        ctx.assignStmt().stream()
-                .filter(assignCtx -> this.includedNames == null || this.includedNames.contains(super.visitName(assignCtx.name())))
-                .map(stmt -> {
-                    if (this.as != null)
-                        stmt.id = this.as.qualify(visitName(stmt.name()));
-                    else
-                        stmt.id = this.from.qualify(visitName(stmt.name()));
+                visitAssignStmt(assignStmt, true).execute(super.mellowD, NullOutput.getInstance());
+            }
 
-                    return super.visitAssignStmt(stmt, true);
-                })
-                .forEach(s -> s.execute(super.mellowD, NullOutput.getInstance()));
+            return null;
+        }
+
+        MellowDParser.DoStmtContext doStmt = ctx.doStmt();
+        if (doStmt != null) {
+            visitDoStmt(doStmt).execute(this.mellowD, NullOutput.getInstance());
+            return null;
+        }
 
         return null;
     }

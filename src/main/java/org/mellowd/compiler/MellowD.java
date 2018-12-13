@@ -60,6 +60,7 @@ public class MellowD implements ExecutionEnvironment {
             MIDIChannel channel = new MIDIChannel(new MIDITrack(name), percussion, channelNum, timingEnvironment);
             block = new MellowDBlock(this.globals, name, channel);
             this.blocks.put(name, block);
+            this.globals.setNamespace(name, block.getLocals());
         } else {
             throw new AlreadyDefinedException("A block with the name " + name + " is already defined.");
         }
