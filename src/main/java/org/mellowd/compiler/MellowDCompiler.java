@@ -73,7 +73,8 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
 
         this.chordConcatenationDelegate.addDelegate(Pitch.class, Chord::append);
         this.chordConcatenationDelegate.addDelegate(Chord.class, Chord::append);
-        this.chordParamTypes = new Class[]{ Pitch.class, Chord.class };
+        this.chordConcatenationDelegate.addDelegate(Articulated.class, Chord::append);
+        this.chordParamTypes = new Class[]{ Pitch.class, Chord.class, Articulated.class };
 
         this.rhythmConcatenationDelegate.addDelegate(Beat.class, Rhythm::append);
         this.rhythmConcatenationDelegate.addDelegate(Rhythm.class, Rhythm::append);
@@ -522,9 +523,6 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     public Statement visitAssignStmt(MellowDParser.AssignStmtContext ctx, boolean isField) {
         boolean percussionToggle = ctx.STAR() != null;
         boolean isConstant = ctx.KEYWORD_DEF() != null;
-
-        if (isField && !isConstant)
-            throw new CompilationException(ctx, new IllegalStateException("All variable definitions outside of a block must be constant ('def' keyword)"));
 
         if (ctx.id == null)
             ctx.id = visitName(ctx.name());
