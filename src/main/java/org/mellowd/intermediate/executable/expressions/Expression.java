@@ -24,4 +24,19 @@ public interface Expression<T> extends ScopeDependent {
     }
 
     public T evaluate(ExecutionEnvironment environment);
+
+    public default <U> Expression<U> then(Function<T, U> mapper) {
+        Expression<T> first = this;
+        return new Expression<U>() {
+            @Override
+            public Set<QualifiedName> getFreeVariables() {
+                return first.getFreeVariables();
+            }
+
+            @Override
+            public U evaluate(ExecutionEnvironment environment) {
+                return mapper.apply(first.evaluate(environment));
+            }
+        };
+    }
 }

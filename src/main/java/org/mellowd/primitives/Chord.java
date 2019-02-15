@@ -57,6 +57,10 @@ public class Chord implements Transposable<Chord>, Articulatable, Indexable<Pitc
         this.pitches = pitches;
     }
 
+    public Pitch getRoot() {
+        return this.getAtIndex(0);
+    }
+
     //This method provides access to the internal array of pitches. It is used for accessing
     //specific notes via the mellow d syntax `chordName:index`.
     @Override
@@ -126,6 +130,16 @@ public class Chord implements Transposable<Chord>, Articulatable, Indexable<Pitc
         }
     }
 
+    public void append(Articulated articulated) {
+        Articulatable element = articulated.getElement();
+        if (element instanceof Pitch)
+            this.append((Pitch) element);
+        else if (element instanceof Chord)
+            this.append((Chord) element);
+        else
+            throw new IllegalArgumentException("Articualted should be sealed wrt elements.");
+    }
+
     //The `resolve` method is the method that provides the lookup by name support described above with
     //the `CHORD_NAME_PATTERN`.
     public static Chord resolve(String identifier) {
@@ -192,6 +206,14 @@ public class Chord implements Transposable<Chord>, Articulatable, Indexable<Pitc
             case "min6":    return minorSixth(pitch);
             default:        return null;
         }
+    }
+
+    public boolean contains(Pitch pitch) {
+        return Arrays.stream(this.pitches).anyMatch(pitch::equals);
+    }
+
+    public boolean containsIgnoreOctave(Pitch pitch) {
+        return Arrays.stream(this.pitches).anyMatch(pitch::equalsIgnoreOctave);
     }
 
     //For use in various collections we should override the `equals` and `hashcode` methods

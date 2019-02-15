@@ -49,7 +49,11 @@ public final class Pitch implements Transposable<Pitch>, OctaveShiftable<Pitch>,
     //MIDI note value. If the given value is negative or exceeds 127 it is pulled into the range
     //on the end that it exceeded.
     public static Pitch getPitch(int midiNum) {
-        return ALL_PITCHES[Math.max(0, Math.min(midiNum, 127))];
+        if (midiNum < 0)
+            midiNum = 12 + (midiNum % 12); // 12 + -1 = B
+        else if (midiNum > 127)
+            midiNum = 127 + ((midiNum % 12) - 12); // 120 is highest c
+        return ALL_PITCHES[midiNum];
     }
 
     public static int compare(Pitch left, Pitch right) {
@@ -119,6 +123,13 @@ public final class Pitch implements Transposable<Pitch>, OctaveShiftable<Pitch>,
     public Pitch inOctave(int octave) {
         if (this == REST) return REST;
         return getPitch((octave * 12) + (midiNum % 12));
+    }
+
+    public int distanceBetween(Pitch other) {
+        if (this == REST || other == REST)
+            return 0;
+
+        return Math.abs(other.midiNum - this.midiNum);
     }
 
     //Intervals
@@ -197,6 +208,11 @@ public final class Pitch implements Transposable<Pitch>, OctaveShiftable<Pitch>,
     public Pitch transpose(int numSemiTones) {
         if (this == REST) return REST;
         return Pitch.getPitch(this.midiNum + numSemiTones);
+    }
+
+    public boolean equalsIgnoreOctave(Pitch other) {
+        return this == other
+                || (REST != this && REST != other && this.midiNum % 12 == other.midiNum % 12);
     }
 
     @Override

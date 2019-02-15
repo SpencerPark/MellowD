@@ -14,10 +14,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class MellowDBlock implements Output, ExecutionEnvironment {
     public static final QualifiedName GLOBALS_NS = QualifiedName.ofUnqualified("this");
+
     private final Memory blockLocals;
     private final String name;
     private final MIDIChannel channel;
     private final AtomicReference<Statement[]> code;
+    private final AtomicReference<SchedulerDirectives> schedulerDirectives;
 
     private Beat durationSinceGradualStart = null;
     private GradualDynamicChange gradualStart = null;
@@ -28,13 +30,14 @@ public class MellowDBlock implements Output, ExecutionEnvironment {
         this.name = name;
         this.channel = channel;
         this.code = new AtomicReference<>(new Statement[0]);
+        this.schedulerDirectives = new AtomicReference<>(null);
     }
 
     public String getName() {
         return name;
     }
 
-    public void addFragment(Statement block) {
+    public void appendStatement(Statement block) {
         this.code.updateAndGet(code -> {
             Statement[] nextCode = Arrays.copyOf(code, code.length + 1);
             nextCode[code.length] = block;
@@ -48,6 +51,14 @@ public class MellowDBlock implements Output, ExecutionEnvironment {
 
     public void clearCode() {
         this.code.set(new Statement[0]);
+    }
+
+    public SchedulerDirectives getSchedulerDirectives() {
+        return this.schedulerDirectives.get();
+    }
+
+    public void setSchedulerDirectives(SchedulerDirectives directives) {
+        this.schedulerDirectives.set(directives);
     }
 
     public CodeExecutor createExecutor() {

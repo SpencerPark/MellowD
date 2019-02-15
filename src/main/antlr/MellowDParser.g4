@@ -297,7 +297,7 @@ locals [Dynamic dynamic]
       | FFF  { $dynamic = Dynamic.fff;  }
       | FFFF { $dynamic = Dynamic.ffff; }
       )
-      ( ARROWS_LEFT | ARROWS_RIGHT )?
+      ( ARROWS_L | ARROWS_R )?
     ;
 
 performStmt
@@ -361,7 +361,20 @@ importStmt
     ;
 
 block
-    : IDENTIFIER ( COMMA IDENTIFIER )* stmtList
+    : IDENTIFIER ( COMMA IDENTIFIER )* stmtList schedDirs?
+    ;
+
+// TODO get rid of the "sync link". That was an awful model for synchronization
+schedDir
+    : PERCENT ( ( size=number ( ARROWS_R offset=number )? ) | IDENTIFIER ) #SchedQuantize // Quantize on number of bars or come in with the block
+    | ARROWS_R ( rhythm | beat )? PIPE #SchedAlign // align right
+    | PIPE ( rhythm | beat )? ARROWS_L #SchedAlign
+    | STAR number #SchedFinite // run number times
+    | HAT number schedDirs? #SchedFinite  // run number times and resume infinite afterwards with potentially new scheduler directives
+    ;
+
+schedDirs
+    : schedDir ( COMMA schedDir )*
     ;
 
 stmtList

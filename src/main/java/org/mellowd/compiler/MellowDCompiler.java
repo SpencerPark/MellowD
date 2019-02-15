@@ -541,9 +541,9 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     @Override
     public Statement visitDynamicChangeStmt(MellowDParser.DynamicChangeStmtContext ctx) {
         SourceLink link = new SourceLink(ctx);
-        if (ctx.ARROWS_LEFT() != null)
+        if (ctx.ARROWS_L() != null)
             return new ContextFreeStatement(link, new GradualDynamicChange(ctx.dynamic, true));
-        else if (ctx.ARROWS_LEFT() != null)
+        else if (ctx.ARROWS_R() != null)
             return new ContextFreeStatement(link, new GradualDynamicChange(ctx.dynamic, false));
         else
             return new ContextFreeStatement(link, new DynamicChange(ctx.dynamic));
@@ -636,7 +636,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
                 }
         }
 
-        return new ContextFreeStatement(new SourceLink(ctx), playable);
+        return new OnceStatement(new ContextFreeStatement(new SourceLink(ctx), playable));
     }
 
     @Override
@@ -652,7 +652,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         for (TerminalNode id : ctx.IDENTIFIER()) {
             try {
                 MellowDBlock block = this.mellowD.defineBlock(getText(id), ctx.KEYWORD_PERCUSSION() != null);
-                if (config != null) block.addFragment(config);
+                if (config != null) block.appendStatement(config);
             } catch (AlreadyDefinedException e) {
                 throw new CompilationException(id, e);
             }
@@ -744,7 +744,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
                     .map(this::visitName)
                     .collect(Collectors.toSet());
 
-        Qualifier path = compileQualifier(ctx.name);
+        Qualifier path = compileQualifier(ctx.path);
         Qualifier as = ctx.as == null ? null : compileQualifier(ctx.as);
 
         MellowDCompiler importCompiler = new MellowDSelectiveCompiler(this.mellowD, path, as, functions);
@@ -773,6 +773,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
     @Override
     public Void visitBlock(MellowDParser.BlockContext ctx) {
         Map<MellowDBlock, SourceLink> blocksReferenced = new LinkedHashMap<>();
+        // TODO this could just be a statement that is evaluated at the top level?
         ctx.IDENTIFIER().forEach(id -> {
             MellowDBlock block = mellowD.getBlock(getText(id));
             if (block == null) {
@@ -788,14 +789,90 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         if (blocksReferenced.size() > 1) {
             SyncLink link = new SyncLink(blocksReferenced.keySet());
             blocksReferenced.forEach((block, srcLink) -> {
-                block.addFragment(new SyncStatement(srcLink, link));
-                block.addFragment(stmtList);
+                block.appendStatement(new SyncStatement(srcLink, link));
+                block.appendStatement(stmtList);
             });
         } else {
-            blocksReferenced.keySet().forEach(block -> block.addFragment(stmtList));
+            blocksReferenced.keySet().forEach(block -> block.appendStatement(stmtList));
+        }
+
+        MellowDParser.SchedDirsContext schedDirsCtx = ctx.schedDirs();
+        if (schedDirsCtx != null) {
+            SchedulerDirectives dirs = visitSchedDirs(schedDirsCtx).evaluate(this.mellowD);
+            blocksReferenced.keySet().forEach(block -> block.setSchedulerDirectives(dirs));
         }
 
         return null;
+    }
+
+    @Override
+    public Expression<SchedulerDirectives.Quantize> visitSchedQuantize(MellowDParser.SchedQuantizeContext ctx) {
+        MellowDParser.NumberContext numberCtx = ctx.size;
+        if (ctx.size != null)
+            return new Constant<>(SchedulerDirectives.quantize(visitNumber(numberCtx), ctx.offset != null ? visitNumber(ctx.offset) : 0));
+
+        return new Constant<>(SchedulerDirectives.alignBlock(getText(ctx.IDENTIFIER())));
+    }
+
+    @Override
+    public Expression<SchedulerDirectives.Align> visitSchedAlign(MellowDParser.SchedAlignContext ctx) {
+        Expression<Beat> padding = null;
+
+        MellowDParser.RhythmContext rhythmCtx = ctx.rhythm();
+        if (rhythmCtx != null) {
+            Expression<Rhythm> rhythm = visitRhythm(rhythmCtx);
+            padding = rhythm.then(Rhythm::getDuration);
+        }
+
+        MellowDParser.BeatContext beatCtx = ctx.beat();
+        if (beatCtx != null)
+            padding = new Constant<>(visitBeat(beatCtx));
+
+        if (ctx.ARROWS_L() != null)
+            return padding == null
+                    ? new Constant<>(SchedulerDirectives.alignLeft())
+                    : padding.then(SchedulerDirectives::alignLeft);
+        else
+            return padding == null
+                    ? new Constant<>(SchedulerDirectives.alignRight())
+                    : padding.then(SchedulerDirectives::alignRight);
+    }
+
+    @Override
+    public Expression<SchedulerDirectives.Finite> visitSchedFinite(MellowDParser.SchedFiniteContext ctx) {
+        Integer n = visitNumber(ctx.number());
+
+        if (ctx.STAR() != null)
+            return new Constant<>(SchedulerDirectives.runNTimes(n));
+
+        MellowDParser.SchedDirsContext schedDirsCtx = ctx.schedDirs();
+        return schedDirsCtx == null
+                ? new Constant<>(SchedulerDirectives.interruptNTimes(n))
+                : visitSchedDirs(schedDirsCtx).then(nextDirs -> SchedulerDirectives.interruptNTimes(n, nextDirs));
+    }
+
+    @Override
+    public Expression<SchedulerDirectives> visitSchedDirs(MellowDParser.SchedDirsContext ctx) {
+        return new ExpressionList<>(
+                ctx.schedDir().stream()
+                        .map(dir -> (Expression<Object>) this.visit(dir))
+                        .collect(Collectors.toList())
+        ).then(dirs -> {
+            SchedulerDirectives.Quantize quantize = null;
+            SchedulerDirectives.Align align = null;
+            SchedulerDirectives.Finite finite = null;
+
+            for (Object dir : dirs) {
+                if (dir instanceof SchedulerDirectives.Quantize)
+                    quantize = (SchedulerDirectives.Quantize) dir;
+                else if (dir instanceof SchedulerDirectives.Align)
+                    align = (SchedulerDirectives.Align) dir;
+                else if (dir instanceof SchedulerDirectives.Finite)
+                    finite = (SchedulerDirectives.Finite) dir;
+            }
+
+            return new SchedulerDirectives(quantize, align, finite);
+        });
     }
 
     public StatementList visitStmtList(MellowDParser.StmtListContext ctx, StatementList stmts) {
@@ -897,7 +974,7 @@ public class MellowDCompiler extends MellowDParserBaseVisitor {
         return new Abstraction(params, percussion, body);
     }
 
-    // TODO in the future this should be different than a func
+    // TODO in the future this should be different than a func, a func can be used for a proc but not the other way around
 
     @Override
     public Expression<Closure> visitProcDecl(MellowDParser.ProcDeclContext ctx) {

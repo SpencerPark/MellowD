@@ -77,6 +77,8 @@ public class GeneralMidiConstants {
     */
     public static final int PORTAMENTO_TIME_KNOB_CC = 5;
     public static final int CHANNEL_VOLUME_KNOB_CC = 7;
+    public static final int CHANNEL_PAN_KNOB_CC = 10;
+    public static final int CHANNEL_BALANCE_KNOB_CC = 8;
     public static final int SOUND_VARIATION_KNOB_CC = 70;
     public static final int RESONANCE_KNOB_CC = 71;
     public static final int RELEASE_TIME_KNOB_CC = 72;

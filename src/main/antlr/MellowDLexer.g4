@@ -24,8 +24,8 @@ KEYWORD_DO : 'do' ;
 KEYWORD_ONCE : 'once' ;
 KEYWORD_IF : 'if' ;
 KEYWORD_ELSE : 'else' ;
-KEYWORD_TRUE : 'true' | 'on' ;
-KEYWORD_FALSE : 'false' | 'off' ;
+KEYWORD_TRUE : 'true' | 'on' | 'yes' ;
+KEYWORD_FALSE : 'false' | 'off' | 'no' ;
 
 KEYWORD_LT : 'lt' ;
 KEYWORD_LEQ : 'leq' ;
@@ -54,10 +54,10 @@ FFF  : 'fff';
 FFFF : 'ffff';
 
 //**Cresendo**: Gradually increase hte volume until at the volume of the next dynamic
-ARROWS_LEFT   : '<<';
+ARROWS_L : '<<';
 
 //**Decresendo**: Gradually decrease the volume until at the volume of the next dynamic
-ARROWS_RIGHT : '>>';
+ARROWS_R : '>>';
 
 //**Accents**: These characters apply *feel* or *style* to a note.
 //`DOT` also has another meaning in a rhythm context which is to extend a
@@ -132,6 +132,9 @@ IDENTIFIER
         ) ([a-zA-Z0-9] | '_' [a-zA-Z0-9])*
     ;
 
+PERCENT : '%';
+PIPE : '|';
+
 //Octave shift up and down respectively.
 PLUS : '+';
 MINUS : '-';
@@ -172,4 +175,4 @@ MULTI_LINE_COMMENT : '/*' ( MULTI_LINE_COMMENT | . )*? '*/' -> channel(COMMENTS)
 
 //Ignore whitespace and pipes (|) as they can be used by the developer to format
 //their source however they like.
-SRC_SUGAR : [| \n\r\t] -> channel(HIDDEN);
+SRC_SUGAR : [ \n\r\t] -> channel(HIDDEN);

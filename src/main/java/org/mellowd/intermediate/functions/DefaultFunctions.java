@@ -6,6 +6,9 @@ import org.mellowd.intermediate.executable.statements.Statement;
 import org.mellowd.intermediate.variables.Memory;
 import org.mellowd.intermediate.variables.NullMemory;
 import org.mellowd.midi.GeneralMidiInstrument;
+import org.mellowd.midi.Knob;
+import org.mellowd.midi.MIDIControl;
+import org.mellowd.midi.Pedal;
 
 public class DefaultFunctions {
     /* ===========================================================
@@ -97,10 +100,72 @@ public class DefaultFunctions {
         TRANSPOSE = new Abstraction(new Parameters(numSemiTones), false, transposeBody);
     }
 
+    private static final QualifiedName TWIST_NAME = QualifiedName.ofUnqualified("twist");
+    private static final Abstraction TWIST;
+
+    static {
+        final Parameter<String> knobParam = Parameter.newRequiredParameter("knob", String.class);
+        final Parameter<Number> toParam = Parameter.newRequiredParameter("to", Number.class);
+
+        TWIST = new Abstraction(
+                new Parameters(knobParam, toParam), false,
+                Statement.lift((env, out) -> {
+                    String knob = knobParam.dereference(env.getMemory());
+                    Number to = toParam.dereference(env.getMemory());
+
+                    MIDIControl control = MIDIControl.getController(knob);
+                    if (!control.getControllerType().equals(Knob.class))
+                        throw new IllegalArgumentException(knob + " is not a knob.");
+
+                    out.put(new MIDIKnobChange(control, to.intValue()));
+                })
+        );
+    }
+
+    private static final QualifiedName PRESS_NAME = QualifiedName.ofUnqualified("press");
+    private static final Abstraction PRESS;
+    private static final QualifiedName RELEASE_NAME = QualifiedName.ofUnqualified("release");
+    private static final Abstraction RELEASE;
+
+    static {
+        final Parameter<String> pedalParam = Parameter.newRequiredParameter("pedal", String.class);
+        final Parameter<Boolean> pressedParam = Parameter.newOptionalParameter("pressed", Boolean.class);
+
+        PRESS = new Abstraction(
+                new Parameters(pedalParam, pressedParam), false,
+                Statement.lift((env, out) -> {
+                    String pedal = pedalParam.dereference(env.getMemory());
+                    Boolean pressed = pressedParam.dereference(env.getMemory());
+
+                    MIDIControl control = MIDIControl.getController(pedal);
+                    if (!control.getControllerType().equals(Pedal.class))
+                        throw new IllegalArgumentException(pedal + " is not a pedal.");
+
+                    out.put(new MIDIPedalChange(control, pressed != null ? pressed : true));
+                })
+        );
+
+        RELEASE = new Abstraction(
+                new Parameters(pedalParam), false,
+                Statement.lift((env, out) -> {
+                    String pedal = pedalParam.dereference(env.getMemory());
+
+                    MIDIControl control = MIDIControl.getController(pedal);
+                    if (!control.getControllerType().equals(Pedal.class))
+                        throw new IllegalArgumentException(pedal + " is not a pedal.");
+
+                    out.put(new MIDIPedalChange(control, false));
+                })
+        );
+    }
+
     public static void addAllToScope(Memory scope) {
         scope.set(INSTRUMENT_CHANGE_NAME, new Closure(NullMemory.getInstance(), INSTRUMENT_CHANGE));
         scope.set(MUTE_NAME, new Closure(NullMemory.getInstance(), MUTE));
         scope.set(OCTAVE_SHIFT_NAME, new Closure(NullMemory.getInstance(), OCTAVE_SHIFT));
         scope.set(TRANSPOSE_NAME, new Closure(NullMemory.getInstance(), TRANSPOSE));
+        scope.set(TWIST_NAME, new Closure(NullMemory.getInstance(), TWIST));
+        scope.set(PRESS_NAME, new Closure(NullMemory.getInstance(), PRESS));
+        scope.set(RELEASE_NAME, new Closure(NullMemory.getInstance(), RELEASE));
     }
 }

@@ -323,7 +323,7 @@ public class MIDIChannel {
     }
 
     public final void setPitchBend(int bendAmt) {
-        if (this.pitchBend == bendAmt) return;
+        // TODO if (this.pitchBend == bendAmt) return;
         ShortMessage resetMessage;
         try {
             resetMessage = new ShortMessage(ShortMessage.PITCH_BEND, channelNum, 0x7F & bendAmt, 0x7F & (bendAmt >> 7));
@@ -339,7 +339,7 @@ public class MIDIChannel {
     }
 
     public void setSoundBank(int soundBank) {
-        if (this.soundBank == soundBank) return;
+        // TODO if (this.soundBank == soundBank) return;
 
         //Preform the sound bank change sequence described in the
         //[General MIDI Constants](../midi/GeneralMidiConstants.html).
@@ -353,7 +353,7 @@ public class MIDIChannel {
     }
 
     public void setInstrument(int instrument) {
-        if (this.instrument == instrument) return;
+        // TODO if (this.instrument == instrument) return;
 
         //Add the program change message
         try {

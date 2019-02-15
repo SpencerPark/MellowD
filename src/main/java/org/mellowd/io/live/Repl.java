@@ -4,6 +4,7 @@ import org.mellowd.compiler.MellowD;
 import org.mellowd.io.Compiler;
 import org.mellowd.io.*;
 import org.mellowd.midi.TimingEnvironment;
+import org.mellowd.plugin.defaults.MelodicExpectationPlugin;
 
 import javax.sound.midi.MidiSystem;
 import java.io.File;
@@ -19,11 +20,15 @@ public class Repl {
         TimingEnvironment timingEnvironment = new TimingEnvironment(4, 4, 120);
 
         MellowD mellowD = new MellowD(srcFinder, timingEnvironment);
+        new MelodicExpectationPlugin().apply(mellowD);
+
         MellowDSession session = new MellowDSession(mellowD, MidiSystem.getSynthesizer(), workingDir);
-        session.eval("def block Piano { instrument: \"piano\" } \n");
+        session.eval("def block Piano { instrument: \"lead 1\" } \n");
         session.eval("def block Guitar { instrument: \"acoustic guitar\" }\n");
-        session.eval("Piano { [b]*<e, e, e, e, e, e, e, e> }");
-        session.eval("Guitar { [C~, *, *, *]*<q> }");
+        //session.eval("Piano { do { mellowd.improv <= in: c+1, over: <q, 3e>, headingDown: true } do { mellowd.improv <= in: c, over: <q, 3e> } do { mellowd.improv <= in: e, over: <q, 3e, h> }}");
+        //session.eval("Piano { once mel -> [mellowd.generate <= in: c+1, len: 4] [(mel:-1, mel:1)]*<q, 3e> }");
+        //session.eval("Guitar { [C, *, E, *]*<q> }");
+        //session.eval("Piano { [c, e, e, g]*<e, e, (e, e)> }");
 
         Scanner in = new Scanner(System.in);
         System.out.print("mellowd > ");
@@ -37,6 +42,7 @@ public class Repl {
                 case ":quit":
                     System.out.println("Stopping...");
                     quit = true;
+                    System.exit(0);
                     break;
                 default:
                     try {

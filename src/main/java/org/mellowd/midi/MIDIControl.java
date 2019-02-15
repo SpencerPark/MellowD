@@ -9,6 +9,8 @@ public final class MIDIControl<T extends MIDIController> {
 
     public static final MIDIControl<Knob>  PORTAMENTO_TIME  = new MIDIControl<>("PORTAMENTO_TIME", GeneralMidiConstants.PORTAMENTO_TIME_KNOB_CC, Knob.class, Knob::new);
     public static final MIDIControl<Knob>  VOLUME           = new MIDIControl<>("VOLUME", GeneralMidiConstants.CHANNEL_VOLUME_KNOB_CC, Knob.class, Knob::new);
+    public static final MIDIControl<Knob>  PAN              = new MIDIControl<>("PAN", GeneralMidiConstants.CHANNEL_PAN_KNOB_CC, Knob.class, Knob::new);
+    public static final MIDIControl<Knob>  BALANCE          = new MIDIControl<>("BALANCE", GeneralMidiConstants.CHANNEL_BALANCE_KNOB_CC, Knob.class, Knob::new);
     public static final MIDIControl<Knob>  SOUND_VARIATION  = new MIDIControl<>("SOUND_VARIATION", GeneralMidiConstants.SOUND_VARIATION_KNOB_CC, Knob.class, Knob::new);
     public static final MIDIControl<Knob>  RESONANCE        = new MIDIControl<>("RESONANCE", GeneralMidiConstants.RESONANCE_KNOB_CC, Knob.class, Knob::new);
     public static final MIDIControl<Knob>  RELEASE_TIME     = new MIDIControl<>("RELEASE_TIME", GeneralMidiConstants.RELEASE_TIME_KNOB_CC, Knob.class, Knob::new);

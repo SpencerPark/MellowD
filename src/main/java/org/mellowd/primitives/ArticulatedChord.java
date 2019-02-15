@@ -1,10 +1,11 @@
 package org.mellowd.primitives;
 
 import org.mellowd.intermediate.Sound;
+import org.mellowd.intermediate.functions.operations.Indexable;
 
 import java.util.Objects;
 
-public class ArticulatedChord implements Articulated {
+public class ArticulatedChord implements Articulated, Indexable<Pitch, Chord> {
     private final Chord chord;
     private Articulation articulation;
 
@@ -46,6 +47,16 @@ public class ArticulatedChord implements Articulated {
     @Override
     public Articulated articulate(Articulation articulation) {
         return new ArticulatedChord(this.chord, articulation);
+    }
+
+    @Override
+    public Pitch getAtIndex(int index) {
+        return this.chord.getAtIndex(index);
+    }
+
+    @Override
+    public Chord getAtRange(int lower, int upper) {
+        return this.chord.getAtRange(lower, upper);
     }
 
     @Override
